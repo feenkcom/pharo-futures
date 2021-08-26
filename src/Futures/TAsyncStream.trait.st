@@ -1,6 +1,6 @@
 Trait {
 	#name : 'TAsyncStream',
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'api - stream' }

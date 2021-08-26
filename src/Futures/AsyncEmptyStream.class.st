@@ -3,7 +3,7 @@ Class {
 	#superclass : 'Object',
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'api - stream' }

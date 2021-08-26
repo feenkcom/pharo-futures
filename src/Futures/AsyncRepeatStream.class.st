@@ -6,7 +6,7 @@ Class {
 	#instVars : [
 		'item'
 	],
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'instance creation' }

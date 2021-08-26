@@ -9,7 +9,7 @@ Class {
 		'index',
 		'done'
 	],
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'initialization' }
@@ -19,7 +19,7 @@ AsyncSequenceableCollectionStream class >> collection: aCollectiionOrFuture [
 
 { #category : 'initialization' }
 AsyncSequenceableCollectionStream >> collection: aCollectiionOrFuture [
-	collectionFuture := aCollectiionOrFuture gtFuture
+	collectionFuture := aCollectiionOrFuture asFuture
 ]
 
 { #category : 'initialization' }

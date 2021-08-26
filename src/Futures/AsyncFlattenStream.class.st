@@ -7,7 +7,7 @@ Class {
 		'stream',
 		'next'
 	],
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'accessing' }

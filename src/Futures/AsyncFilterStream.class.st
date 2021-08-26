@@ -9,7 +9,7 @@ Class {
 		'pendingItem',
 		'pendingFilterFuture'
 	],
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'initialization' }
@@ -55,7 +55,7 @@ AsyncFilterStream >> pollNext: anAsynchronousContext [
 					ifReady: [ :aReadyPoll |
 						aReadyPoll value
 							ifSome: [ :aSomeValue |
-								pendingFilterFuture := AsyncOptionalValue some: (filter value: aSomeValue) gtFuture.
+								pendingFilterFuture := AsyncOptionalValue some: (filter value: aSomeValue) asFuture.
 								pendingItem := AsyncOptionalValue some: aSomeValue ]
 							ifNone: [ ^ AsyncPoll ready: AsyncOptionalValue none ] ]
 					ifPending: [ :aPendingPoll | ^ aPendingPoll ] ] 

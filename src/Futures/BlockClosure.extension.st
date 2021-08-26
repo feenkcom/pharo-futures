@@ -1,6 +1,6 @@
 Extension { #name : 'BlockClosure' }
 
 { #category : '*Futures' }
-BlockClosure >> gtFuture [
+BlockClosure >> asFuture [
 	^ AsyncPollFuture pollBlock: self
 ]

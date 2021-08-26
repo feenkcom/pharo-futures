@@ -7,7 +7,7 @@ Class {
 		'stream',
 		'mapBlock'
 	],
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'instance creation' }

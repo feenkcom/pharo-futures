@@ -7,7 +7,7 @@ Class {
 		'stream',
 		'remaining'
 	],
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'instance creation' }

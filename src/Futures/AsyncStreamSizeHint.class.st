@@ -8,7 +8,7 @@ Class {
 	#classInstVars : [
 		'unknown'
 	],
-	#category : 'Futures-Streams'
+	#category : 'Futures-Stream'
 }
 
 { #category : 'cleanup' }

@@ -14,11 +14,6 @@ AsyncPoll class >> ready: anObject [
 	^ AsyncPollReady value: anObject
 ]
 
-{ #category : 'converting' }
-AsyncPoll >> asFuturePoll [
-	^ self
-]
-
 { #category : 'operators-mapping' }
 AsyncPoll >> ifPending: aPendingBlock [
 	^ self isReady

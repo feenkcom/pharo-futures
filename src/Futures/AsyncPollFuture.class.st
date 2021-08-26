@@ -16,7 +16,7 @@ AsyncPollFuture class >> pollBlock: aBlock [
 
 { #category : 'api - future' }
 AsyncPollFuture >> poll: anAsynchronousContext [
-	^ (pollBlock cull: anAsynchronousContext) asFuturePoll
+	^ AsyncPoll ready: (pollBlock cull: anAsynchronousContext)
 ]
 
 { #category : 'initialization' }

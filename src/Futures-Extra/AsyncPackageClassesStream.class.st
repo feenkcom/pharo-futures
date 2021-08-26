@@ -18,7 +18,7 @@ AsyncPackageClassesStream class >> package: aPackage [
 { #category : 'initialization' }
 AsyncPackageClassesStream >> forPackage: aRPackage [
 	package := aRPackage.
-	stream := AsyncSequenceableCollectionStream collection: [ package definedClasses asArray ] gtFuture.
+	stream := AsyncSequenceableCollectionStream collection: [ package definedClasses asArray ] asFuture.
 ]
 
 { #category : 'api - stream' }

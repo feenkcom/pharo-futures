@@ -4,13 +4,13 @@ Trait {
 }
 
 { #category : 'api - future' }
-TAsyncFuture >> await [
-	^ (AsyncTaskItFutureTask new forFuture: self) future: TKTConfiguration runner
+TAsyncFuture >> asFuture [
+	^ self
 ]
 
 { #category : 'api - future' }
-TAsyncFuture >> gtFuture [
-	^ self
+TAsyncFuture >> await [
+	^ (AsyncTaskItFutureTask new forFuture: self) future: TKTConfiguration runner
 ]
 
 { #category : 'api - future' }
