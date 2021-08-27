@@ -1,7 +1,7 @@
 Class {
 	#name : 'AsyncOptionalValue',
 	#superclass : 'Object',
-	#category : 'Futures-Base'
+	#category : 'Futures-Utilities'
 }
 
 { #category : 'instance creation' }

@@ -1,3 +1,12 @@
+"
+#Filter stream
+Filters the values produced by this stream according to the provided asynchronous predicate.
+As values of this stream are made available, the provided predicate f will be run against them. If the predicate returns a {{gtClass:TAsyncFuture}} which resolves to {{gtClass:True}}, then the stream will yield the value, but if the predicate returns a {{gtClass:TAsyncFuture}} which resolves to {{gtClass:False}}, then the value will be discarded and the next value will be produced.
+
+##Example
+
+{{gtExample:AsyncStreamExamples>>#filter}}
+"
 Class {
 	#name : 'AsyncFilterStream',
 	#superclass : 'Object',
@@ -9,7 +18,7 @@ Class {
 		'pendingItem',
 		'pendingFilterFuture'
 	],
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'initialization' }

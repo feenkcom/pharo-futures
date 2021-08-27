@@ -28,7 +28,7 @@ AsyncImagePackagesStream >> deprecated [
 AsyncImagePackagesStream >> initialize [
 	super initialize.
 	
-	stream := AsyncSequenceableCollectionStream collection: [ RPackage organizer packages ] asFuture.
+	stream := AsyncSequenceStream forCollection: [ RPackage organizer packages ] asFuture.
 ]
 
 { #category : 'api - stream' }

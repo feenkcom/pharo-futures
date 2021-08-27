@@ -1,5 +1,12 @@
+"
+#Sequenceable Collection Stream
+Creates a stream that wraps a {{gtClass:SequenceableCollection}} or a {{gtClass:TAsyncFuture}} that returns said collection.
+
+##Example
+{{gtExample:AsyncStreamExamples>>sequence}}
+"
 Class {
-	#name : 'AsyncSequenceableCollectionStream',
+	#name : 'AsyncSequenceStream',
 	#superclass : 'Object',
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
@@ -9,21 +16,21 @@ Class {
 		'index',
 		'done'
 	],
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'initialization' }
-AsyncSequenceableCollectionStream class >> collection: aCollectiionOrFuture [
-	^ self new collection: aCollectiionOrFuture
+AsyncSequenceStream class >> forCollection: aCollectionOrFuture [
+	^ self new collection: aCollectionOrFuture
 ]
 
 { #category : 'initialization' }
-AsyncSequenceableCollectionStream >> collection: aCollectiionOrFuture [
-	collectionFuture := aCollectiionOrFuture asFuture
+AsyncSequenceStream >> collection: aCollectionOrFuture [
+	collectionFuture := aCollectionOrFuture asFuture.
 ]
 
 { #category : 'initialization' }
-AsyncSequenceableCollectionStream >> initialize [
+AsyncSequenceStream >> initialize [
 	super initialize.
 	
 	index := 1.
@@ -31,7 +38,7 @@ AsyncSequenceableCollectionStream >> initialize [
 ]
 
 { #category : 'api - stream' }
-AsyncSequenceableCollectionStream >> pollNext: anAsynchronousContext [
+AsyncSequenceStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
 	 - Poll::Pending means that this stream's next value is not ready yet. Implementations will ensure that the current task will be notified when the next value may be ready.
@@ -42,7 +49,7 @@ AsyncSequenceableCollectionStream >> pollNext: anAsynchronousContext [
 	[
 		done ifTrue: [
 			^ AsyncPoll ready: AsyncOptionalValue none ].
-	
+
 		collection
 			ifNotNil: [ :aCollection |
 				index <= aCollection size
@@ -69,4 +76,17 @@ AsyncSequenceableCollectionStream >> pollNext: anAsynchronousContext [
 					index := 1 ]
 				ifPending: [ :aPendingPoll | ^ aPendingPoll ] ]
 	] repeat.
+]
+
+{ #category : 'api - stream' }
+AsyncSequenceStream >> sizeHint [
+	<return: #AsyncStreamSizeHint>
+	| remainingSize |
+	
+	remainingSize := collection
+		ifNil: [ 0 ]
+		ifNotNil: [ :aCollection | aCollection size - index + 1 ].
+
+	^ AsyncStreamSizeHint
+		lowerBound: remainingSize
 ]

@@ -18,7 +18,7 @@ AsyncPackageClassesStream class >> package: aPackage [
 { #category : 'initialization' }
 AsyncPackageClassesStream >> forPackage: aRPackage [
 	package := aRPackage.
-	stream := AsyncSequenceableCollectionStream collection: [ package definedClasses asArray ] asFuture.
+	stream := AsyncSequenceStream forCollection: [ package definedClasses asArray ] asFuture.
 ]
 
 { #category : 'api - stream' }

@@ -8,7 +8,7 @@ Class {
 	#classInstVars : [
 		'unknown'
 	],
-	#category : 'Futures-Stream'
+	#category : 'Futures-Utilities'
 }
 
 { #category : 'cleanup' }
@@ -31,6 +31,13 @@ AsyncStreamSizeHint class >> lowerBound: aLowerBound higherBound: aHigherBound [
 { #category : 'instance creation' }
 AsyncStreamSizeHint class >> unknown [
 	^ unknown ifNil: [ unknown := self new ]
+]
+
+{ #category : 'accessing' }
+AsyncStreamSizeHint >> approximateAmount [
+	^ self hasHigherBound
+		ifTrue: [ self higherBound ]
+		ifFalse: [ self lowerBound ]
 ]
 
 { #category : 'testing' }

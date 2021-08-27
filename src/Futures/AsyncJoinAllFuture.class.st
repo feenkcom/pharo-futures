@@ -1,3 +1,11 @@
+"
+#Join all future
+Creates a future which represents a collection of the outputs of the futures given.
+The returned future will drive execution for all of its underlying futures, collecting the results into a destination Collection in the same order as they were provided.
+
+##Example
+{{gtExample:AsyncFutureExamples>>joinAll}}
+"
 Class {
 	#name : 'AsyncJoinAllFuture',
 	#superclass : 'Object',
@@ -6,7 +14,7 @@ Class {
 	#instVars : [
 		'futures'
 	],
-	#category : 'Futures-Future'
+	#category : 'Futures-Base - Futures'
 }
 
 { #category : 'instance creation' }

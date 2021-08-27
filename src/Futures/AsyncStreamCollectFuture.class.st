@@ -5,9 +5,10 @@ Class {
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
 		'stream',
-		'collection'
+		'species',
+		'outputStream'
 	],
-	#category : 'Futures-Future'
+	#category : 'Futures-Base - Futures'
 }
 
 { #category : 'instance creation' }
@@ -15,13 +16,23 @@ AsyncStreamCollectFuture class >> stream: anAsyncStream [
 	^ self new stream: anAsyncStream
 ]
 
+{ #category : 'instance creation' }
+AsyncStreamCollectFuture class >> stream: anAsyncStream species: aClass [
+	^ self new
+		stream: anAsyncStream;
+		species: aClass
+]
+
 { #category : 'api - future' }
 AsyncStreamCollectFuture >> finish [
 	<return: #OrderedCollection>
 	| aResultingCollection |
 	
-	aResultingCollection := collection.
-	collection := OrderedCollection new.
+	aResultingCollection := outputStream position = outputStream originalContents size
+		ifTrue: [ outputStream originalContents ]
+		ifFalse: [ outputStream contents ].
+
+	outputStream := nil.
 
 	^ aResultingCollection
 ]
@@ -30,22 +41,31 @@ AsyncStreamCollectFuture >> finish [
 AsyncStreamCollectFuture >> initialize [
 	super initialize.
 	
-	collection := OrderedCollection new
+	species := Array.
+	outputStream := nil
 ]
 
 { #category : 'api - future' }
 AsyncStreamCollectFuture >> poll: anAsynchronousContext [
 	<return: #AsyncPoll>
 
+	outputStream ifNil: [
+		outputStream := WriteStream on: (species new: stream sizeHint approximateAmount) ].
+
 	[ 
 		(stream pollNext: anAsynchronousContext)
 			ifReady: [ :aReadyPoll |
 				aReadyPoll value
-					ifSome: [ :nextItem | collection add: nextItem ]
+					ifSome: [ :nextItem | outputStream nextPut: nextItem ]
 					ifNone: [ ^ AsyncPoll ready: self finish ]
 			]
 			ifPending: [ :aPendingPoll | ^ aPendingPoll ]
 	] repeat
+]
+
+{ #category : 'initialization' }
+AsyncStreamCollectFuture >> species: aClass [
+	species := aClass
 ]
 
 { #category : 'initialization' }

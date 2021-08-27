@@ -1,3 +1,10 @@
+"
+#Flatten stream
+Flattens a stream of streams into just one continuous stream.
+
+##Example
+{{gtExample:AsyncStreamExamples>>#flatten}}
+"
 Class {
 	#name : 'AsyncFlattenStream',
 	#superclass : 'Object',
@@ -7,7 +14,7 @@ Class {
 		'stream',
 		'next'
 	],
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'accessing' }

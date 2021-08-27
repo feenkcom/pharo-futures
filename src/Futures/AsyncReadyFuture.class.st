@@ -9,7 +9,7 @@ Class {
 	#instVars : [
 		'value'
 	],
-	#category : 'Futures-Future'
+	#category : 'Futures-Base - Futures'
 }
 
 { #category : 'instance creation' }

@@ -1,3 +1,11 @@
+"
+#Map stream
+Maps this stream's items to a different type, returning a new stream of the resulting type.
+The provided closure is executed over all elements of this stream as they are made available. It is executed inline with calls to {{gtMethod:TAsyncStream>>#pollNext:}}.
+
+##Example
+{{gtExample:AsyncStreamExamples>>#map}}
+"
 Class {
 	#name : 'AsyncMapStream',
 	#superclass : 'Object',
@@ -7,7 +15,7 @@ Class {
 		'stream',
 		'mapBlock'
 	],
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'instance creation' }

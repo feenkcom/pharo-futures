@@ -1,3 +1,11 @@
+"
+#Map future
+Map future's output to a different type, returning a new future of the resulting type.
+This is useful to chain along a computation once a future has been resolved.
+
+##Example
+{{gtExample:AsyncFutureExamples>>map}}
+"
 Class {
 	#name : 'AsyncMapFuture',
 	#superclass : 'Object',
@@ -7,7 +15,7 @@ Class {
 		'future',
 		'mapBlock'
 	],
-	#category : 'Futures-Future'
+	#category : 'Futures-Base - Futures'
 }
 
 { #category : 'instance creation' }

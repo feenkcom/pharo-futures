@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'exception'
 	],
-	#category : 'Futures-Base'
+	#category : 'Futures-Utilities'
 }
 
 { #category : 'signalling' }

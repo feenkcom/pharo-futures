@@ -1,7 +1,7 @@
 Class {
 	#name : 'AsyncPoll',
 	#superclass : 'Object',
-	#category : 'Futures-Base'
+	#category : 'Futures-Utilities'
 }
 
 { #category : 'accessing' }

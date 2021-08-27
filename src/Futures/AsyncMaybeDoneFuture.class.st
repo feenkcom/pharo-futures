@@ -6,7 +6,7 @@ Class {
 	#instVars : [
 		'state'
 	],
-	#category : 'Futures-Future'
+	#category : 'Futures-Base - Futures'
 }
 
 { #category : 'instance creation' }

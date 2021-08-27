@@ -11,5 +11,7 @@ BaselineOfFutures >> baseline: spec [
 	spec for: #'common' do: [
 		spec package: #'Futures'.
 		spec package: #'Futures-Extra' with: [
-				spec requires: #('Futures' ) ] ]
+				spec requires: #('Futures' ) ].
+		spec package: #'Futures-Examples' with: [
+				spec requires: #('Futures' 'Futures-Extra') ] ]
 ]

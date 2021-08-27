@@ -1,9 +1,14 @@
+"
+#Empty stream
+Creates a stream which contains no elements.
+The returned stream will always return `AsyncPoll ready: AsyncOptionalValue none` when polled.
+"
 Class {
 	#name : 'AsyncEmptyStream',
 	#superclass : 'Object',
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'api - stream' }

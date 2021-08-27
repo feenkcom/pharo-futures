@@ -1,3 +1,11 @@
+"
+#Repeating stream
+Create a stream which produces the same item repeatedly.
+The stream never terminates. Note that you likely want to avoid usage of `collect` or such on the returned stream as it will exhaust available memory as it tries to just fill up all RAM.
+
+##Example
+{{gtExample:AsyncStreamExamples>>repeat}}
+"
 Class {
 	#name : 'AsyncRepeatStream',
 	#superclass : 'Object',
@@ -6,7 +14,7 @@ Class {
 	#instVars : [
 		'item'
 	],
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'instance creation' }

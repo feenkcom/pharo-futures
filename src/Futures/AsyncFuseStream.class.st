@@ -1,3 +1,11 @@
+"
+#Fuse stream
+Creates an utility stream that wraps another stream and allows users to query whether the underlying stream has finished or not.
+If {{gtMethod:AsyncFuseStream>>#isDone}} method returns true, then all future calls to poll are guaranteed to return nothing. If this returns false, then the underlying stream is still in use.
+
+##Example
+{{gtExample:AsyncStreamExamples>>fuse}}
+"
 Class {
 	#name : 'AsyncFuseStream',
 	#superclass : 'Object',
@@ -7,14 +15,13 @@ Class {
 		'stream',
 		'done'
 	],
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'instance creation' }
-AsyncFuseStream class >> stream: anAsyncStream amount: aNumber [
+AsyncFuseStream class >> stream: anAsyncStream [
 	^ self new
 		stream: anAsyncStream
-		amount: aNumber
 ]
 
 { #category : 'testing' }

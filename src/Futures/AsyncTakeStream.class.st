@@ -1,3 +1,11 @@
+"
+#Take stream
+Creates a new stream of at most n items of the underlying stream.
+Once n items have been yielded from this stream then it will always return that the stream is done.
+
+##Example
+{{gtExample:AsyncStreamExamples>>take}}
+"
 Class {
 	#name : 'AsyncTakeStream',
 	#superclass : 'Object',
@@ -7,7 +15,7 @@ Class {
 		'stream',
 		'remaining'
 	],
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'instance creation' }

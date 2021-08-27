@@ -1,14 +1,34 @@
+"
+#Asynchronous Stream
+A stream of values produced asynchronously.
+
+If {{gtClass:TAsyncFuture}} is an asynchronous version of {{gtClass:Object}}, then {{gtClass:TAsyncStream}} is an asynchronous version of Iterator. A stream represents a sequence of value-producing events that occur asynchronously to the caller.
+The trait is modeled after {{gtClass:TAsyncFuture}}, but allows {{gtMethod:TAsyncStream>>#pollNext:}} to be called even after a value has been produced, yielding {{gtClass:AsyncNoneValue}} once the stream has been fully exhausted.
+"
 Trait {
 	#name : 'TAsyncStream',
-	#category : 'Futures-Stream'
+	#category : 'Futures-Base - Streams'
 }
 
 { #category : 'api - stream' }
+TAsyncStream >> asAsyncStream [
+	^ self
+]
+
+{ #category : 'api - stream' }
 TAsyncStream >> collect [
+	"Transforms a stream into an Array, returning a future representing the result of that computation."
+	<return: #TAsyncFuture>
+
+	^ self collectAs: Array
+]
+
+{ #category : 'api - stream' }
+TAsyncStream >> collectAs: aClass [
 	"Transforms a stream into a collection, returning a future representing the result of that computation."
 	<return: #TAsyncFuture>
 
-	^ AsyncStreamCollectFuture stream: self
+	^ AsyncStreamCollectFuture stream: self species: aClass
 ]
 
 { #category : 'api - stream' }
@@ -22,6 +42,11 @@ TAsyncStream >> filter: aFilterBlock [
 { #category : 'api - stream' }
 TAsyncStream >> flatten [
 	^ AsyncFlattenStream stream: self
+]
+
+{ #category : 'api - stream' }
+TAsyncStream >> fuse [
+	^ AsyncFuseStream stream: self
 ]
 
 { #category : 'api - stream' }

@@ -4,7 +4,7 @@ Class {
 	#classInstVars : [
 		'uniqueInstance'
 	],
-	#category : 'Futures-Base'
+	#category : 'Futures-Utilities'
 }
 
 { #category : 'instance creation' }
