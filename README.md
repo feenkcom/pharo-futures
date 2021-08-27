@@ -1,6 +1,15 @@
 # Asynchronous Futures & Streams
 Abstractions for asynchronous programming in Pharo.
 
+## Install
+
+```smalltalk
+Metacello new
+   baseline: 'Futures';
+   repository: 'github://feenkcom/pharo-futures:main/src';
+   load
+```
+
 ## Futures
 
 Ready:
