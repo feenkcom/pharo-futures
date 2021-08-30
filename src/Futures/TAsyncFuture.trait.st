@@ -13,6 +13,11 @@ Trait {
 }
 
 { #category : 'api - future' }
+TAsyncFuture >> asAsyncStream [
+	^ AsyncOnceStream forFuture: self
+]
+
+{ #category : 'api - future' }
 TAsyncFuture >> asFuture [
 	^ self
 ]
@@ -20,6 +25,14 @@ TAsyncFuture >> asFuture [
 { #category : 'api - future' }
 TAsyncFuture >> await [
 	^ (AsyncTaskItFutureTask new forFuture: self) future: TKTConfiguration runner
+]
+
+{ #category : 'api - testing' }
+TAsyncFuture >> isReadyFuture [
+	"Return true if a future is a ready future, meaning that the value can be taken synchronously"
+	<return: #Boolean>
+
+	^ false
 ]
 
 { #category : 'api - future' }

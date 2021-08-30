@@ -25,7 +25,7 @@ AsyncMaybeDoneFuture >> poll: anAsynchronousContext [
 				ifReady: [ :aReadyPoll | self setDone: aReadyPoll value ]
 				ifPending: [ :aPendingPoll | ^ aPendingPoll ] ].
 			
-	^ AsyncPoll ready: nil
+	^ AsyncPoll ready: self
 ]
 
 { #category : 'initialization' }
