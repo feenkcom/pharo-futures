@@ -47,7 +47,7 @@ AsyncMaybeDoneFuture >> setGone [
 AsyncMaybeDoneFuture >> takeOutput [
 	^ self
 		takeOutput: [ :aValue | aValue ]
-		ifNone: [ self error: 'The future is not done or the outout is already taken' ]
+		ifNone: [ self error: 'The future is not done or the output is already taken' ]
 ]
 
 { #category : 'accessing' }
