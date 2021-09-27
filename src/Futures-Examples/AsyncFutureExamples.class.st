@@ -27,10 +27,20 @@ AsyncFutureExamples >> map [
 	<gtExample>
 	| future result |
 	
-	future := [ 42 ] asFuture.
-	future := future map: [ :x | x * 2 ].
+	future := self mapFuture.
 
 	result := future wait.
 	self assert: result equals: 84.
 	^ result
+]
+
+{ #category : 'examples' }
+AsyncFutureExamples >> mapFuture [
+	<gtExample>
+	| future |
+	
+	future := [ 42 ] asFuture.
+	future := future map: [ :x | x * 2 ].
+
+	^ future
 ]
