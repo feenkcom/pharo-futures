@@ -1,10 +1,10 @@
 Class {
-	#name : 'AsyncStreamExamples',
-	#superclass : 'Object',
+	#name : #AsyncStreamExamples,
+	#superclass : #Object,
 	#category : 'Futures-Examples'
 }
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncStreamExamples >> filter [
 	<gtExample>
 	| stream evens result |
@@ -17,7 +17,7 @@ AsyncStreamExamples >> filter [
 	^ result
 ]
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncStreamExamples >> flatten [
 	<gtExample>
 	| streams flatten result |
@@ -32,7 +32,7 @@ AsyncStreamExamples >> flatten [
 	^ result
 ]
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncStreamExamples >> fuse [
 	<gtExample>
 	| stream fuse result |
@@ -47,7 +47,7 @@ AsyncStreamExamples >> fuse [
 	^ result
 ]
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncStreamExamples >> map [
 	<gtExample>
 	| stream evens result |
@@ -60,7 +60,7 @@ AsyncStreamExamples >> map [
 	^ result
 ]
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncStreamExamples >> repeat [
 	<gtExample>
 	| stream result |
@@ -72,7 +72,7 @@ AsyncStreamExamples >> repeat [
 	^ result
 ]
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncStreamExamples >> sequence [
 	<gtExample>
 	| collection stream result |
@@ -85,7 +85,7 @@ AsyncStreamExamples >> sequence [
 	^ result
 ]
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncStreamExamples >> take [
 	<gtExample>
 	| stream first result |

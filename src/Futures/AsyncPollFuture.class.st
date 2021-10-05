@@ -1,6 +1,6 @@
 Class {
-	#name : 'AsyncPollFuture',
-	#superclass : 'Object',
+	#name : #AsyncPollFuture,
+	#superclass : #Object,
 	#traits : 'TAsyncFuture',
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
@@ -9,17 +9,17 @@ Class {
 	#category : 'Futures-Base - Futures'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncPollFuture class >> pollBlock: aBlock [
 	^ self new pollBlock: aBlock
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncPollFuture >> poll: anAsynchronousContext [
 	^ AsyncPoll ready: (pollBlock cull: anAsynchronousContext)
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncPollFuture >> pollBlock: anObject [
 
 	pollBlock := anObject

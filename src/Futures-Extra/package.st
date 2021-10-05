@@ -1,1 +1,1 @@
-Package { #name : 'Futures-Extra' }
+Package { #name : #'Futures-Extra' }

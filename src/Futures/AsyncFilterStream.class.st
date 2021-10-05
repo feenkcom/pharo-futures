@@ -8,8 +8,8 @@ As values of this stream are made available, the provided predicate f will be ru
 {{gtExample:AsyncStreamExamples>>#filter}}
 "
 Class {
-	#name : 'AsyncFilterStream',
-	#superclass : 'Object',
+	#name : #AsyncFilterStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -18,15 +18,15 @@ Class {
 		'pendingItem',
 		'pendingFilterFuture'
 	],
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncFilterStream class >> stream: anAsyncStream filter: aFilterBlock [
 	^ self new stream: anAsyncStream filter: aFilterBlock
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncFilterStream >> initialize [
 	super initialize.
 	
@@ -34,7 +34,7 @@ AsyncFilterStream >> initialize [
 	pendingItem := AsyncOptionalValue none
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncFilterStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -64,14 +64,14 @@ AsyncFilterStream >> pollNext: anAsynchronousContext [
 					ifReady: [ :aReadyPoll |
 						aReadyPoll value
 							ifSome: [ :aSomeValue |
-								pendingFilterFuture := AsyncOptionalValue some: (filter value: aSomeValue) asFuture.
+								pendingFilterFuture := AsyncOptionalValue some: (filter value: aSomeValue) asAsyncFuture.
 								pendingItem := AsyncOptionalValue some: aSomeValue ]
 							ifNone: [ ^ AsyncPoll ready: AsyncOptionalValue none ] ]
 					ifPending: [ :aPendingPoll | ^ aPendingPoll ] ] 
 	] repeat.
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncFilterStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 	| aPendingLength aStreamSizeHint aHigherBound |
@@ -86,7 +86,7 @@ AsyncFilterStream >> sizeHint [
 	^ AsyncStreamSizeHint lowerBound: 0 higherBound: aHigherBound
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncFilterStream >> stream: anAsyncStream filter: aFilterBlock [
 	stream := anAsyncStream.
 	filter := aFilterBlock

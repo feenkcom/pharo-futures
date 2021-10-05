@@ -1,6 +1,6 @@
 Class {
-	#name : 'AsyncStreamCollectFuture',
-	#superclass : 'Object',
+	#name : #AsyncStreamCollectFuture,
+	#superclass : #Object,
 	#traits : 'TAsyncFuture',
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
@@ -11,19 +11,19 @@ Class {
 	#category : 'Futures-Base - Futures'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncStreamCollectFuture class >> stream: anAsyncStream [
 	^ self new stream: anAsyncStream
 ]
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncStreamCollectFuture class >> stream: anAsyncStream species: aClass [
 	^ self new
 		stream: anAsyncStream;
 		species: aClass
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncStreamCollectFuture >> finish [
 	<return: #OrderedCollection>
 	| aResultingCollection |
@@ -37,7 +37,7 @@ AsyncStreamCollectFuture >> finish [
 	^ aResultingCollection
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncStreamCollectFuture >> initialize [
 	super initialize.
 	
@@ -45,7 +45,7 @@ AsyncStreamCollectFuture >> initialize [
 	outputStream := nil
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncStreamCollectFuture >> poll: anAsynchronousContext [
 	<return: #AsyncPoll>
 
@@ -63,12 +63,12 @@ AsyncStreamCollectFuture >> poll: anAsynchronousContext [
 	] repeat
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncStreamCollectFuture >> species: aClass [
 	species := aClass
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncStreamCollectFuture >> stream: anAsyncStream [
 	stream := anAsyncStream
 ]

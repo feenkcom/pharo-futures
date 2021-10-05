@@ -1,18 +1,18 @@
 Class {
-	#name : 'AsyncFutureExamples',
-	#superclass : 'Object',
-	#category : 'Futures-Examples'
+	#name : #AsyncFutureExamples,
+	#superclass : #Object,
+	#category : #'Futures-Examples'
 }
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncFutureExamples >> joinAll [
 	<gtExample>
 	| futures joinAll result |
 	
 	futures := { 
-		[ 42 ] asFuture.
-		3.14 asFuture.
-		9 asFuture map: [ :x | x * x ].
+		[ 42 ] asAsyncFuture.
+		3.14 asAsyncFuture.
+		9 asAsyncFuture map: [ :x | x * x ].
 	}.
 	
 	joinAll := AsyncJoinAllFuture futures: futures.
@@ -22,7 +22,7 @@ AsyncFutureExamples >> joinAll [
 	^ result
 ]
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncFutureExamples >> map [
 	<gtExample>
 	| future result |
@@ -34,12 +34,12 @@ AsyncFutureExamples >> map [
 	^ result
 ]
 
-{ #category : 'examples' }
+{ #category : #examples }
 AsyncFutureExamples >> mapFuture [
 	<gtExample>
 	| future |
 	
-	future := [ 42 ] asFuture.
+	future := [ 42 ] asAsyncFuture.
 	future := future map: [ :x | x * 2 ].
 
 	^ future

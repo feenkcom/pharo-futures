@@ -1,10 +1,10 @@
 Class {
-	#name : 'AsyncFutureExecution',
-	#superclass : 'TKTFutureExecution',
-	#category : 'Futures-Executor'
+	#name : #AsyncFutureExecution,
+	#superclass : #TKTFutureExecution,
+	#category : #'Futures-Executor'
 }
 
-{ #category : 'evaluating' }
+{ #category : #evaluating }
 AsyncFutureExecution >> doExecuteTask [
 	[
 		| aPoll |
@@ -13,10 +13,10 @@ AsyncFutureExecution >> doExecuteTask [
 			ifReady: [ future deploySuccess: aPoll value ]
 			ifPending: [ runner scheduleTaskExecution: self copy ] ]
 		on: Error
-		do: [ :error | future deployFailure: error freezeOrWithoutContext ].
+		do: [ :error | future deployFailure: error freeze ].
 ]
 
-{ #category : 'copying' }
+{ #category : #copying }
 AsyncFutureExecution >> postCopy [
 	state := TKTReadyTaskState new.
 	cancelled := nil.

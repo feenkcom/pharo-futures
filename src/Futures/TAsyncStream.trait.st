@@ -6,16 +6,16 @@ If {{gtClass:TAsyncFuture}} is an asynchronous version of {{gtClass:Object}}, th
 The trait is modeled after {{gtClass:TAsyncFuture}}, but allows {{gtMethod:TAsyncStream>>#pollNext:}} to be called even after a value has been produced, yielding {{gtClass:AsyncNoneValue}} once the stream has been fully exhausted.
 "
 Trait {
-	#name : 'TAsyncStream',
+	#name : #TAsyncStream,
 	#category : 'Futures-Base - Streams'
 }
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> asAsyncStream [
 	^ self
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> collect [
 	"Transforms a stream into an Array, returning a future representing the result of that computation."
 	<return: #TAsyncFuture>
@@ -23,7 +23,7 @@ TAsyncStream >> collect [
 	^ self collectAs: Array
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> collectAs: aClass [
 	"Transforms a stream into a collection, returning a future representing the result of that computation."
 	<return: #TAsyncFuture>
@@ -31,7 +31,7 @@ TAsyncStream >> collectAs: aClass [
 	^ AsyncStreamCollectFuture stream: self species: aClass
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> filter: aFilterBlock [
 	"Filters the values produced by this stream according to the provided asynchronous predicate."
 	<return: #TAsyncStream>
@@ -39,24 +39,24 @@ TAsyncStream >> filter: aFilterBlock [
 	^ AsyncFilterStream stream: self filter: aFilterBlock
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> flatten [
 	^ AsyncFlattenStream stream: self
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> fuse [
 	^ AsyncFuseStream stream: self
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> map: aMapBlock [
 	<return: #TAsyncStream>
 
 	^ AsyncMapStream stream: self mapBlock: aMapBlock
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> next [
 	"Creates a future that resolves to the next item in the stream."
 	<return: #TAsyncFuture>
@@ -64,7 +64,7 @@ TAsyncStream >> next [
 	^ AsyncStreamNextFuture stream: self
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -76,14 +76,14 @@ TAsyncStream >> pollNext: anAsynchronousContext [
 	^ self explicitRequirement
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
 	^ AsyncStreamSizeHint unknown
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 TAsyncStream >> take: anAmount [
 	"Creates a new stream of at most anAmount items of the underlying stream."
 	<return: #TAsyncStream>

@@ -7,8 +7,8 @@ Once n items have been yielded from this stream then it will always return that 
 {{gtExample:AsyncStreamExamples>>take}}
 "
 Class {
-	#name : 'AsyncTakeStream',
-	#superclass : 'Object',
+	#name : #AsyncTakeStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -18,14 +18,14 @@ Class {
 	#category : 'Futures-Base - Streams'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncTakeStream class >> stream: anAsyncStream amount: aNumber [
 	^ self new
 		stream: anAsyncStream
 		amount: aNumber
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncTakeStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -49,7 +49,7 @@ AsyncTakeStream >> pollNext: anAsynchronousContext [
 			AsyncPoll ready: nextItem ]
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncTakeStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 	| aStreamSizeHint aLowerBound aHigherBound |
@@ -69,7 +69,7 @@ AsyncTakeStream >> sizeHint [
 		higherBound: aHigherBound
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncTakeStream >> stream: anAsyncStream amount: aNumber [
 	stream := anAsyncStream.
 	remaining := aNumber

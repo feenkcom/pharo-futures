@@ -2,8 +2,8 @@
 A future that resolves to the next item in the stream.
 "
 Class {
-	#name : 'AsyncStreamNextFuture',
-	#superclass : 'Object',
+	#name : #AsyncStreamNextFuture,
+	#superclass : #Object,
 	#traits : 'TAsyncFuture',
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
@@ -12,19 +12,19 @@ Class {
 	#category : 'Futures-Base - Futures'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncStreamNextFuture class >> stream: anAsyncStream [
 	^ self new stream: anAsyncStream
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncStreamNextFuture >> poll: anAsynchronousContext [
 	<return: #AsyncPoll>
 
 	^ stream pollNext: anAsynchronousContext
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncStreamNextFuture >> stream: anAsyncStream [
 	stream := anAsyncStream
 ]

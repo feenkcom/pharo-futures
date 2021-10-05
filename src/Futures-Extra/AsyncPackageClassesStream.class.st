@@ -1,27 +1,27 @@
 Class {
-	#name : 'AsyncPackageClassesStream',
-	#superclass : 'Object',
+	#name : #AsyncPackageClassesStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
 		'package',
 		'stream'
 	],
-	#category : 'Futures-Extra'
+	#category : #'Futures-Extra'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncPackageClassesStream class >> package: aPackage [
 	^ self new forPackage: aPackage
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncPackageClassesStream >> forPackage: aRPackage [
 	package := aRPackage.
-	stream := AsyncSequenceStream forCollection: [ package definedClasses asArray ] asFuture.
+	stream := AsyncSequenceStream forCollection: [ package definedClasses asArray ] asAsyncFuture.
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncPackageClassesStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -33,7 +33,7 @@ AsyncPackageClassesStream >> pollNext: anAsynchronousContext [
 	^ stream pollNext: anAsynchronousContext
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncPackageClassesStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 

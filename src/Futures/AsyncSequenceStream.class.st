@@ -6,8 +6,8 @@ Creates a stream that wraps a {{gtClass:SequenceableCollection}} or a {{gtClass:
 {{gtExample:AsyncStreamExamples>>sequence}}
 "
 Class {
-	#name : 'AsyncSequenceStream',
-	#superclass : 'Object',
+	#name : #AsyncSequenceStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -16,20 +16,20 @@ Class {
 		'index',
 		'done'
 	],
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncSequenceStream class >> forCollection: aCollectionOrFuture [
 	^ self new collection: aCollectionOrFuture
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncSequenceStream >> collection: aCollectionOrFuture [
-	collectionFuture := aCollectionOrFuture asFuture.
+	collectionFuture := aCollectionOrFuture asAsyncFuture.
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncSequenceStream >> initialize [
 	super initialize.
 	
@@ -37,7 +37,7 @@ AsyncSequenceStream >> initialize [
 	done := false
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncSequenceStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -78,7 +78,7 @@ AsyncSequenceStream >> pollNext: anAsynchronousContext [
 	] repeat.
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncSequenceStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 	| remainingSize |

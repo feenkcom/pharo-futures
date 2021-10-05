@@ -7,8 +7,8 @@ This is useful to chain along a computation once a future has been resolved.
 {{gtExample:AsyncFutureExamples>>map}}
 "
 Class {
-	#name : 'AsyncMapFuture',
-	#superclass : 'Object',
+	#name : #AsyncMapFuture,
+	#superclass : #Object,
 	#traits : 'TAsyncFuture',
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
@@ -18,18 +18,18 @@ Class {
 	#category : 'Futures-Base - Futures'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncMapFuture class >> future: aFuture mapBlock: aBlock [
 	^ self new future: aFuture mapBlock: aBlock
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncMapFuture >> future: aFuture mapBlock: aBlock [
 	future := aFuture.
 	mapBlock := aBlock
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncMapFuture >> poll: anAsynchronousContext [
 	^ (future poll: anAsynchronousContext)
 		ifReady: [ :aReadyPoll | aReadyPoll map: mapBlock ]

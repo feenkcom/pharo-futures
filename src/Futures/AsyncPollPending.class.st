@@ -1,33 +1,33 @@
 Class {
-	#name : 'AsyncPollPending',
-	#superclass : 'AsyncPoll',
+	#name : #AsyncPollPending,
+	#superclass : #AsyncPoll,
 	#classInstVars : [
 		'uniqueInstance'
 	],
 	#category : 'Futures-Utilities'
 }
 
-{ #category : 'cleanup' }
+{ #category : #cleanup }
 AsyncPollPending class >> cleanUp [
 	uniqueInstance := nil
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncPollPending class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncPollPending >> isPending [
 	^ true
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncPollPending >> isReady [
 	^ false
 ]
 
-{ #category : 'operators-mapping' }
+{ #category : #'operators-mapping' }
 AsyncPollPending >> map: aBlock [
 	"Changes the ready value of this Poll with the value computed."
 	<return: #AsyncPoll>

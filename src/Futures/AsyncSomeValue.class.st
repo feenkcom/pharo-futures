@@ -1,18 +1,18 @@
 Class {
-	#name : 'AsyncSomeValue',
-	#superclass : 'AsyncOptionalValue',
+	#name : #AsyncSomeValue,
+	#superclass : #AsyncOptionalValue,
 	#instVars : [
 		'value'
 	],
 	#category : 'Futures-Utilities'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncSomeValue class >> value: anObject [
 	^ self new value: anObject
 ]
 
-{ #category : 'comparing' }
+{ #category : #comparing }
 AsyncSomeValue >> = anObject [
 
 	"Answer whether the receiver and anObject represent the same object."
@@ -22,7 +22,7 @@ AsyncSomeValue >> = anObject [
 	^ value = anObject value
 ]
 
-{ #category : 'comparing' }
+{ #category : #comparing }
 AsyncSomeValue >> hash [
 
 	"Answer an integer value that is related to the identity of the receiver."
@@ -30,32 +30,32 @@ AsyncSomeValue >> hash [
 	^ self class hash bitXor: value hash
 ]
 
-{ #category : 'controlling' }
+{ #category : #controlling }
 AsyncSomeValue >> ifSome: aSomeBlock ifNone: aNoneBlock [
 	^ aSomeBlock cull: self value
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncSomeValue >> isNone [
 	^ false
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncSomeValue >> isSome [
 	^ true
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncSomeValue >> map: aBlock [
 	^ self class value: (aBlock value: self value)
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncSomeValue >> value [
 	^ value
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncSomeValue >> value: anObject [
 	value := anObject
 ]

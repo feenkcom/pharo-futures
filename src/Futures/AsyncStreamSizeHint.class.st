@@ -1,6 +1,6 @@
 Class {
-	#name : 'AsyncStreamSizeHint',
-	#superclass : 'Object',
+	#name : #AsyncStreamSizeHint,
+	#superclass : #Object,
 	#instVars : [
 		'lowerBound',
 		'higherBound'
@@ -11,47 +11,47 @@ Class {
 	#category : 'Futures-Utilities'
 }
 
-{ #category : 'cleanup' }
+{ #category : #cleanup }
 AsyncStreamSizeHint class >> cleanUp [
 	unknown := nil
 ]
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncStreamSizeHint class >> lowerBound: aLowerBound [
 	^ self
 		lowerBound: aLowerBound
 		higherBound: nil
 ]
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncStreamSizeHint class >> lowerBound: aLowerBound higherBound: aHigherBound [
 	^ self new lowerBound: aLowerBound higherBound: aHigherBound
 ]
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncStreamSizeHint class >> unknown [
 	^ unknown ifNil: [ unknown := self new ]
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncStreamSizeHint >> approximateAmount [
 	^ self hasHigherBound
 		ifTrue: [ self higherBound ]
 		ifFalse: [ self lowerBound ]
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncStreamSizeHint >> hasHigherBound [
 	^ higherBound notNil
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncStreamSizeHint >> higherBound [
 
 	^ higherBound
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncStreamSizeHint >> initialize [
 	super initialize.
 	
@@ -59,13 +59,13 @@ AsyncStreamSizeHint >> initialize [
 	higherBound := nil
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncStreamSizeHint >> lowerBound [
 
 	^ lowerBound
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncStreamSizeHint >> lowerBound: aLowerBound higherBound: aHigherBound [
 	lowerBound := aLowerBound.
 	higherBound := aHigherBound

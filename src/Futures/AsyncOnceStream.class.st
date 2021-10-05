@@ -1,6 +1,6 @@
 Class {
-	#name : 'AsyncOnceStream',
-	#superclass : 'Object',
+	#name : #AsyncOnceStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -9,17 +9,17 @@ Class {
 	#category : 'Futures-Base - Streams'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncOnceStream class >> forFuture: aFuture [
 	^ self new future: aFuture
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncOnceStream >> future: aFuture [
 	future := AsyncOptionalValue some: aFuture
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncOnceStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -40,7 +40,7 @@ AsyncOnceStream >> pollNext: anAsynchronousContext [
 	^ AsyncPoll ready: (AsyncOptionalValue some: aValue)
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncOnceStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 	| aSize |

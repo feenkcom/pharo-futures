@@ -7,8 +7,8 @@ If {{gtMethod:AsyncFuseStream>>#isDone}} method returns true, then all future ca
 {{gtExample:AsyncStreamExamples>>fuse}}
 "
 Class {
-	#name : 'AsyncFuseStream',
-	#superclass : 'Object',
+	#name : #AsyncFuseStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -18,18 +18,18 @@ Class {
 	#category : 'Futures-Base - Streams'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncFuseStream class >> stream: anAsyncStream [
 	^ self new
 		stream: anAsyncStream
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncFuseStream >> isDone [
 	^ done
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncFuseStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -52,7 +52,7 @@ AsyncFuseStream >> pollNext: anAsynchronousContext [
 	^ aReadyPoll
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncFuseStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
@@ -61,7 +61,7 @@ AsyncFuseStream >> sizeHint [
 		ifFalse: [ stream sizeHint ]
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncFuseStream >> stream: anAsyncStream [
 	stream := anAsyncStream.
 	done := false
