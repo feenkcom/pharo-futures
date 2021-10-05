@@ -1,8 +1,19 @@
 Class {
 	#name : #AsyncStreamExamples,
 	#superclass : #Object,
-	#category : 'Futures-Examples'
+	#category : #'Futures-Examples'
 }
+
+{ #category : #documentation }
+AsyncStreamExamples >> allTypesOfStreams [
+	<gtExample>
+	
+	^ ((TAsyncStream users asArray
+		flatCollect: [ :cls | cls withAllSubclasses ])
+		copyWithoutDuplicates
+		reject: [ :cls | cls isAbstract ])
+		sorted: [ :a :b | a name < b name ]
+]
 
 { #category : #examples }
 AsyncStreamExamples >> filter [
@@ -18,18 +29,35 @@ AsyncStreamExamples >> filter [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> filterStream [
+	<gtExample>
+	| stream |
+	
+	stream := (1 to: 10) asAsyncStream.
+	^ stream filter: [ :x | x even ]
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> flatten [
 	<gtExample>
-	| streams flatten result |
-	
-	streams := (0 to: 3) asAsyncStream map: [ :x |
-		(AsyncRepeatStream item: ($a asInteger + x) asCharacter)
-			take: (x + 1) ].
-	flatten := streams flatten.
+	| flatten result |
+
+	flatten := self flattenStream.
 	
 	result := (flatten collectAs: String) wait.
 	self assert: result equals: 'abbcccdddd'.
 	^ result
+]
+
+{ #category : #examples }
+AsyncStreamExamples >> flattenStream [
+	<gtExample>
+	| streams |
+	
+	streams := (0 to: 3) asAsyncStream map: [ :x |
+		(AsyncRepeatStream item: ($a asInteger + x) asCharacter)
+			take: (x + 1) ].
+	^ streams flatten
 ]
 
 { #category : #examples }
@@ -50,14 +78,22 @@ AsyncStreamExamples >> fuse [
 { #category : #examples }
 AsyncStreamExamples >> map [
 	<gtExample>
-	| stream evens result |
+	| evens result |
 	
-	stream := (1 to: 5) asAsyncStream.
-	evens := stream map: [ :x | x * 2 ].
+	evens := self mapStream.
 	
 	result := evens collect wait.
 	self assert: result equals: #(2 4 6 8 10).
 	^ result
+]
+
+{ #category : #examples }
+AsyncStreamExamples >> mapStream [
+	<gtExample>
+	| stream |
+	
+	stream := (1 to: 5) asAsyncStream.
+	^ stream map: [ :x | x * 2 ]
 ]
 
 { #category : #examples }

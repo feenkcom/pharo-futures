@@ -9,6 +9,11 @@ Class {
 	#category : #'Futures-Base - Futures'
 }
 
+{ #category : #testing }
+AsyncTypedFuture class >> isAbstract [
+	^ self = AsyncTypedFuture
+]
+
 { #category : #accessing }
 AsyncTypedFuture >> future: anObject [
 

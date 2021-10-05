@@ -4,6 +4,17 @@ Class {
 	#category : #'Futures-Examples'
 }
 
+{ #category : #documentation }
+AsyncFutureExamples >> allTypesOfFutures [
+	<gtExample>
+	
+	^ ((TAsyncFuture users asArray
+		flatCollect: [ :cls | cls withAllSubclasses ])
+		copyWithoutDuplicates
+		reject: [ :cls | cls isAbstract ])
+		sorted: [ :a :b | a name < b name ]
+]
+
 { #category : #examples }
 AsyncFutureExamples >> joinAll [
 	<gtExample>
@@ -39,8 +50,15 @@ AsyncFutureExamples >> mapFuture [
 	<gtExample>
 	| future |
 	
-	future := [ 42 ] asAsyncFuture.
+	future := self simpleFuture asAsyncFuture.
 	future := future map: [ :x | x * 2 ].
 
 	^ future
+]
+
+{ #category : #examples }
+AsyncFutureExamples >> simpleFuture [
+	<gtExample>
+
+	^ [ 21 * 2 ] asAsyncFuture
 ]

@@ -18,6 +18,8 @@ AsyncRejectedPromise >> asyncThen: onFulfilledBlock [
 
 { #category : #accessing }
 AsyncRejectedPromise >> error: anError [
+	anError signalContext
+		ifNotNil: [ anError freeze ].
 	error := anError
 ]
 
