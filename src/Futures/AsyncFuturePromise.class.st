@@ -24,7 +24,7 @@ AsyncFuturePromise >> future: anAsyncFuture [
 	future := anAsyncFuture asAsyncFuture.
 	future await
 		onSuccessDo: [ :aValue | self fulfillWithValue: aValue ];
-		onFailureDo: [ :anError | anError freeze. self rejectWithError: anError ]
+		onFailureDo: [ :anError | self rejectWithError: anError ]
 ]
 
 { #category : #'private - state' }

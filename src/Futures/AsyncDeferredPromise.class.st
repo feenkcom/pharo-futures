@@ -12,6 +12,11 @@ Class {
 	#category : #'Futures-Base - Promises'
 }
 
+{ #category : #testing }
+AsyncDeferredPromise class >> isAbstract [
+	^ self = AsyncDeferredPromise
+]
+
 { #category : #'api - promise' }
 AsyncDeferredPromise >> asyncThen: onFulfilledBlock [
 	mutex critical: [
