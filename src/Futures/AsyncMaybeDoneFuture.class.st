@@ -1,20 +1,27 @@
 Class {
-	#name : 'AsyncMaybeDoneFuture',
-	#superclass : 'Object',
+	#name : #AsyncMaybeDoneFuture,
+	#superclass : #Object,
 	#traits : 'TAsyncFuture',
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
 		'state'
 	],
-	#category : 'Futures-Base - Futures'
+	#category : #'Futures-Base - Futures'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncMaybeDoneFuture class >> future: aFuture [
 	^ self new setFuture: aFuture
 ]
 
-{ #category : 'api - future' }
+{ #category : #accessing }
+AsyncMaybeDoneFuture >> borrowOutput: aBlock ifNone: aNoneBlock [
+	^ state key = #done
+		ifTrue: [ aBlock value: state value ]
+		ifFalse: aNoneBlock
+]
+
+{ #category : #'api - future' }
 AsyncMaybeDoneFuture >> poll: anAsynchronousContext [
 	state key = #gone
 		ifTrue: [ self error: ('{1} is polled after being taken' format: { self printString }) ].
@@ -28,29 +35,29 @@ AsyncMaybeDoneFuture >> poll: anAsynchronousContext [
 	^ AsyncPoll ready: self
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncMaybeDoneFuture >> setDone: anObject [
 	state := #done -> anObject
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncMaybeDoneFuture >> setFuture: aFuture [
 	state := #future -> aFuture
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncMaybeDoneFuture >> setGone [
 	state := #gone -> nil
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncMaybeDoneFuture >> takeOutput [
 	^ self
 		takeOutput: [ :aValue | aValue ]
 		ifNone: [ self error: 'The future is not done or the output is already taken' ]
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncMaybeDoneFuture >> takeOutput: aBlock ifNone: aNoneBlock [
 	^ state key = #done
 		ifTrue: [

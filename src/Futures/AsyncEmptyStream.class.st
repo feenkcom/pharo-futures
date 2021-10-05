@@ -4,14 +4,14 @@ Creates a stream which contains no elements.
 The returned stream will always return `AsyncPoll ready: AsyncOptionalValue none` when polled.
 "
 Class {
-	#name : 'AsyncEmptyStream',
-	#superclass : 'Object',
+	#name : #AsyncEmptyStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#category : 'Futures-Base - Streams'
 }
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncEmptyStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -23,7 +23,7 @@ AsyncEmptyStream >> pollNext: anAsynchronousContext [
 	^ AsyncPoll ready: AsyncOptionalValue none
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncEmptyStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 

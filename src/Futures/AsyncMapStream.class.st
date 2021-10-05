@@ -7,8 +7,8 @@ The provided closure is executed over all elements of this stream as they are ma
 {{gtExample:AsyncStreamExamples>>#map}}
 "
 Class {
-	#name : 'AsyncMapStream',
-	#superclass : 'Object',
+	#name : #AsyncMapStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -18,12 +18,12 @@ Class {
 	#category : 'Futures-Base - Streams'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncMapStream class >> stream: anAsyncStream mapBlock: aBlock [
 	^ self new stream: anAsyncStream mapBlock: aBlock
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncMapStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -37,14 +37,14 @@ AsyncMapStream >> pollNext: anAsynchronousContext [
 		ifPending: [ :aPendingPoll | aPendingPoll ]
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncMapStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
 	^ stream sizeHint
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncMapStream >> stream: anAsyncStream mapBlock: aBlock [
 	stream := anAsyncStream.
 	mapBlock := aBlock

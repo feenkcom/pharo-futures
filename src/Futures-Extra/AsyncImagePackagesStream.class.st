@@ -1,37 +1,37 @@
 Class {
-	#name : 'AsyncImagePackagesStream',
-	#superclass : 'Object',
+	#name : #AsyncImagePackagesStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
 		'stream'
 	],
-	#category : 'Futures-Extra'
+	#category : #'Futures-Extra'
 }
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncImagePackagesStream class >> stream: aPackagesStream [
 	^ self new stream: aPackagesStream
 ]
 
-{ #category : 'api - queries' }
+{ #category : #'api - queries' }
 AsyncImagePackagesStream >> definedBehaviors [
 	^ AsyncClassesStream stream: (self map: [ :eachPackage | AsyncPackageClassesStream package: eachPackage ]) flatten
 ]
 
-{ #category : 'api - queries' }
+{ #category : #'api - queries' }
 AsyncImagePackagesStream >> deprecated [
 	^ self class stream: (self filter: [ :each | each isDeprecated ])
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncImagePackagesStream >> initialize [
 	super initialize.
 	
-	stream := AsyncSequenceStream forCollection: [ RPackage organizer packages ] asFuture.
+	stream := AsyncSequenceStream forCollection: [ RPackage organizer packages ] asAsyncFuture.
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncImagePackagesStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -43,14 +43,14 @@ AsyncImagePackagesStream >> pollNext: anAsynchronousContext [
 	^ stream pollNext: anAsynchronousContext
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncImagePackagesStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
 	^ stream sizeHint
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncImagePackagesStream >> stream: aStream [
 	stream := aStream
 ]

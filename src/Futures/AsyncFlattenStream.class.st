@@ -6,8 +6,8 @@ Flattens a stream of streams into just one continuous stream.
 {{gtExample:AsyncStreamExamples>>#flatten}}
 "
 Class {
-	#name : 'AsyncFlattenStream',
-	#superclass : 'Object',
+	#name : #AsyncFlattenStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -17,19 +17,19 @@ Class {
 	#category : 'Futures-Base - Streams'
 }
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncFlattenStream class >> stream: anAsyncStream [
 	^ self new stream: anAsyncStream
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncFlattenStream >> initialize [
 	super initialize.
 	
 	next := AsyncOptionalValue none
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncFlattenStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -59,7 +59,7 @@ AsyncFlattenStream >> pollNext: anAsynchronousContext [
 		] repeat
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncFlattenStream >> stream: anAsyncStream [
 	stream := anAsyncStream
 ]

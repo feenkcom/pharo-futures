@@ -1,28 +1,28 @@
 Class {
-	#name : 'AsyncPollReady',
-	#superclass : 'AsyncPoll',
+	#name : #AsyncPollReady,
+	#superclass : #AsyncPoll,
 	#instVars : [
 		'value'
 	],
 	#category : 'Futures-Utilities'
 }
 
-{ #category : 'generated' }
+{ #category : #generated }
 AsyncPollReady class >> value: anObject [
 	^ self new value: anObject
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncPollReady >> isPending [
 	^ false
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncPollReady >> isReady [
 	^ true
 ]
 
-{ #category : 'operators-mapping' }
+{ #category : #'operators-mapping' }
 AsyncPollReady >> map: aBlock [
 	"Changes the ready value of this Poll with the value computed."
 	<return: #AsyncPoll>
@@ -30,12 +30,12 @@ AsyncPollReady >> map: aBlock [
 	^ self class value: (aBlock cull: self value)
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncPollReady >> value [
 	^ value
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncPollReady >> value: anObject [
 
 	value := anObject

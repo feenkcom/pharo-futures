@@ -7,8 +7,8 @@ The returned future will drive execution for all of its underlying futures, coll
 {{gtExample:AsyncFutureExamples>>joinAll}}
 "
 Class {
-	#name : 'AsyncJoinAllFuture',
-	#superclass : 'Object',
+	#name : #AsyncJoinAllFuture,
+	#superclass : #Object,
 	#traits : 'TAsyncFuture',
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
@@ -17,17 +17,17 @@ Class {
 	#category : 'Futures-Base - Futures'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncJoinAllFuture class >> futures: aCollectionOfFutures [
 	^ self new futures: aCollectionOfFutures
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncJoinAllFuture >> futures: aCollectionOfFutures [
 	futures := aCollectionOfFutures collect: [ :eachFuture | AsyncMaybeDoneFuture future: eachFuture ] as: Array
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncJoinAllFuture >> poll: anAsynchronousContext [
 	| allDone |
 	

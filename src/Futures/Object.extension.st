@@ -1,6 +1,11 @@
-Extension { #name : 'Object' }
+Extension { #name : #Object }
 
-{ #category : '*Futures' }
-Object >> asFuture [
+{ #category : #'*Futures' }
+Object >> asAsyncFuture [
 	^ AsyncReadyFuture value: self
+]
+
+{ #category : #'*Futures' }
+Object >> asAsyncPromise [
+	^ AsyncFulfilledPromise new value: self
 ]

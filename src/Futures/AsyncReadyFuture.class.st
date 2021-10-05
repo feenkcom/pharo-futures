@@ -2,8 +2,8 @@
 A future that is immediately ready with a value.
 "
 Class {
-	#name : 'AsyncReadyFuture',
-	#superclass : 'Object',
+	#name : #AsyncReadyFuture,
+	#superclass : #Object,
 	#traits : 'TAsyncFuture',
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
@@ -12,12 +12,12 @@ Class {
 	#category : 'Futures-Base - Futures'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncReadyFuture class >> value: anObject [
 	^ self new value: anObject
 ]
 
-{ #category : 'api - testing' }
+{ #category : #'api - testing' }
 AsyncReadyFuture >> isReadyFuture [
 	"Return true if a future is a ready future, meaning that the value can be taken synchronously"
 	<return: #Boolean>
@@ -25,7 +25,7 @@ AsyncReadyFuture >> isReadyFuture [
 	^ true
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncReadyFuture >> poll: anAsynchronousContext [
 	| aValue |
 
@@ -39,14 +39,14 @@ AsyncReadyFuture >> poll: anAsynchronousContext [
 	^ AsyncPoll ready: aValue
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncReadyFuture >> takeOutput [
 	^ self
 		takeOutput: [ :aValue | aValue ]
 		ifNone: [ self error: 'The future is not done or the outout is already taken' ]
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncReadyFuture >> takeOutput: aBlock ifNone: aNoneBlock [
 	^ value
 		ifSome: [ :aValue |
@@ -55,7 +55,7 @@ AsyncReadyFuture >> takeOutput: aBlock ifNone: aNoneBlock [
 		] ifNone: aNoneBlock
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncReadyFuture >> value: anObject [
 	value := AsyncOptionalValue some: anObject
 ]

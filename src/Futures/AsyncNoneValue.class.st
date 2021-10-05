@@ -1,18 +1,18 @@
 Class {
-	#name : 'AsyncNoneValue',
-	#superclass : 'AsyncOptionalValue',
+	#name : #AsyncNoneValue,
+	#superclass : #AsyncOptionalValue,
 	#classInstVars : [
 		'uniqueInstance'
 	],
 	#category : 'Futures-Utilities'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncNoneValue class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
-{ #category : 'comparing' }
+{ #category : #comparing }
 AsyncNoneValue >> = anObject [
 
 	"Answer whether the receiver and anObject represent the same object."
@@ -21,7 +21,7 @@ AsyncNoneValue >> = anObject [
 	^ self class = anObject class
 ]
 
-{ #category : 'comparing' }
+{ #category : #comparing }
 AsyncNoneValue >> hash [
 
 	"Answer an integer value that is related to the identity of the receiver."
@@ -29,22 +29,22 @@ AsyncNoneValue >> hash [
 	^ self class hash
 ]
 
-{ #category : 'controlling' }
+{ #category : #controlling }
 AsyncNoneValue >> ifSome: aSomeBlock ifNone: aNoneBlock [
 	^ aNoneBlock value
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncNoneValue >> isNone [
 	^ true
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 AsyncNoneValue >> isSome [
 	^ false
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 AsyncNoneValue >> map: aBlock [
 	^ self
 ]

@@ -1,6 +1,6 @@
 Class {
-	#name : 'AsyncClassesStream',
-	#superclass : 'Object',
+	#name : #AsyncClassesStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -9,12 +9,12 @@ Class {
 	#category : 'Futures-Extra'
 }
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 AsyncClassesStream class >> stream: aStream [
 	^ self new stream: aStream
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncClassesStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -26,14 +26,14 @@ AsyncClassesStream >> pollNext: anAsynchronousContext [
 	^ stream pollNext: anAsynchronousContext
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncClassesStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
 	^ stream sizeHint
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncClassesStream >> stream: aStream [
 	stream := aStream
 ]

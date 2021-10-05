@@ -8,26 +8,31 @@ The core method of future, {{gtMethod:TAsyncFuture>>#poll:}}, attempts to resolv
 When using a future, you generally won't call poll directly, but instead {{gtMethod:TAsyncFuture>>#await}} the value.
 "
 Trait {
-	#name : 'TAsyncFuture',
-	#category : 'Futures-Base - Futures'
+	#name : #TAsyncFuture,
+	#category : #'Futures-Base - Futures'
 }
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
+TAsyncFuture >> asAsyncFuture [
+	^ self
+]
+
+{ #category : #'api - future' }
+TAsyncFuture >> asAsyncPromise [
+	^ AsyncFuturePromise new future: self
+]
+
+{ #category : #'api - future' }
 TAsyncFuture >> asAsyncStream [
 	^ AsyncOnceStream forFuture: self
 ]
 
-{ #category : 'api - future' }
-TAsyncFuture >> asFuture [
-	^ self
-]
-
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 TAsyncFuture >> await [
-	^ (AsyncTaskItFutureTask new forFuture: self) future: TKTConfiguration runner
+	^ AsyncTaskItFutureTask forAsyncFuture: self
 ]
 
-{ #category : 'api - testing' }
+{ #category : #'api - testing' }
 TAsyncFuture >> isReadyFuture [
 	"Return true if a future is a ready future, meaning that the value can be taken synchronously"
 	<return: #Boolean>
@@ -35,19 +40,19 @@ TAsyncFuture >> isReadyFuture [
 	^ false
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 TAsyncFuture >> map: aBlock [
 	^ AsyncMapFuture future: self mapBlock: aBlock
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 TAsyncFuture >> poll: anAsynchronousContext [
 	<return: #AsyncPoll>
 
-	self explicitRequirement
+	^ self explicitRequirement
 ]
 
-{ #category : 'api - future' }
+{ #category : #'api - future' }
 TAsyncFuture >> wait [
 	| aSemaphore anAwaitResult anAwaitError |
 	
@@ -58,7 +63,7 @@ TAsyncFuture >> wait [
 			anAwaitResult := aResult.
 			aSemaphore signal ];
 		onFailureDo: [ :anError |
-			anAwaitError := anError freezeOrWithoutContext.
+			anAwaitError := anError freeze.
 			aSemaphore signal ].
 	
 	aSemaphore wait.

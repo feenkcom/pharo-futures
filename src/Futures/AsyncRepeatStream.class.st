@@ -7,8 +7,8 @@ The stream never terminates. Note that you likely want to avoid usage of `collec
 {{gtExample:AsyncStreamExamples>>repeat}}
 "
 Class {
-	#name : 'AsyncRepeatStream',
-	#superclass : 'Object',
+	#name : #AsyncRepeatStream,
+	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
@@ -17,18 +17,18 @@ Class {
 	#category : 'Futures-Base - Streams'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 AsyncRepeatStream class >> item: anItem [
 	^ self new item: anItem
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 AsyncRepeatStream >> item: anObject [
 
 	item := anObject
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncRepeatStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
@@ -40,7 +40,7 @@ AsyncRepeatStream >> pollNext: anAsynchronousContext [
 	^ AsyncPoll ready: (AsyncOptionalValue some: item copy)
 ]
 
-{ #category : 'api - stream' }
+{ #category : #'api - stream' }
 AsyncRepeatStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 

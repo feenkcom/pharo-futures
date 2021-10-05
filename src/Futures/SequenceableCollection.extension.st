@@ -1,6 +1,6 @@
-Extension { #name : 'SequenceableCollection' }
+Extension { #name : #SequenceableCollection }
 
-{ #category : '*Futures' }
+{ #category : #'*Futures' }
 SequenceableCollection >> asAsyncStream [
 	^ AsyncSequenceStream forCollection: self
 ]
