@@ -23,6 +23,11 @@ AsyncRejectedPromise >> error: anError [
 	error := anError
 ]
 
+{ #category : #testing }
+AsyncRejectedPromise >> isAsyncPromise [
+	^ true
+]
+
 { #category : #'api - promise' }
 AsyncRejectedPromise >> then: aFulfillmentBlock [
 	<return: #TAsyncPromise>

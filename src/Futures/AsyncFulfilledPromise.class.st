@@ -22,6 +22,11 @@ AsyncFulfilledPromise >> asyncThen: onFulfilledBlock [
 	^ AsyncFuturePromise new future: aFutureValue
 ]
 
+{ #category : #testing }
+AsyncFulfilledPromise >> isAsyncPromise [
+	^ true
+]
+
 { #category : #'api - promise' }
 AsyncFulfilledPromise >> then: onFulfilledBlock [
 	<return: #TAsyncPromise>
@@ -32,7 +37,9 @@ AsyncFulfilledPromise >> then: onFulfilledBlock [
 		isSynchronous: true)
 			value: value.
 
-	^ AsyncFulfilledPromise new value: aTransformedValue
+	^ aTransformedValue isAsyncPromise
+		ifTrue: [ aTransformedValue ]
+		ifFalse: [ AsyncFulfilledPromise new value: aTransformedValue ]
 ]
 
 { #category : #'api - promise' }
@@ -44,5 +51,7 @@ AsyncFulfilledPromise >> then: aFulfillmentBlock otherwise: aRejectionBlock [
 
 { #category : #initialization }
 AsyncFulfilledPromise >> value: anObject [
+	AsyncPromiseComputation assertNotPromise: anObject.
+
 	value := anObject
 ]
