@@ -1,5 +1,5 @@
 Class {
-	#name : #AsyncImagePackagesStream,
+	#name : #AsyncImageBehaviorsStream,
 	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
@@ -9,30 +9,15 @@ Class {
 	#category : #'Futures-Extra'
 }
 
-{ #category : #accessing }
-AsyncImagePackagesStream class >> stream: aPackagesStream [
-	^ self new stream: aPackagesStream
-]
-
-{ #category : #'api - queries' }
-AsyncImagePackagesStream >> definedBehaviors [
-	^ AsyncClassesStream stream: (self map: [ :eachPackage | AsyncPackageClassesStream package: eachPackage ]) flatten
-]
-
-{ #category : #'api - queries' }
-AsyncImagePackagesStream >> deprecated [
-	^ self class stream: (self filter: [ :each | each isDeprecated ])
-]
-
 { #category : #initialization }
-AsyncImagePackagesStream >> initialize [
+AsyncImageBehaviorsStream >> initialize [
 	super initialize.
 	
-	stream := AsyncSequenceStream forCollection: [ RPackage organizer packages ] asAsyncFuture
+	stream := AsyncSequenceStream forCollection: [ self class environment classNames copy ] asAsyncFuture
 ]
 
 { #category : #'api - stream' }
-AsyncImagePackagesStream >> pollNext: anAsynchronousContext [
+AsyncImageBehaviorsStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
 	 - Poll::Pending means that this stream's next value is not ready yet. Implementations will ensure that the current task will be notified when the next value may be ready.
@@ -40,17 +25,18 @@ AsyncImagePackagesStream >> pollNext: anAsynchronousContext [
 	 - Poll::Ready(None) means that the stream has terminated, and poll_next should not be invoked again."
 	<return: #AsyncPoll>
 
-	^ stream pollNext: anAsynchronousContext
+	^ (stream pollNext: anAsynchronousContext)
+		map: [ :aNameOption |
+			aNameOption map: [ :aName |
+				self class environment
+					at: aName
+					ifPresent: [ :aBehavior | aBehavior ]
+					ifAbsent: [ ^ AsyncPoll pending ] ] ]
 ]
 
 { #category : #'api - stream' }
-AsyncImagePackagesStream >> sizeHint [
+AsyncImageBehaviorsStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
 	^ stream sizeHint
-]
-
-{ #category : #initialization }
-AsyncImagePackagesStream >> stream: aStream [
-	stream := aStream
 ]
