@@ -9,3 +9,8 @@ Object >> asAsyncFuture [
 Object >> asAsyncPromise [
 	^ AsyncFulfilledPromise new value: self
 ]
+
+{ #category : #'*Futures' }
+Object >> isAsyncPromise [
+	^ false
+]

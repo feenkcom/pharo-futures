@@ -13,6 +13,11 @@ AsyncTaskItFutureTask class >> forAsyncFuture: aTAsyncFuture [
 ]
 
 { #category : #accessing }
+AsyncTaskItFutureTask class >> isRunnerBusy [
+	^ (self runner taskQueue itemArray reject: #isZombie thenCollect: #object) isNotEmpty
+]
+
+{ #category : #accessing }
 AsyncTaskItFutureTask class >> runner [
 	| aRunner |
 	

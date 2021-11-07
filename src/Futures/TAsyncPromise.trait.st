@@ -17,6 +17,11 @@ TAsyncPromise >> asyncThen: onFulfilledBlock [
 	^ self explicitRequirement
 ]
 
+{ #category : #testing }
+TAsyncPromise >> isAsyncPromise [
+	^ true
+]
+
 { #category : #'api - promise' }
 TAsyncPromise >> then: onFulfilledBlock [
 	<return: #TAsyncPromise>

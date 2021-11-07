@@ -43,6 +43,20 @@ AsyncDeferredPromise >> asyncThen: onFulfilledBlock [
 ]
 
 { #category : #'private - state' }
+AsyncDeferredPromise >> fulfillWithTransformedValue: anObject [
+	| theFulfillmentPromises |
+
+	AsyncPromiseComputation assertNotPromise: anObject.
+
+	mutex critical: [
+		state := (AsyncFulfilledPromiseState new value: anObject).
+		theFulfillmentPromises := whenResolvedPromises.
+		whenResolvedPromises := OrderedCollection new ].
+
+	theFulfillmentPromises do: [ :eachPromise | eachPromise fulfillWithValue: anObject ]
+]
+
+{ #category : #'private - state' }
 AsyncDeferredPromise >> fulfillWithValue: aValue [
 	self subclassResponsibility
 ]
@@ -55,6 +69,11 @@ AsyncDeferredPromise >> initialize [
 	mutex := Monitor new.
 	whenResolvedPromises := OrderedCollection new.
 	whenRejectedPromises := OrderedCollection new.
+]
+
+{ #category : #testing }
+AsyncDeferredPromise >> isAsyncPromise [
+	^ true
 ]
 
 { #category : #testing }
@@ -72,6 +91,17 @@ AsyncDeferredPromise >> rejectWithError: anError [
 	self subclassResponsibility
 ]
 
+{ #category : #'private - state' }
+AsyncDeferredPromise >> rejectWithTransformedError: anError [
+	| theRejectionPromises |
+	
+	mutex critical: [
+		state := (AsyncRejectedPromiseState new error: anError).
+		theRejectionPromises := whenRejectedPromises.
+		whenRejectedPromises := OrderedCollection new ].
+	theRejectionPromises do: [ :eachPromise | eachPromise rejectWithError: anError ]
+]
+
 { #category : #'api - promise' }
 AsyncDeferredPromise >> then: onFulfilledBlock [
 	mutex critical: [
@@ -86,11 +116,14 @@ AsyncDeferredPromise >> then: onFulfilledBlock [
 				^ aResolvedPromise ] ].
 
 	state isFulfilled
-		ifTrue: [
-			^ AsyncFulfilledPromise new
-				value: state value;
-				then: onFulfilledBlock ].
-		
+		ifTrue: [			
+			^ state value isAsyncPromise
+				ifTrue: [ state value asyncThen: onFulfilledBlock ]
+				ifFalse: [
+					AsyncFulfilledPromise new
+						value: state value;
+						then: onFulfilledBlock ] ].
+
 	state isRejected
 		ifTrue: [ ^ AsyncRejectedPromise new error: state error ].
 		
@@ -116,13 +149,12 @@ AsyncDeferredPromise >> then: onFulfilledBlock otherwise: onRejectedBlock [
 
 	state isFulfilled
 		ifTrue: [
-			| aTransformedValue |
-			aTransformedValue := (AsyncPromiseComputation new
-				computation: onFulfilledBlock;
-				isSynchronous: true)
-					value: state value.
-
-			^ AsyncFulfilledPromise new value: aTransformedValue ].
+			^ state value isAsyncPromise
+				ifTrue: [ state value asyncThen: onFulfilledBlock ]
+				ifFalse: [
+					AsyncFulfilledPromise new
+						value: state value;
+						then: onFulfilledBlock ] ].
 
 	state isRejected
 		ifTrue: [

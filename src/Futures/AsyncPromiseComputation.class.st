@@ -8,6 +8,19 @@ Class {
 	#category : #'Futures-Utilities'
 }
 
+{ #category : #asserting }
+AsyncPromiseComputation class >> assertNotPromise: aValue [
+	[ self
+		assert: [ aValue isAsyncPromise not ]
+		description: [ 'Must not be a promise!' ] ] on: Error do: [ :anError |
+			Smalltalk logStdOutDuring: [ :logger |
+				logger
+					nextPutAll: '*** EXCEPTION ***'; cr;
+					nextPutAll: anError printString; cr;
+					nextPutAll: (String
+						streamContents: [ :stream | anError signalerContext errorReportOn: stream ]); cr ] ].
+]
+
 { #category : #accessing }
 AsyncPromiseComputation >> computation [
 
@@ -42,5 +55,7 @@ AsyncPromiseComputation >> isSynchronous: anObject [
 
 { #category : #generated }
 AsyncPromiseComputation >> value: aValue [
+	self class assertNotPromise: aValue.
+
 	^ computation cull: aValue cull: isSynchronous
 ]

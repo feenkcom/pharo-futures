@@ -10,19 +10,21 @@ Class {
 
 { #category : #'private - state' }
 AsyncChainedPromise >> fulfillWithValue: aValue [
-	| aTransformedValue theFulfillmentPromises |
+	| aTransformedValue  |
+
+	AsyncPromiseComputation assertNotPromise: aValue.
 
 	aTransformedValue := (AsyncPromiseComputation new
 		computation: fulfilledComputation;
 		isSynchronous: false)
 			value: aValue.
 
-	mutex critical: [
-		state := (AsyncFulfilledPromiseState new value: aTransformedValue).
-		theFulfillmentPromises := whenResolvedPromises.
-		whenResolvedPromises := OrderedCollection new ].
-
-	theFulfillmentPromises do: [ :eachPromise | eachPromise fulfillWithValue: aTransformedValue ]
+	aTransformedValue isAsyncPromise
+		ifTrue: [
+			aTransformedValue
+				then: [ :aPromiseValue | self fulfillWithTransformedValue:  aPromiseValue ]
+				otherwise: [ :anError | self rejectWithTransformedError: anError ] ]
+		ifFalse: [ self fulfillWithTransformedValue:  aTransformedValue ]
 ]
 
 { #category : #accessing }
@@ -41,27 +43,16 @@ AsyncChainedPromise >> fulfilledComputation: anObject [
 AsyncChainedPromise >> rejectWithError: anError [
 
 	rejectedComputation
-		ifNil: [
-			| theRejectionPromises |
-			mutex critical: [
-				state := (AsyncRejectedPromiseState new error: anError).
-				theRejectionPromises := whenRejectedPromises.
-				whenRejectedPromises := OrderedCollection new ].
-			theRejectionPromises do: [ :eachPromise | eachPromise rejectWithError: anError ] ]
+		ifNil: [ self rejectWithTransformedError: anError ]
 		ifNotNil: [ :anErrorHandlingBlock |
-			| aTransformedValue theFulfillmentPromises |
+			| aTransformedValue |
 
 			aTransformedValue := (AsyncPromiseComputation new
 				computation: anErrorHandlingBlock;
 				isSynchronous: false)
 					value: anError.
 
-			mutex critical: [
-				state := (AsyncFulfilledPromiseState new value: aTransformedValue).
-				theFulfillmentPromises := whenResolvedPromises.
-				whenResolvedPromises := OrderedCollection new ].
-
-			theFulfillmentPromises do: [ :eachPromise | eachPromise fulfillWithValue: aTransformedValue ] ]
+			self fulfillWithTransformedValue: aTransformedValue ]
 ]
 
 { #category : #accessing }
