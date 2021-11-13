@@ -40,3 +40,10 @@ AsyncBehaviorInstanceMethodsStream >> pollNext: anAsynchronousContext [
 					compiledMethodAt: aSelector
 					ifAbsent: [ ^ AsyncPoll pending ] ] ]
 ]
+
+{ #category : #'api - stream copy' }
+AsyncBehaviorInstanceMethodsStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	self behavior: behavior
+]

@@ -7,7 +7,7 @@ The trait is modeled after {{gtClass:TAsyncFuture}}, but allows {{gtMethod:TAsyn
 "
 Trait {
 	#name : #TAsyncStream,
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'api - stream' }
@@ -50,6 +50,17 @@ TAsyncStream >> fuse [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> inject: anInitialValue into: aBinaryBlock [
+	"Execute an accumulating asynchronous computation over a stream, collecting all the values into one final result.
+	This combinator will accumulate all values returned by this stream according to the closure provided. The initial state is also provided to this method and then is returned again by each execution of the closure. Once the entire stream has been exhausted the returned future will resolve to this value."
+
+	^ AsyncStreamFoldFuture
+		forStream: self
+		initialValue: anInitialValue
+		block: aBinaryBlock
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> map: aMapBlock [
 	<return: #TAsyncStream>
 
@@ -74,6 +85,21 @@ TAsyncStream >> pollNext: anAsynchronousContext [
 	<return: #AsyncPoll>
 
 	^ self explicitRequirement
+]
+
+{ #category : #'api - stream copy' }
+TAsyncStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+]
+
+{ #category : #'api - stream copy' }
+TAsyncStream >> similarCopy [
+	"Answer another stream of the same type that is not yet polled.
+	This is different from #copy, which would potentially create a copy of the stream
+	in the same state as the copied stream"
+	<return: #TAsyncStream>
+
+	^ self shallowCopy postSimilarCopy
 ]
 
 { #category : #'api - stream' }

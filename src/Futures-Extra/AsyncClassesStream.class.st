@@ -6,7 +6,7 @@ Class {
 	#instVars : [
 		'stream'
 	],
-	#category : 'Futures-Extra'
+	#category : #'Futures-Extra'
 }
 
 { #category : #accessing }
@@ -24,6 +24,13 @@ AsyncClassesStream >> pollNext: anAsynchronousContext [
 	<return: #AsyncPoll>
 
 	^ stream pollNext: anAsynchronousContext
+]
+
+{ #category : #'api - stream copy' }
+AsyncClassesStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream similarCopy
 ]
 
 { #category : #'api - stream' }

@@ -108,11 +108,12 @@ AsyncDeferredPromise >> then: onFulfilledBlock [
 		state isPending
 			ifTrue: [
 				| aResolvedPromise |
-				
+
 				aResolvedPromise := AsyncChainedPromise new
 					fulfilledComputation: onFulfilledBlock.
 
 				whenResolvedPromises add: aResolvedPromise.
+				whenRejectedPromises add: aResolvedPromise.
 				^ aResolvedPromise ] ].
 
 	state isFulfilled
@@ -154,16 +155,15 @@ AsyncDeferredPromise >> then: onFulfilledBlock otherwise: onRejectedBlock [
 				ifFalse: [
 					AsyncFulfilledPromise new
 						value: state value;
-						then: onFulfilledBlock ] ].
+						then: onFulfilledBlock
+						otherwise: onRejectedBlock ] ].
 
 	state isRejected
 		ifTrue: [
-			| aTransformedValue |
-			aTransformedValue := (AsyncPromiseComputation new
-				computation: onRejectedBlock;
-				isSynchronous: true)
-					value: state error.
-			^ AsyncRejectedPromise new error: aTransformedValue ].
+			^ AsyncRejectedPromise new
+				error: state error;
+				then: onFulfilledBlock
+				otherwise: onRejectedBlock ].
 
 	^ self error: ('Unexpected state: {1}' format: { state })
 ]

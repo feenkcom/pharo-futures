@@ -78,6 +78,16 @@ AsyncSequenceStream >> pollNext: anAsynchronousContext [
 	] repeat.
 ]
 
+{ #category : #'api - stream copy' }
+AsyncSequenceStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	index := 1.
+	done := false.
+	collectionFuture := collectionFuture postSimilarCopy.
+	collection := nil
+]
+
 { #category : #'api - stream' }
 AsyncSequenceStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>

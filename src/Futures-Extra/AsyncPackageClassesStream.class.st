@@ -33,6 +33,13 @@ AsyncPackageClassesStream >> pollNext: anAsynchronousContext [
 	^ stream pollNext: anAsynchronousContext
 ]
 
+{ #category : #'api - stream copy' }
+AsyncPackageClassesStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream similarCopy
+]
+
 { #category : #'api - stream' }
 AsyncPackageClassesStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>

@@ -29,5 +29,14 @@ AsyncPollFuture >> poll: anAsynchronousContext [
 
 { #category : #initialization }
 AsyncPollFuture >> pollBlock: aBlock [
-	pollBlock := aBlock
+	pollBlock := aBlock.
+	executedBlock := nil
+]
+
+{ #category : #'api - future copy' }
+AsyncPollFuture >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+
+	executedBlock ifNotNil: [ pollBlock := executedBlock ].
+	executedBlock := nil
 ]
