@@ -48,3 +48,10 @@ AsyncBehaviorAllMethodsStream >> pollNext: anAsynchronousContext [
 					currentStream pollNext: anAsynchronousContext ] ]
 		ifPending: [ :aPendingPoll | aPendingPoll ]
 ]
+
+{ #category : #'api - stream copy' }
+AsyncBehaviorAllMethodsStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	self behavior: behavior
+]

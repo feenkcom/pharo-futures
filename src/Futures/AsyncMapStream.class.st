@@ -15,7 +15,7 @@ Class {
 		'stream',
 		'mapBlock'
 	],
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'instance creation' }
@@ -35,6 +35,13 @@ AsyncMapStream >> pollNext: anAsynchronousContext [
 	^ (stream pollNext: anAsynchronousContext)
 		ifReady: [ :aReadyPoll | AsyncPoll ready: (aReadyPoll value map: mapBlock) ]
 		ifPending: [ :aPendingPoll | aPendingPoll ]
+]
+
+{ #category : #'api - stream copy' }
+AsyncMapStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream similarCopy
 ]
 
 { #category : #'api - stream' }

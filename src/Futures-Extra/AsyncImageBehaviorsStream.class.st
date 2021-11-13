@@ -12,7 +12,7 @@ Class {
 { #category : #initialization }
 AsyncImageBehaviorsStream >> initialize [
 	super initialize.
-	
+
 	stream := AsyncSequenceStream forCollection: [ self class environment classNames copy ] asAsyncFuture
 ]
 
@@ -32,6 +32,13 @@ AsyncImageBehaviorsStream >> pollNext: anAsynchronousContext [
 					at: aName
 					ifPresent: [ :aBehavior | aBehavior ]
 					ifAbsent: [ ^ AsyncPoll pending ] ] ]
+]
+
+{ #category : #'api - stream copy' }
+AsyncImageBehaviorsStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream similarCopy
 ]
 
 { #category : #'api - stream' }

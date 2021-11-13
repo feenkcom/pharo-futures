@@ -27,3 +27,10 @@ AsyncImageMethodsStream >> pollNext: anAsynchronousContext [
 	
 	^ stream pollNext: anAsynchronousContext
 ]
+
+{ #category : #'api - stream copy' }
+AsyncImageMethodsStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream similarCopy
+]

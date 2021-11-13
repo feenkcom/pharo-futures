@@ -13,9 +13,10 @@ Class {
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
 		'stream',
+		'amount',
 		'remaining'
 	],
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'instance creation' }
@@ -49,6 +50,14 @@ AsyncTakeStream >> pollNext: anAsynchronousContext [
 			AsyncPoll ready: nextItem ]
 ]
 
+{ #category : #'api - stream copy' }
+AsyncTakeStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream similarCopy.
+	remaining := amount
+]
+
 { #category : #'api - stream' }
 AsyncTakeStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
@@ -72,5 +81,6 @@ AsyncTakeStream >> sizeHint [
 { #category : #initialization }
 AsyncTakeStream >> stream: anAsyncStream amount: aNumber [
 	stream := anAsyncStream.
-	remaining := aNumber
+	amount := aNumber.
+	remaining := amount
 ]

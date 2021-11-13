@@ -14,7 +14,7 @@ Class {
 		'stream',
 		'next'
 	],
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #accessing }
@@ -57,6 +57,14 @@ AsyncFlattenStream >> pollNext: anAsynchronousContext [
 							ifFalse: [ ^ AsyncPoll ready: AsyncOptionalValue none ] ]
 					ifPending: [ :aPendingPoll | ^ aPendingPoll ] ]
 		] repeat
+]
+
+{ #category : #'api - stream copy' }
+AsyncFlattenStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream similarCopy.
+	next := AsyncOptionalValue none
 ]
 
 { #category : #accessing }

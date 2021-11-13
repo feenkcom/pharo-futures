@@ -15,7 +15,7 @@ Class {
 		'stream',
 		'done'
 	],
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'instance creation' }
@@ -50,6 +50,14 @@ AsyncFuseStream >> pollNext: anAsynchronousContext [
 		ifTrue: [ done := true ].
 		
 	^ aReadyPoll
+]
+
+{ #category : #'api - stream copy' }
+AsyncFuseStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream similarCopy.
+	done := false
 ]
 
 { #category : #'api - stream' }
