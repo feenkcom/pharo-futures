@@ -42,3 +42,17 @@ AsyncPromiseExamples >> rejectedPromise [
 	
 	^ [ 1/ 0 ] on: Error do: #asAsyncPromise
 ]
+
+{ #category : #examples }
+AsyncPromiseExamples >> rejectedPromiseWithOtherwise [
+	<gtExample>
+	| aPromise |
+
+	aPromise := [ 1 / 0 ] asAsyncPromise
+		then: [ :n | n * 2 ]
+		otherwise: [ :e | 0 ].
+	
+	self assert: aPromise wait equals: 0.
+	
+	^ aPromise
+]
