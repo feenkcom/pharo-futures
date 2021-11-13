@@ -9,19 +9,21 @@ Class {
 	#category : #'Futures-Extra'
 }
 
-{ #category : #accessing }
-AsyncImagePackagesStream class >> stream: aPackagesStream [
-	^ self new stream: aPackagesStream
+{ #category : #comparing }
+AsyncImagePackagesStream >> = anObject [
+
+	"Answer whether the receiver and anObject represent the same object."
+
+	self == anObject ifTrue: [ ^ true ].
+	^ self class = anObject class
 ]
 
-{ #category : #'api - queries' }
-AsyncImagePackagesStream >> definedBehaviors [
-	^ AsyncClassesStream stream: (self map: [ :eachPackage | AsyncPackageClassesStream package: eachPackage ]) flatten
-]
+{ #category : #comparing }
+AsyncImagePackagesStream >> hash [
 
-{ #category : #'api - queries' }
-AsyncImagePackagesStream >> deprecated [
-	^ self class stream: (self filter: [ :each | each isDeprecated ])
+	"Answer an integer value that is related to the identity of the receiver."
+
+	^ self class hash
 ]
 
 { #category : #initialization }
@@ -47,7 +49,7 @@ AsyncImagePackagesStream >> pollNext: anAsynchronousContext [
 AsyncImagePackagesStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
-	stream := stream similarCopy
+	stream := stream asyncSimilarCopy
 ]
 
 { #category : #'api - stream' }
@@ -55,9 +57,4 @@ AsyncImagePackagesStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
 	^ stream sizeHint
-]
-
-{ #category : #initialization }
-AsyncImagePackagesStream >> stream: aStream [
-	stream := aStream
 ]

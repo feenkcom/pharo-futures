@@ -15,10 +15,34 @@ AsyncBehaviorInstanceMethodsStream class >> forBehavior: aBehavior [
 	^ self new behavior: aBehavior
 ]
 
+{ #category : #comparing }
+AsyncBehaviorInstanceMethodsStream >> = anObject [
+
+	"Answer whether the receiver and anObject represent the same object."
+
+	self == anObject ifTrue: [ ^ true ].
+	self class = anObject class ifFalse: [ ^ false ].
+	^ behavior = anObject behavior
+]
+
+{ #category : #accessing }
+AsyncBehaviorInstanceMethodsStream >> behavior [
+
+	^ behavior
+]
+
 { #category : #initialization }
 AsyncBehaviorInstanceMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
 	stream := AsyncSequenceStream forCollection: [ behavior localSelectors ] asAsyncFuture
+]
+
+{ #category : #comparing }
+AsyncBehaviorInstanceMethodsStream >> hash [
+
+	"Answer an integer value that is related to the identity of the receiver."
+
+	^ behavior hash
 ]
 
 { #category : #'api - stream' }

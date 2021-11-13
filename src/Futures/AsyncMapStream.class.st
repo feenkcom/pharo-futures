@@ -41,7 +41,7 @@ AsyncMapStream >> pollNext: anAsynchronousContext [
 AsyncMapStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
-	stream := stream similarCopy
+	stream := stream asyncSimilarCopy
 ]
 
 { #category : #'api - stream' }

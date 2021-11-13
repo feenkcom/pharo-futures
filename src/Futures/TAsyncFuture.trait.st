@@ -27,9 +27,24 @@ TAsyncFuture >> asAsyncStream [
 	^ AsyncOnceStream forFuture: self
 ]
 
+{ #category : #'api - future copy' }
+TAsyncFuture >> asyncSimilarCopy [
+	"Answer another future of the same type that is not yet polled.
+	This is different from #copy, which would potentially create a copy of the future
+	in the same state as the copied future"
+	<return: #TAsyncFuture>
+
+	^ self shallowCopy postSimilarCopy
+]
+
 { #category : #'api - future' }
 TAsyncFuture >> await [
 	^ AsyncTaskItFutureTask forAsyncFuture: self
+]
+
+{ #category : #'api - testing' }
+TAsyncFuture >> isAsyncFuture [
+	^ true
 ]
 
 { #category : #'api - testing' }
@@ -55,16 +70,6 @@ TAsyncFuture >> poll: anAsynchronousContext [
 { #category : #'api - future copy' }
 TAsyncFuture >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
-]
-
-{ #category : #'api - future copy' }
-TAsyncFuture >> similarCopy [
-	"Answer another future of the same type that is not yet polled.
-	This is different from #copy, which would potentially create a copy of the future
-	in the same state as the copied future"
-	<return: #TAsyncFuture>
-
-	^ self shallowCopy postSimilarCopy
 ]
 
 { #category : #'api - future' }

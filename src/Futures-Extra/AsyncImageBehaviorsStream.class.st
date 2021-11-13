@@ -9,6 +9,23 @@ Class {
 	#category : #'Futures-Extra'
 }
 
+{ #category : #comparing }
+AsyncImageBehaviorsStream >> = anObject [
+
+	"Answer whether the receiver and anObject represent the same object."
+
+	self == anObject ifTrue: [ ^ true ].
+	^ self class = anObject class
+]
+
+{ #category : #comparing }
+AsyncImageBehaviorsStream >> hash [
+
+	"Answer an integer value that is related to the identity of the receiver."
+
+	^ self class hash
+]
+
 { #category : #initialization }
 AsyncImageBehaviorsStream >> initialize [
 	super initialize.
@@ -38,7 +55,7 @@ AsyncImageBehaviorsStream >> pollNext: anAsynchronousContext [
 AsyncImageBehaviorsStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
-	stream := stream similarCopy
+	stream := stream asyncSimilarCopy
 ]
 
 { #category : #'api - stream' }

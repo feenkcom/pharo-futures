@@ -26,3 +26,10 @@ AsyncTypedFuture >> poll: anAsynchronousContext [
 
 	^ future poll: anAsynchronousContext
 ]
+
+{ #category : #'api - future copy' }
+AsyncTypedFuture >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	future := future asyncSimilarCopy
+]

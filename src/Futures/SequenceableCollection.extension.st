@@ -4,3 +4,8 @@ Extension { #name : #SequenceableCollection }
 SequenceableCollection >> asAsyncStream [
 	^ AsyncSequenceStream forCollection: self
 ]
+
+{ #category : #'*Futures' }
+SequenceableCollection >> asyncSimilarCopy [
+	^ self collect: [ :each | each asyncSimilarCopy ]
+]
