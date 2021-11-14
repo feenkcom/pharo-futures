@@ -34,7 +34,7 @@ AsyncBehaviorClassMethodsStream >> behavior [
 { #category : #accessing }
 AsyncBehaviorClassMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
-	stream := AsyncSequenceStream forCollection: [ behavior classSide localSelectors ] asAsyncFuture
+	stream := AsyncSequenceStream forCollection: [ behavior classSide localSelectors sorted: GtMethodsSortFunction new ] asAsyncFuture
 ]
 
 { #category : #comparing }
