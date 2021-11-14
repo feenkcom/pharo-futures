@@ -40,6 +40,14 @@ AsyncWithoutDuplicatesStream >> pollNext: anAsynchronousContext [
 	] repeat
 ]
 
+{ #category : #'api - stream copy' }
+AsyncWithoutDuplicatesStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	stream := stream asyncSimilarCopy.
+	seenItems := Set new
+]
+
 { #category : #initialization }
 AsyncWithoutDuplicatesStream >> stream: anAsyncStream [
 	stream := anAsyncStream.
