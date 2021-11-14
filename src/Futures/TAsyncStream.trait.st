@@ -29,16 +29,19 @@ TAsyncStream >> asyncSimilarCopy [
 TAsyncStream >> collect [
 	"Transforms a stream into an Array, returning a future representing the result of that computation."
 	<return: #TAsyncFuture>
+	
+	self
+		deprecated: 'Use #toArray instead.'
+		transformWith: '`@receiver collect' -> '`@receiver toArray'.
 
-	^ self collectAs: Array
+	^ self toArray
 ]
 
 { #category : #'api - stream' }
-TAsyncStream >> collectAs: aClass [
-	"Transforms a stream into a collection, returning a future representing the result of that computation."
-	<return: #TAsyncFuture>
+TAsyncStream >> collect: aMapBlock [
+	<return: #TAsyncStream>
 
-	^ AsyncStreamCollectFuture stream: self species: aClass
+	^ AsyncMapStream stream: self mapBlock: aMapBlock
 ]
 
 { #category : #'api - stream' }
@@ -94,7 +97,7 @@ TAsyncStream >> isAsyncStream [
 TAsyncStream >> map: aMapBlock [
 	<return: #TAsyncStream>
 
-	^ AsyncMapStream stream: self mapBlock: aMapBlock
+	^ self collect: aMapBlock
 ]
 
 { #category : #'api - stream' }
@@ -140,4 +143,25 @@ TAsyncStream >> take: anAmount [
 	<return: #TAsyncStream>
 
 	^ AsyncTakeStream stream: self amount: anAmount
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> to: aClass [
+	"Transforms a stream into a collection, returning a future representing the result of that computation."
+	<return: #TAsyncFuture>
+
+	^ AsyncStreamCollectFuture stream: self species: aClass
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> toArray [
+	"Transforms a stream into an Array, returning a future representing the result of that computation."
+	<return: #TAsyncFuture>
+
+	^ self to: Array
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> withoutDuplicates [
+	^ AsyncWithoutDuplicatesStream forStream: self
 ]

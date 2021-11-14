@@ -30,7 +30,7 @@ AsyncImageMethodsStream >> hash [
 AsyncImageMethodsStream >> initialize [
 	super initialize.
 
-	stream := (AsyncImageBehaviorsStream new map: [ :eachBehavior | AsyncBehaviorAllMethodsStream forBehavior: eachBehavior ]) flatten
+	stream := (AsyncImageBehaviorsStream new collect: [ :eachBehavior | AsyncBehaviorAllMethodsStream forBehavior: eachBehavior ]) flatten
 ]
 
 { #category : #'api - stream' }

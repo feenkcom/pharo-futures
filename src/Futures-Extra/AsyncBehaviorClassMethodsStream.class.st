@@ -58,11 +58,11 @@ AsyncBehaviorClassMethodsStream >> pollNext: anAsynchronousContext [
 		^ AsyncPoll ready: AsyncOptionalValue none ].
 	
 	^ (stream pollNext: anAsynchronousContext)
-		map: [ :aSelectorOption |
-			aSelectorOption map: [ :aSelector |
-				behavior classSide
-					compiledMethodAt: aSelector
-					ifAbsent: [ ^ AsyncPoll pending ] ] ]
+			map: [ :aSelectorOption |
+				aSelectorOption map: [ :aSelector |
+					behavior classSide
+						compiledMethodAt: aSelector
+						ifAbsent: [ ^ AsyncPoll pending ] ] ]
 ]
 
 { #category : #'api - stream copy' }
