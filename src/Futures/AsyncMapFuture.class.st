@@ -15,7 +15,7 @@ Class {
 		'future',
 		'mapBlock'
 	],
-	#category : 'Futures-Base - Futures'
+	#category : #'Futures-Base - Futures'
 }
 
 { #category : #'instance creation' }
@@ -34,4 +34,11 @@ AsyncMapFuture >> poll: anAsynchronousContext [
 	^ (future poll: anAsynchronousContext)
 		ifReady: [ :aReadyPoll | aReadyPoll map: mapBlock ]
 		ifPending: [ :aPendingPoll | aPendingPoll ]
+]
+
+{ #category : #'api - future copy' }
+AsyncMapFuture >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	future := future asyncSimilarCopy
 ]

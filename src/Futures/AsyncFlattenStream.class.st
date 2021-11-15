@@ -63,7 +63,7 @@ AsyncFlattenStream >> pollNext: anAsynchronousContext [
 AsyncFlattenStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
-	stream := stream similarCopy.
+	stream := stream asyncSimilarCopy.
 	next := AsyncOptionalValue none
 ]
 

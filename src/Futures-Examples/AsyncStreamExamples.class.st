@@ -23,7 +23,7 @@ AsyncStreamExamples >> filter [
 	stream := (1 to: 10) asAsyncStream.
 	evens := stream filter: [ :x | x even ].
 	
-	result := evens collect wait.
+	result := evens toArray wait.
 	self assert: result equals: #(2 4 6 8 10).
 	^ result
 ]
@@ -44,7 +44,7 @@ AsyncStreamExamples >> flatten [
 
 	flatten := self flattenStream.
 	
-	result := (flatten collectAs: String) wait.
+	result := (flatten to: String) wait.
 	self assert: result equals: 'abbcccdddd'.
 	^ result
 ]
@@ -54,7 +54,7 @@ AsyncStreamExamples >> flattenStream [
 	<gtExample>
 	| streams |
 	
-	streams := (0 to: 3) asAsyncStream map: [ :x |
+	streams := (0 to: 3) asAsyncStream collect: [ :x |
 		(AsyncRepeatStream item: ($a asInteger + x) asCharacter)
 			take: (x + 1) ].
 	^ streams flatten
@@ -69,7 +69,7 @@ AsyncStreamExamples >> fuse [
 	fuse := stream fuse.
 
 	self assert: fuse isDone not.
-	result := fuse collect wait.
+	result := fuse toArray wait.
 	self assert: result equals: #(7 7 7).
 	self assert: fuse isDone.
 	^ result
@@ -82,7 +82,7 @@ AsyncStreamExamples >> map [
 	
 	evens := self mapStream.
 	
-	result := evens collect wait.
+	result := evens toArray wait.
 	self assert: result equals: #(2 4 6 8 10).
 	^ result
 ]
@@ -93,7 +93,7 @@ AsyncStreamExamples >> mapStream [
 	| stream |
 	
 	stream := (1 to: 5) asAsyncStream.
-	^ stream map: [ :x | x * 2 ]
+	^ stream collect: [ :x | x * 2 ]
 ]
 
 { #category : #examples }
@@ -103,7 +103,7 @@ AsyncStreamExamples >> repeat [
 	
 	stream := AsyncRepeatStream item: 42.
 	
-	result := (stream take: 5) collect wait.
+	result := (stream take: 5) toArray wait.
 	self assert: result equals: #(42 42 42 42 42).
 	^ result
 ]
@@ -116,7 +116,7 @@ AsyncStreamExamples >> sequence [
 	collection := OrderedCollection newFrom: #(1 2 3 4 5).
 	stream := collection asAsyncStream.
 	
-	result := stream collect wait.
+	result := stream toArray wait.
 	self assert: result equals: #(1 2 3 4 5).
 	^ result
 ]
@@ -129,7 +129,7 @@ AsyncStreamExamples >> take [
 	stream := (1 to: 10) asAsyncStream.
 	first := stream take: 3.
 	
-	result := first collect wait.
+	result := first toArray wait.
 	self assert: result equals: #(1 2 3).
 	^ result
 ]

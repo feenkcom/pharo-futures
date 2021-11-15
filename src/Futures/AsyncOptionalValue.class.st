@@ -1,7 +1,7 @@
 Class {
 	#name : #AsyncOptionalValue,
 	#superclass : #Object,
-	#category : 'Futures-Utilities'
+	#category : #'Futures-Utilities'
 }
 
 { #category : #'instance creation' }
@@ -12,6 +12,13 @@ AsyncOptionalValue class >> none [
 { #category : #'instance creation' }
 AsyncOptionalValue class >> some: anObject [
 	^ AsyncSomeValue value: anObject
+]
+
+{ #category : #controlling }
+AsyncOptionalValue >> ifSome: aSomeBlock [
+	^ self
+		ifSome: aSomeBlock
+		ifNone: [ nil ]
 ]
 
 { #category : #controlling }

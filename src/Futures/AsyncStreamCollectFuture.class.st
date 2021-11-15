@@ -8,7 +8,7 @@ Class {
 		'species',
 		'outputStream'
 	],
-	#category : 'Futures-Base - Futures'
+	#category : #'Futures-Base - Futures'
 }
 
 { #category : #'instance creation' }
@@ -21,20 +21,6 @@ AsyncStreamCollectFuture class >> stream: anAsyncStream species: aClass [
 	^ self new
 		stream: anAsyncStream;
 		species: aClass
-]
-
-{ #category : #'api - future' }
-AsyncStreamCollectFuture >> finish [
-	<return: #OrderedCollection>
-	| aResultingCollection |
-	
-	aResultingCollection := outputStream position = outputStream originalContents size
-		ifTrue: [ outputStream originalContents ]
-		ifFalse: [ outputStream contents ].
-
-	outputStream := nil.
-
-	^ aResultingCollection
 ]
 
 { #category : #initialization }
@@ -50,17 +36,48 @@ AsyncStreamCollectFuture >> poll: anAsynchronousContext [
 	<return: #AsyncPoll>
 
 	outputStream ifNil: [
-		outputStream := WriteStream on: (species new: stream sizeHint approximateAmount) ].
+		outputStream := self privateCreateWriteStream ].
 
 	[ 
 		(stream pollNext: anAsynchronousContext)
 			ifReady: [ :aReadyPoll |
 				aReadyPoll value
-					ifSome: [ :nextItem | outputStream nextPut: nextItem ]
-					ifNone: [ ^ AsyncPoll ready: self finish ]
+					ifSome: [ :nextItem | self privateNextPut: nextItem ]
+					ifNone: [ ^ AsyncPoll ready: self privateFinish ]
 			]
 			ifPending: [ :aPendingPoll | ^ aPendingPoll ]
 	] repeat
+]
+
+{ #category : #'private - streaming' }
+AsyncStreamCollectFuture >> privateCreateWriteStream [
+	^ (species inheritsFrom: HashedCollection)
+		ifTrue: [ species new: stream sizeHint approximateAmount ]
+		ifFalse: [ WriteStream on: (species new: stream sizeHint approximateAmount) ]
+]
+
+{ #category : #'private - streaming' }
+AsyncStreamCollectFuture >> privateFinish [
+	<return: #Collection>
+	| aResultingCollection |
+	
+	aResultingCollection := (species inheritsFrom: HashedCollection)
+		ifTrue: [ outputStream ]
+		ifFalse: [
+			outputStream position = outputStream originalContents size
+				ifTrue: [ outputStream originalContents ]
+				ifFalse: [ outputStream contents ] ].
+
+	outputStream := nil.
+
+	^ aResultingCollection
+]
+
+{ #category : #'private - streaming' }
+AsyncStreamCollectFuture >> privateNextPut: anObject [
+	(species inheritsFrom: HashedCollection)
+		ifTrue: [ outputStream add: anObject ]
+		ifFalse: [ outputStream nextPut: anObject ]
 ]
 
 { #category : #initialization }

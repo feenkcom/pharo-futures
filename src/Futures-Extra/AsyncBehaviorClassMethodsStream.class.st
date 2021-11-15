@@ -15,10 +15,34 @@ AsyncBehaviorClassMethodsStream class >> forBehavior: aBehavior [
 	^ self new behavior: aBehavior
 ]
 
+{ #category : #comparing }
+AsyncBehaviorClassMethodsStream >> = anObject [
+
+	"Answer whether the receiver and anObject represent the same object."
+
+	self == anObject ifTrue: [ ^ true ].
+	self class = anObject class ifFalse: [ ^ false ].
+	^ behavior = anObject behavior
+]
+
+{ #category : #accessing }
+AsyncBehaviorClassMethodsStream >> behavior [
+
+	^ behavior
+]
+
 { #category : #accessing }
 AsyncBehaviorClassMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
-	stream := AsyncSequenceStream forCollection: [ behavior classSide localSelectors ] asAsyncFuture
+	stream := AsyncSequenceStream forCollection: [ behavior classSide localSelectors sorted: GtMethodsSortFunction new ] asAsyncFuture
+]
+
+{ #category : #comparing }
+AsyncBehaviorClassMethodsStream >> hash [
+
+	"Answer an integer value that is related to the identity of the receiver."
+
+	^ behavior hash
 ]
 
 { #category : #'api - stream' }
@@ -34,11 +58,11 @@ AsyncBehaviorClassMethodsStream >> pollNext: anAsynchronousContext [
 		^ AsyncPoll ready: AsyncOptionalValue none ].
 	
 	^ (stream pollNext: anAsynchronousContext)
-		map: [ :aSelectorOption |
-			aSelectorOption map: [ :aSelector |
-				behavior classSide
-					compiledMethodAt: aSelector
-					ifAbsent: [ ^ AsyncPoll pending ] ] ]
+			map: [ :aSelectorOption |
+				aSelectorOption map: [ :aSelector |
+					behavior classSide
+						compiledMethodAt: aSelector
+						ifAbsent: [ ^ AsyncPoll pending ] ] ]
 ]
 
 { #category : #'api - stream copy' }

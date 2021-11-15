@@ -7,9 +7,10 @@ Class {
 	#traits : 'TAsyncFuture',
 	#classTraits : 'TAsyncFuture classTrait',
 	#instVars : [
-		'value'
+		'value',
+		'takenValue'
 	],
-	#category : 'Futures-Base - Futures'
+	#category : #'Futures-Base - Futures'
 }
 
 { #category : #'instance creation' }
@@ -34,9 +35,21 @@ AsyncReadyFuture >> poll: anAsynchronousContext [
 		description: [ 'Value already polled' ].
 
 	aValue := value value.
+	takenValue := value.
+
 	value := AsyncOptionalValue none.
 
 	^ AsyncPoll ready: aValue
+]
+
+{ #category : #'api - future copy' }
+AsyncReadyFuture >> postSimilarCopy [
+
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+
+	takenValue isSome ifTrue: [ value := takenValue ].
+	value := value map: [ :anObject | anObject asyncSimilarCopy ].
+	takenValue := AsyncOptionalValue none
 ]
 
 { #category : #'api - future' }
@@ -57,5 +70,6 @@ AsyncReadyFuture >> takeOutput: aBlock ifNone: aNoneBlock [
 
 { #category : #initialization }
 AsyncReadyFuture >> value: anObject [
-	value := AsyncOptionalValue some: anObject
+	value := AsyncOptionalValue some: anObject.
+	takenValue := AsyncOptionalValue none
 ]

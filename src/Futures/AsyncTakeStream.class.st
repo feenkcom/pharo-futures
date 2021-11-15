@@ -54,7 +54,7 @@ AsyncTakeStream >> pollNext: anAsynchronousContext [
 AsyncTakeStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
-	stream := stream similarCopy.
+	stream := stream asyncSimilarCopy.
 	remaining := amount
 ]
 

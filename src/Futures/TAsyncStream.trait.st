@@ -15,20 +15,40 @@ TAsyncStream >> asAsyncStream [
 	^ self
 ]
 
+{ #category : #'api - stream copy' }
+TAsyncStream >> asyncSimilarCopy [
+	"Answer another stream of the same type that is not yet polled.
+	This is different from #copy, which would potentially create a copy of the stream
+	in the same state as the copied stream"
+	<return: #TAsyncStream>
+
+	^ self shallowCopy postSimilarCopy
+]
+
 { #category : #'api - stream' }
 TAsyncStream >> collect [
 	"Transforms a stream into an Array, returning a future representing the result of that computation."
 	<return: #TAsyncFuture>
+	
+	self
+		deprecated: 'Use #toArray instead.'
+		transformWith: '`@receiver collect' -> '`@receiver toArray'.
 
-	^ self collectAs: Array
+	^ self toArray
 ]
 
 { #category : #'api - stream' }
-TAsyncStream >> collectAs: aClass [
-	"Transforms a stream into a collection, returning a future representing the result of that computation."
-	<return: #TAsyncFuture>
+TAsyncStream >> collect: aMapBlock [
+	<return: #TAsyncStream>
 
-	^ AsyncStreamCollectFuture stream: self species: aClass
+	^ AsyncMapStream stream: self mapBlock: aMapBlock
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> do: aBlock [
+	"Do something with each item of this stream, afterwards passing it on."
+
+	^ self map: [ :eachItem | aBlock value: eachItem. eachItem ]
 ]
 
 { #category : #'api - stream' }
@@ -50,6 +70,14 @@ TAsyncStream >> fuse [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> hasNext [
+	"Creates a future that resolves to true if the #next item is polled succesfully and it is not none"
+	<return: #TAsyncFuture>
+
+	^ AsyncStreamHasNextFuture stream: self
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> inject: anInitialValue into: aBinaryBlock [
 	"Execute an accumulating asynchronous computation over a stream, collecting all the values into one final result.
 	This combinator will accumulate all values returned by this stream according to the closure provided. The initial state is also provided to this method and then is returned again by each execution of the closure. Once the entire stream has been exhausted the returned future will resolve to this value."
@@ -60,11 +88,21 @@ TAsyncStream >> inject: anInitialValue into: aBinaryBlock [
 		block: aBinaryBlock
 ]
 
+{ #category : #'api - testing' }
+TAsyncStream >> isAsyncStream [
+	^ true
+]
+
 { #category : #'api - stream' }
 TAsyncStream >> map: aMapBlock [
 	<return: #TAsyncStream>
 
-	^ AsyncMapStream stream: self mapBlock: aMapBlock
+	^ self collect: aMapBlock
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> merge: aStream [
+	^ (AsyncSequenceStream forCollection: { self . aStream }) flatten
 ]
 
 { #category : #'api - stream' }
@@ -92,16 +130,6 @@ TAsyncStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 ]
 
-{ #category : #'api - stream copy' }
-TAsyncStream >> similarCopy [
-	"Answer another stream of the same type that is not yet polled.
-	This is different from #copy, which would potentially create a copy of the stream
-	in the same state as the copied stream"
-	<return: #TAsyncStream>
-
-	^ self shallowCopy postSimilarCopy
-]
-
 { #category : #'api - stream' }
 TAsyncStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
@@ -115,4 +143,25 @@ TAsyncStream >> take: anAmount [
 	<return: #TAsyncStream>
 
 	^ AsyncTakeStream stream: self amount: anAmount
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> to: aClass [
+	"Transforms a stream into a collection, returning a future representing the result of that computation."
+	<return: #TAsyncFuture>
+
+	^ AsyncStreamCollectFuture stream: self species: aClass
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> toArray [
+	"Transforms a stream into an Array, returning a future representing the result of that computation."
+	<return: #TAsyncFuture>
+
+	^ self to: Array
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> withoutDuplicates [
+	^ AsyncWithoutDuplicatesStream forStream: self
 ]

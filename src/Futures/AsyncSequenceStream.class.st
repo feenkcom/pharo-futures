@@ -84,7 +84,7 @@ AsyncSequenceStream >> postSimilarCopy [
 	
 	index := 1.
 	done := false.
-	collectionFuture := collectionFuture postSimilarCopy.
+	collectionFuture := collectionFuture asyncSimilarCopy.
 	collection := nil
 ]
 

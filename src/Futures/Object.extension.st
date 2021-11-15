@@ -11,6 +11,21 @@ Object >> asAsyncPromise [
 ]
 
 { #category : #'*Futures' }
+Object >> asyncSimilarCopy [
+	^ self
+]
+
+{ #category : #'*Futures' }
+Object >> isAsyncFuture [
+	^ false
+]
+
+{ #category : #'*Futures' }
 Object >> isAsyncPromise [
+	^ false
+]
+
+{ #category : #'*Futures' }
+Object >> isAsyncStream [
 	^ false
 ]
