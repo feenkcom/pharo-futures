@@ -51,9 +51,9 @@ AsyncStreamCollectFuture >> poll: anAsynchronousContext [
 
 { #category : #'private - streaming' }
 AsyncStreamCollectFuture >> privateCreateWriteStream [
-	^ (species inheritsFrom: HashedCollection)
-		ifTrue: [ species new: stream sizeHint approximateAmount ]
-		ifFalse: [ WriteStream on: (species new: stream sizeHint approximateAmount) ]
+	^ self privateSupportsStreamContents
+		ifTrue: [ WriteStream on: (species new: stream sizeHint approximateAmount) ]
+		ifFalse: [ species new: stream sizeHint approximateAmount ]
 ]
 
 { #category : #'private - streaming' }
@@ -61,12 +61,12 @@ AsyncStreamCollectFuture >> privateFinish [
 	<return: #Collection>
 	| aResultingCollection |
 	
-	aResultingCollection := (species inheritsFrom: HashedCollection)
-		ifTrue: [ outputStream ]
-		ifFalse: [
+	aResultingCollection := self privateSupportsStreamContents
+		ifTrue: [
 			outputStream position = outputStream originalContents size
 				ifTrue: [ outputStream originalContents ]
-				ifFalse: [ outputStream contents ] ].
+				ifFalse: [ outputStream contents ] ]
+		ifFalse: [ outputStream ].
 
 	outputStream := nil.
 
@@ -75,9 +75,14 @@ AsyncStreamCollectFuture >> privateFinish [
 
 { #category : #'private - streaming' }
 AsyncStreamCollectFuture >> privateNextPut: anObject [
-	(species inheritsFrom: HashedCollection)
-		ifTrue: [ outputStream add: anObject ]
-		ifFalse: [ outputStream nextPut: anObject ]
+	self privateSupportsStreamContents
+		ifTrue: [ outputStream nextPut: anObject ]
+		ifFalse: [ outputStream add: anObject ]
+]
+
+{ #category : #'private - streaming' }
+AsyncStreamCollectFuture >> privateSupportsStreamContents [
+	^ species inheritsFrom: SequenceableCollection
 ]
 
 { #category : #initialization }
