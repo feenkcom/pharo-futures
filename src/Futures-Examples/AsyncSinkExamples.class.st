@@ -37,3 +37,18 @@ AsyncSinkExamples >> collectionSinkSet [
 	
 	^ sink
 ]
+
+{ #category : #examples }
+AsyncSinkExamples >> counterSink [
+	<gtExample>
+	| stream sink |
+	
+	stream := (1 to: 42) asAsyncStream.
+	
+	sink := AsyncCounterSink new.
+	(sink sendAll: stream) wait.
+	
+	self assert: sink count equals: 42.
+	
+	^ sink
+]
