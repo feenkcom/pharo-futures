@@ -26,6 +26,19 @@ TAsyncStream >> asyncSimilarCopy [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> chunks: aCapacity [
+	"An adaptor for chunking up items of the stream inside a vector.
+	This combinator will attempt to pull items from this stream and buffer them into a local vector.
+	At most `capacity` items will get buffered before they're yielded from the returned stream. Note that
+	the vectors returned from this iterator may not always have `capacity` elements. If the underlying
+	stream ended and only a partial vector was created, it'll be returned. Additionally if an error happens
+	from the underlying stream then the currently buffered items will be yielded."
+	<return: #TAsyncStream>
+
+	^ AsyncChunksStream forStream: self capacity: aCapacity
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> collect [
 	"Transforms a stream into an Array, returning a future representing the result of that computation."
 	<return: #TAsyncFuture>

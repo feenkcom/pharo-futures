@@ -16,6 +16,31 @@ AsyncStreamExamples >> allTypesOfStreams [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> chunks [
+	<gtExample>
+	| chunks result |
+
+	chunks := self chunksStream.
+	
+	result := (chunks to: Array) wait.
+	self assert: result equals: {
+		{ 1 . 2 . 3 }.
+		{ 4 . 5 . 6 }.
+		{ 7 . 8 . 9 }.
+		{ 10. 11 } }.
+	^ result
+]
+
+{ #category : #examples }
+AsyncStreamExamples >> chunksStream [
+	<gtExample>
+	| stream |
+	
+	stream := (1 to: 11) asAsyncStream.
+	^ stream chunks: 3
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> filter [
 	<gtExample>
 	| stream evens result |
