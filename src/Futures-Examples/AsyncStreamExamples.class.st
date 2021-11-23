@@ -158,3 +158,27 @@ AsyncStreamExamples >> take [
 	self assert: result equals: #(1 2 3).
 	^ result
 ]
+
+{ #category : #examples }
+AsyncStreamExamples >> terminatable [
+	<gtExample>
+	| stream |
+
+	stream := self terminatableStream.
+	"Terminate a stream after taking first 100 items"
+	((stream take: 100) toArray then: [ stream terminate ]) wait.
+	
+	"An attempt to take more items from the terminated stream does not produce items"
+	self assert: (stream take: 10) toArray wait equals: #().
+
+	^ stream
+]
+
+{ #category : #examples }
+AsyncStreamExamples >> terminatableStream [
+	<gtExample>
+	| stream |
+
+	stream := (1 to: 100000) asAsyncStream.
+	^ stream terminatable
+]

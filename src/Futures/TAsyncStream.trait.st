@@ -159,6 +159,15 @@ TAsyncStream >> take: anAmount [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> terminatable [
+	"Creates a new Terminatable stream. When #terminate is sent to the terminatable stream, the stream will complete immediately without making any further progress.
+	Please note, that if the #terminate is sent while a stream is being polled, the stream will finish the current polling step."
+	<return: #TAsyncStream>
+
+	^ AsyncTerminatableStream forStream: self
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> to: aClass [
 	"Transforms a stream into a collection, returning a future representing the result of that computation."
 	<return: #TAsyncFuture>
