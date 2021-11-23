@@ -78,6 +78,17 @@ TAsyncStream >> flatten [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> forEach: aBlock [
+	"Runs this stream to completion, executing the provided asynchronous closure for each element on the stream.
+	The closure provided will be called for each item this stream produces,
+	yielding a future. That future will then be executed to completion
+	before moving on to the next item."
+	<return: #TAsyncFuture>
+
+	^ AsyncStreamForEachFuture forStream: self block: aBlock
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> fuse [
 	^ AsyncFuseStream stream: self
 ]

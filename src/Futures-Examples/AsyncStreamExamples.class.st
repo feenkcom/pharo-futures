@@ -86,6 +86,24 @@ AsyncStreamExamples >> flattenStream [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> forEach [
+	<gtExample>
+	| stream result forEach |
+
+	stream := (1 to: 6) asAsyncStream.
+	
+	result := OrderedCollection new.
+	forEach := stream forEach: [ :each | result add: each ].
+	
+	self assert: forEach wait.
+	self
+		assert: result
+		equals: {  1 . 2 . 3 . 4 . 5 . 6 } asOrderedCollection.
+
+	^ result
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> fuse [
 	<gtExample>
 	| stream fuse result |
