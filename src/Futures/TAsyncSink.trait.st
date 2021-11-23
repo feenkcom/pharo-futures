@@ -33,6 +33,15 @@ TAsyncSink >> close [
 ]
 
 { #category : #'api - sink' }
+TAsyncSink >> fanout: anotherSink [
+	"Fanout items to multiple sinks.
+	The fanout sink forwards each incoming item to both this as well as the other sink at the same time."
+	<return: #TAsyncSink>
+
+	^ AsyncFanoutSink forSinkA: self sinkB: anotherSink
+]
+
+{ #category : #'api - sink' }
 TAsyncSink >> pollClose: anAsynchronousContext [
 	"Flush any remaining output and close this sink, if necessary.
 	Returns AsyncPoll::Ready(true) when no buffered items remain and the sink has been successfully closed.

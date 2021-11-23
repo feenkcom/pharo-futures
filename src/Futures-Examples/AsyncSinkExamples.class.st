@@ -65,3 +65,22 @@ AsyncSinkExamples >> drainSink [
 	
 	^ sink
 ]
+
+{ #category : #examples }
+AsyncSinkExamples >> fanoutSink [
+	<gtExample>
+	| stream sinkA sinkB sink |
+	
+	stream := (1 to: 5) asAsyncStream.
+	
+	sinkA := AsyncCollectionSink new.
+	sinkB := AsyncCollectionSink new.
+	sink := sinkA fanout: sinkB.
+	
+	(sink sendAll: stream) wait.
+	
+	self assert: sinkA collection equals: (1 to: 5) asOrderedCollection.
+	self assert: sinkB collection equals: (1 to: 5) asOrderedCollection.
+
+	^ sink
+]
