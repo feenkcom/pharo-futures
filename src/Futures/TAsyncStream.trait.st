@@ -26,6 +26,16 @@ TAsyncStream >> asyncSimilarCopy [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> cached [
+	"Returns a stream that caches items across all #asyncSimilarCopy streams.
+	Correctly handles the case when each similar stream is polled from a difference worker process,
+	the cache is shared and synchronised between such streams."
+	<return: #TAsyncStream>
+
+	^ AsyncCachedStream forStream: self
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> chunks: aCapacity [
 	"An adaptor for chunking up items of the stream inside a vector.
 	This combinator will attempt to pull items from this stream and buffer them into a local vector.

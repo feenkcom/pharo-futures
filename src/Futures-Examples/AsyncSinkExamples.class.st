@@ -84,3 +84,26 @@ AsyncSinkExamples >> fanoutSink [
 
 	^ sink
 ]
+
+{ #category : #examples }
+AsyncSinkExamples >> groupBySink [
+	<gtExample>
+	| stream even odd sink |
+	
+	stream := (1 to: 10) asAsyncStream.
+	
+	even := AsyncCollectionSink new.
+	odd := AsyncCollectionSink new.
+	
+	sink := AsyncGroupBySink new
+		groupBy: [ :each | each even ];
+		at: true putSink: even;
+		at: false putSink: odd.
+	
+	(sink sendAll: stream) wait.
+	
+	self assert: even collection equals: { 2. 4. 6. 8. 10 } asOrderedCollection.
+	self assert: odd collection equals: { 1. 3. 5. 7. 9 } asOrderedCollection.
+	
+	^ sink
+]
