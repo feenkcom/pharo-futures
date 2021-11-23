@@ -42,6 +42,15 @@ TAsyncFuture >> await [
 	^ AsyncTaskItFutureTask forAsyncFuture: self
 ]
 
+{ #category : #'api - future' }
+TAsyncFuture >> flatten [
+	"Flatten the execution of this future when the output of this future is itself another future.
+	This can be useful when combining futures together to flatten the computation out the final result."
+	<return: #TAsyncFuture>
+
+	^ AsyncFlattenFuture forFuture: self
+]
+
 { #category : #'api - testing' }
 TAsyncFuture >> isAsyncFuture [
 	^ true
