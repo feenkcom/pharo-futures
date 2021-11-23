@@ -9,7 +9,7 @@ Class {
 	#instVars : [
 		'stream'
 	],
-	#category : 'Futures-Base - Futures'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'instance creation' }

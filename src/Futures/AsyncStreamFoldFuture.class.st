@@ -9,7 +9,7 @@ Class {
 		'accumulator',
 		'future'
 	],
-	#category : #'Futures-Base - Futures'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'instance creation' }

@@ -16,6 +16,31 @@ AsyncStreamExamples >> allTypesOfStreams [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> chunks [
+	<gtExample>
+	| chunks result |
+
+	chunks := self chunksStream.
+	
+	result := (chunks to: Array) wait.
+	self assert: result equals: {
+		{ 1 . 2 . 3 }.
+		{ 4 . 5 . 6 }.
+		{ 7 . 8 . 9 }.
+		{ 10. 11 } }.
+	^ result
+]
+
+{ #category : #examples }
+AsyncStreamExamples >> chunksStream [
+	<gtExample>
+	| stream |
+	
+	stream := (1 to: 11) asAsyncStream.
+	^ stream chunks: 3
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> filter [
 	<gtExample>
 	| stream evens result |
@@ -58,6 +83,24 @@ AsyncStreamExamples >> flattenStream [
 		(AsyncRepeatStream item: ($a asInteger + x) asCharacter)
 			take: (x + 1) ].
 	^ streams flatten
+]
+
+{ #category : #examples }
+AsyncStreamExamples >> forEach [
+	<gtExample>
+	| stream result forEach |
+
+	stream := (1 to: 6) asAsyncStream.
+	
+	result := OrderedCollection new.
+	forEach := stream forEach: [ :each | result add: each ].
+	
+	self assert: forEach wait.
+	self
+		assert: result
+		equals: {  1 . 2 . 3 . 4 . 5 . 6 } asOrderedCollection.
+
+	^ result
 ]
 
 { #category : #examples }
@@ -122,6 +165,26 @@ AsyncStreamExamples >> sequence [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> smalltalkApiAlias [
+	<gtExample>
+	| result forEach |
+	
+	result := OrderedCollection new.
+	
+	forEach := (((1 to: 6) asAsyncStream
+		collect: [ :each | each + 10 ])
+		select: [ :each | each even ])
+		do: [ :each | result add: each ].
+	
+	self assert: forEach wait.
+	self
+		assert: result
+		equals: {  12 . 14 . 16 } asOrderedCollection.
+
+	^ result
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> take [
 	<gtExample>
 	| stream first result |
@@ -132,4 +195,28 @@ AsyncStreamExamples >> take [
 	result := first toArray wait.
 	self assert: result equals: #(1 2 3).
 	^ result
+]
+
+{ #category : #examples }
+AsyncStreamExamples >> terminatable [
+	<gtExample>
+	| stream |
+
+	stream := self terminatableStream.
+	"Terminate a stream after taking first 100 items"
+	((stream take: 100) toArray then: [ stream terminate ]) wait.
+	
+	"An attempt to take more items from the terminated stream does not produce items"
+	self assert: (stream take: 10) toArray wait equals: #().
+
+	^ stream
+]
+
+{ #category : #examples }
+AsyncStreamExamples >> terminatableStream [
+	<gtExample>
+	| stream |
+
+	stream := (1 to: 100000) asAsyncStream.
+	^ stream terminatable
 ]

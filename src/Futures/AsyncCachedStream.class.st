@@ -1,11 +1,12 @@
 Class {
-	#name : #AsyncBufferedStream,
+	#name : #AsyncCachedStream,
 	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
-		'stream',
-		'next'
+		'buffer',
+		'currentIndex',
+		'collector'
 	],
 	#category : #'Futures-Base - Streams'
 }

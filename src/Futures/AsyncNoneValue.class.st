@@ -4,7 +4,7 @@ Class {
 	#classInstVars : [
 		'uniqueInstance'
 	],
-	#category : 'Futures-Utilities'
+	#category : #'Futures-Utilities'
 }
 
 { #category : #'instance creation' }
@@ -19,6 +19,11 @@ AsyncNoneValue >> = anObject [
 
 	self == anObject ifTrue: [ ^ true ].
 	^ self class = anObject class
+]
+
+{ #category : #'api - stream copy' }
+AsyncNoneValue >> asyncSimilarCopy [
+	^ self
 ]
 
 { #category : #comparing }

@@ -26,29 +26,32 @@ TAsyncStream >> asyncSimilarCopy [
 ]
 
 { #category : #'api - stream' }
-TAsyncStream >> collect [
-	"Transforms a stream into an Array, returning a future representing the result of that computation."
-	<return: #TAsyncFuture>
-	
-	self
-		deprecated: 'Use #toArray instead.'
-		transformWith: '`@receiver collect' -> '`@receiver toArray'.
+TAsyncStream >> chunks: aCapacity [
+	"An adaptor for chunking up items of the stream inside a vector.
+	This combinator will attempt to pull items from this stream and buffer them into a local vector.
+	At most `capacity` items will get buffered before they're yielded from the returned stream. Note that
+	the vectors returned from this iterator may not always have `capacity` elements. If the underlying
+	stream ended and only a partial vector was created, it'll be returned. Additionally if an error happens
+	from the underlying stream then the currently buffered items will be yielded."
+	<return: #TAsyncStream>
 
-	^ self toArray
+	^ AsyncChunksStream forStream: self capacity: aCapacity
 ]
 
 { #category : #'api - stream' }
 TAsyncStream >> collect: aMapBlock [
+	"An alias to TAsyncStream>>#map:"
 	<return: #TAsyncStream>
 
-	^ AsyncMapStream stream: self mapBlock: aMapBlock
+	^ self map: aMapBlock
 ]
 
 { #category : #'api - stream' }
 TAsyncStream >> do: aBlock [
-	"Do something with each item of this stream, afterwards passing it on."
+	"Alias to TAsyncSteam>>#forEach:"
+	<return: #TAsyncFuture>
 
-	^ self map: [ :eachItem | aBlock value: eachItem. eachItem ]
+	^ self forEach: aBlock
 ]
 
 { #category : #'api - stream' }
@@ -65,8 +68,19 @@ TAsyncStream >> flatten [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> forEach: aBlock [
+	"Runs this stream to completion, executing the provided asynchronous closure for each element on the stream.
+	The closure provided will be called for each item this stream produces,
+	yielding a future. That future will then be executed to completion
+	before moving on to the next item."
+	<return: #TAsyncFuture>
+
+	^ AsyncStreamForEachFuture forStream: self block: aBlock
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> fuse [
-	^ AsyncFuseStream stream: self
+	^ AsyncFuseStream forStream: self
 ]
 
 { #category : #'api - stream' }
@@ -97,7 +111,7 @@ TAsyncStream >> isAsyncStream [
 TAsyncStream >> map: aMapBlock [
 	<return: #TAsyncStream>
 
-	^ self collect: aMapBlock
+	^ AsyncMapStream stream: self mapBlock: aMapBlock
 ]
 
 { #category : #'api - stream' }
@@ -131,6 +145,14 @@ TAsyncStream >> postSimilarCopy [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> select: aFilterBlock [
+	"An alias to TAsyncStream>>#filter:"
+	<return: #TAsyncStream>
+
+	^ self filter: aFilterBlock
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
@@ -143,6 +165,15 @@ TAsyncStream >> take: anAmount [
 	<return: #TAsyncStream>
 
 	^ AsyncTakeStream stream: self amount: anAmount
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> terminatable [
+	"Creates a new Terminatable stream. When #terminate is sent to the terminatable stream, the stream will complete immediately without making any further progress.
+	Please note, that if the #terminate is sent while a stream is being polled, the stream will finish the current polling step."
+	<return: #TAsyncStream>
+
+	^ AsyncTerminatableStream forStream: self
 ]
 
 { #category : #'api - stream' }

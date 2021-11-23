@@ -19,7 +19,7 @@ Class {
 }
 
 { #category : #'instance creation' }
-AsyncFuseStream class >> stream: anAsyncStream [
+AsyncFuseStream class >> forStream: anAsyncStream [
 	^ self new
 		stream: anAsyncStream
 ]

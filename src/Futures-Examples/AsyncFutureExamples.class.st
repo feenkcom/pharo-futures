@@ -16,6 +16,43 @@ AsyncFutureExamples >> allTypesOfFutures [
 ]
 
 { #category : #examples }
+AsyncFutureExamples >> flatten [
+	<gtExample>
+	| future result |
+	
+	future := self flattenFuture.
+
+	result := future wait.
+	self assert: result equals: 42.
+	^ result
+]
+
+{ #category : #examples }
+AsyncFutureExamples >> flattenFuture [
+	<gtExample>
+	| future |
+	
+	future := [ [ 42 ] asAsyncFuture ] asAsyncFuture.
+	future := future flatten.
+
+	^ future
+]
+
+{ #category : #examples }
+AsyncFutureExamples >> flattenSimilarCopy [
+	<gtExample>
+	| future |
+	
+	future := self flattenFuture.
+	self assert: future wait equals: 42.
+	
+	future := future asyncSimilarCopy.
+	self assert: future wait equals: 42.
+	
+	^ future asyncSimilarCopy
+]
+
+{ #category : #examples }
 AsyncFutureExamples >> joinAll [
 	<gtExample>
 	| futures joinAll result |
@@ -61,4 +98,27 @@ AsyncFutureExamples >> simpleFuture [
 	<gtExample>
 
 	^ [ 21 * 2 ] asAsyncFuture
+]
+
+{ #category : #examples }
+AsyncFutureExamples >> then [
+	<gtExample>
+	| future result |
+	
+	future := self thenFuture.
+
+	result := future wait.
+	self assert: result equals: 84.
+	^ result
+]
+
+{ #category : #examples }
+AsyncFutureExamples >> thenFuture [
+	<gtExample>
+	| future |
+	
+	future := self simpleFuture asAsyncFuture.
+	future := future then: [ :x | [ x * 2 ] asAsyncFuture ].
+
+	^ future
 ]
