@@ -52,3 +52,16 @@ AsyncSinkExamples >> counterSink [
 	
 	^ sink
 ]
+
+{ #category : #examples }
+AsyncSinkExamples >> drainSink [
+	<gtExample>
+	| stream sink |
+	
+	stream := (1 to: 42) asAsyncStream.
+	
+	sink := AsyncDrainSink new.
+	(sink sendAll: stream) wait.
+	
+	^ sink
+]
