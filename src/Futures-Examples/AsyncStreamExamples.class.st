@@ -165,6 +165,26 @@ AsyncStreamExamples >> sequence [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> smalltalkApiAlias [
+	<gtExample>
+	| result forEach |
+	
+	result := OrderedCollection new.
+	
+	forEach := (((1 to: 6) asAsyncStream
+		collect: [ :each | each + 10 ])
+		select: [ :each | each even ])
+		do: [ :each | result add: each ].
+	
+	self assert: forEach wait.
+	self
+		assert: result
+		equals: {  12 . 14 . 16 } asOrderedCollection.
+
+	^ result
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> take [
 	<gtExample>
 	| stream first result |

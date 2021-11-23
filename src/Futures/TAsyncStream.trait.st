@@ -39,29 +39,19 @@ TAsyncStream >> chunks: aCapacity [
 ]
 
 { #category : #'api - stream' }
-TAsyncStream >> collect [
-	"Transforms a stream into an Array, returning a future representing the result of that computation."
-	<return: #TAsyncFuture>
-	
-	self
-		deprecated: 'Use #toArray instead.'
-		transformWith: '`@receiver collect' -> '`@receiver toArray'.
-
-	^ self toArray
-]
-
-{ #category : #'api - stream' }
 TAsyncStream >> collect: aMapBlock [
+	"An alias to TAsyncStream>>#map:"
 	<return: #TAsyncStream>
 
-	^ AsyncMapStream stream: self mapBlock: aMapBlock
+	^ self map: aMapBlock
 ]
 
 { #category : #'api - stream' }
 TAsyncStream >> do: aBlock [
-	"Do something with each item of this stream, afterwards passing it on."
+	"Alias to TAsyncSteam>>#forEach:"
+	<return: #TAsyncFuture>
 
-	^ self map: [ :eachItem | aBlock value: eachItem. eachItem ]
+	^ self forEach: aBlock
 ]
 
 { #category : #'api - stream' }
@@ -121,7 +111,7 @@ TAsyncStream >> isAsyncStream [
 TAsyncStream >> map: aMapBlock [
 	<return: #TAsyncStream>
 
-	^ self collect: aMapBlock
+	^ AsyncMapStream stream: self mapBlock: aMapBlock
 ]
 
 { #category : #'api - stream' }
@@ -152,6 +142,14 @@ TAsyncStream >> pollNext: anAsynchronousContext [
 { #category : #'api - stream copy' }
 TAsyncStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> select: aFilterBlock [
+	"An alias to TAsyncStream>>#filter:"
+	<return: #TAsyncStream>
+
+	^ self filter: aFilterBlock
 ]
 
 { #category : #'api - stream' }
