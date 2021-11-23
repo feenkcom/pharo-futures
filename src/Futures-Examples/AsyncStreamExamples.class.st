@@ -16,6 +16,29 @@ AsyncStreamExamples >> allTypesOfStreams [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> cachedStream [
+	<gtExample>
+	| count stream streamCopy |
+	
+	count := 0.
+
+	stream := (1 to: 5) asAsyncStream map: [ :each |
+		count := count + 1.
+		each * 2 ].
+	stream := stream cached.
+	
+	self assert: stream toArray wait equals: #(2 4 6 8 10).
+	self assert: count equals: 5.
+	
+	streamCopy := stream asyncSimilarCopy.
+	self assert: streamCopy toArray wait equals: #(2 4 6 8 10).
+	"the copy of the stream returns items from the cache which does not increase the counter"
+	self assert: count equals: 5.
+
+	^ stream
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> chunks [
 	<gtExample>
 	| chunks result |
