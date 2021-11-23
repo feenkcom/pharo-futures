@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'value'
 	],
-	#category : 'Futures-Utilities'
+	#category : #'Futures-Utilities'
 }
 
 { #category : #'instance creation' }
@@ -20,6 +20,11 @@ AsyncSomeValue >> = anObject [
 	self == anObject ifTrue: [ ^ true ].
 	self class = anObject class ifFalse: [ ^ false ].
 	^ value = anObject value
+]
+
+{ #category : #'api - stream copy' }
+AsyncSomeValue >> asyncSimilarCopy [
+	^ self class some: self value asyncSimilarCopy
 ]
 
 { #category : #comparing }

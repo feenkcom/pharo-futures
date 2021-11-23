@@ -14,7 +14,7 @@ Class {
 	#instVars : [
 		'futures'
 	],
-	#category : 'Futures-Base - Futures'
+	#category : #'Futures-Base - Futures'
 }
 
 { #category : #'instance creation' }
@@ -24,7 +24,7 @@ AsyncJoinAllFuture class >> futures: aCollectionOfFutures [
 
 { #category : #initialization }
 AsyncJoinAllFuture >> futures: aCollectionOfFutures [
-	futures := aCollectionOfFutures collect: [ :eachFuture | AsyncMaybeDoneFuture future: eachFuture ] as: Array
+	futures := aCollectionOfFutures collect: [ :eachFuture | AsyncMaybeDoneFuture forFuture: eachFuture ] as: Array
 ]
 
 { #category : #'api - future' }

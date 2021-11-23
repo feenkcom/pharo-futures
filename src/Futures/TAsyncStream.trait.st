@@ -80,7 +80,7 @@ TAsyncStream >> forEach: aBlock [
 
 { #category : #'api - stream' }
 TAsyncStream >> fuse [
-	^ AsyncFuseStream stream: self
+	^ AsyncFuseStream forStream: self
 ]
 
 { #category : #'api - stream' }

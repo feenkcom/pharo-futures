@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : #'instance creation' }
-AsyncMaybeDoneFuture class >> future: aFuture [
+AsyncMaybeDoneFuture class >> forFuture: aFuture [
 	^ self new setFuture: aFuture
 ]
 

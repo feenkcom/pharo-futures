@@ -160,7 +160,7 @@ AsyncStreamBuffer >> stream: aStream [
 		assert: [ stream isNil ]
 		description: [ 'Stream must not be already initialized' ].
 
-	stream := AsyncFuseStream stream: aStream.
+	stream := AsyncFuseStream forStream: aStream.
 	self privateLoadNewItems
 ]
 
