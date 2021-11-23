@@ -99,3 +99,26 @@ AsyncFutureExamples >> simpleFuture [
 
 	^ [ 21 * 2 ] asAsyncFuture
 ]
+
+{ #category : #examples }
+AsyncFutureExamples >> then [
+	<gtExample>
+	| future result |
+	
+	future := self thenFuture.
+
+	result := future wait.
+	self assert: result equals: 84.
+	^ result
+]
+
+{ #category : #examples }
+AsyncFutureExamples >> thenFuture [
+	<gtExample>
+	| future |
+	
+	future := self simpleFuture asAsyncFuture.
+	future := future then: [ :x | [ x * 2 ] asAsyncFuture ].
+
+	^ future
+]

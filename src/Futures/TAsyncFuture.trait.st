@@ -66,6 +66,11 @@ TAsyncFuture >> isReadyFuture [
 
 { #category : #'api - future' }
 TAsyncFuture >> map: aBlock [
+	"Map this future's output to a different object.
+	This function is similar to the `Collection>>#collect:` where it will change the type of the underlying future.
+	This is useful to chain along a computation once a future has been resolved."
+	<return: #TAsyncFuture>
+
 	^ AsyncMapFuture future: self mapBlock: aBlock
 ]
 
@@ -79,6 +84,17 @@ TAsyncFuture >> poll: anAsynchronousContext [
 { #category : #'api - future copy' }
 TAsyncFuture >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+]
+
+{ #category : #'api - future' }
+TAsyncFuture >> then: aBlock [
+	"Chain on a computation for when a future finished, passing the result of the future to the provided block closure.
+	The returned value of the closure must implement the `TAsyncFuture` trait or be converted to a future with #asAsyncFuture
+	and can represent some more work to be done before the composed future is finished.
+   The given block closure is only run *after* successful completion of the `self` future."
+	<return: #TAsyncFuture>
+
+	^ (self map: aBlock) flatten
 ]
 
 { #category : #'api - future' }
