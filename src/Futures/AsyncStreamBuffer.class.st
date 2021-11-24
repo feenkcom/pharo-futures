@@ -99,7 +99,7 @@ AsyncStreamBuffer >> privateLoadNewItems [
 	monitor critical: [ 
 		loadingPromise
 			ifNotNil: [ ^ self ].
-		loadingPromise := (stream take: 20) toArray asAsyncPromise
+		loadingPromise := ((AsyncWithTimeoutStream stream: stream for: 100 milliSecond) take: 20) toArray asAsyncPromise
 			then: [ :newItems | newItems ifNotEmpty:  [ self privateOnItemsLoaded: newItems ] ]
 			otherwise: [ :anException | monitor critical: [
 				"Logging the error on the transcript only shows the exception, not where it came from.

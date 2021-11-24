@@ -243,3 +243,24 @@ AsyncStreamExamples >> terminatableStream [
 	stream := (1 to: 100000) asAsyncStream.
 	^ stream terminatable
 ]
+
+{ #category : #accessing }
+AsyncStreamExamples >> timeout [
+	<gtExample>
+	| events result |
+	
+	events := self timeoutStream.
+	
+	result := events toArray wait.
+	self assert: result equals: #(1 2 3).
+	^ result
+]
+
+{ #category : #accessing }
+AsyncStreamExamples >> timeoutStream [
+	<gtExample>
+	| stream |
+	
+	stream := (1 to: 10) asAsyncStream map: [ :each | each second wait. each ].
+	^ AsyncWithTimeoutStream stream: stream for: 5 second
+]
