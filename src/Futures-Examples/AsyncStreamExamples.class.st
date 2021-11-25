@@ -127,6 +127,23 @@ AsyncStreamExamples >> forEach [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> forward [
+	<gtExample>
+	| stream sink |
+	
+	stream := (1 to: 5) asAsyncStream.
+	sink := AsyncCollectionSink forCollection: OrderedCollection new.
+	
+	(stream forward: sink) wait.
+
+	self
+		assert: sink collection
+		equals: { 1. 2. 3. 4. 5} asOrderedCollection.
+
+	^ sink
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> fuse [
 	<gtExample>
 	| stream fuse result |

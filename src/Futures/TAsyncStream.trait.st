@@ -89,6 +89,16 @@ TAsyncStream >> forEach: aBlock [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> forward: anAsyncSink [
+	"A future that completes after this stream has been fully processed into the sink and the sink has been flushed and closed.
+	This future will drive the stream to keep producing items until it is exhausted, sending each item to the sink.
+	It will complete once the stream is exhausted, the sink has received and flushed all items, and the sink is closed."
+	<return: #TAsyncFuture>
+
+	^ AsyncStreamForwardFuture forStream: self sink: anAsyncSink
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> fuse [
 	^ AsyncFuseStream forStream: self
 ]
