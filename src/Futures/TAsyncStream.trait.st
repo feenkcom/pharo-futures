@@ -96,6 +96,16 @@ TAsyncStream >> forEach: aBlock [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> forward: anAsyncSink [
+	"A future that completes after this stream has been fully processed into the sink and the sink has been flushed and closed.
+	This future will drive the stream to keep producing items until it is exhausted, sending each item to the sink.
+	It will complete once the stream is exhausted, the sink has received and flushed all items, and the sink is closed."
+	<return: #TAsyncFuture>
+
+	^ AsyncStreamForwardFuture forStream: self sink: anAsyncSink
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> fuse [
 	^ AsyncFuseStream forStream: self
 ]
@@ -126,9 +136,24 @@ TAsyncStream >> isAsyncStream [
 
 { #category : #'api - stream' }
 TAsyncStream >> map: aMapBlock [
+	"Maps this stream's object to a different object, returning a new stream.
+	The provided closure is executed over all elements of this stream as they are made available."
 	<return: #TAsyncStream>
 
 	^ AsyncMapStream stream: self mapBlock: aMapBlock
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> map: aMapBlock cache: anAsyncSharedDictionary [
+	"Maps this stream's object to a different object, returning a new stream,
+	caching the mapping result in a provided shared dictionary.
+	The provided closure is executed over all elements of this stream as they are made available."
+	<return: #TAsyncStream>
+
+	^ AsyncMapWithCacheStream
+		forStream: self
+		map: aMapBlock
+		cache: anAsyncSharedDictionary
 ]
 
 { #category : #'api - stream' }
@@ -162,11 +187,27 @@ TAsyncStream >> postSimilarCopy [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> relay: aBlock [
+	"Do something with each item of this stream, afterwards passing it on."
+	<return: #TAsyncStream>
+
+	^ self map: [ :eachItem | aBlock value: eachItem. eachItem ]
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> select: aFilterBlock [
 	"An alias to TAsyncStream>>#filter:"
 	<return: #TAsyncStream>
 
 	^ self filter: aFilterBlock
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> size [
+	"Return a future that resolves to the amount of items left in the stream"
+	<return: #TAsyncFuture>
+
+	^ self inject: 0 into: [ :aCounter :each | aCounter + 1 ]
 ]
 
 { #category : #'api - stream' }
