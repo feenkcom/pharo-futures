@@ -77,6 +77,13 @@ TAsyncStream >> flatten [
 	^ AsyncFlattenStream stream: self
 ]
 
+{ #category : #accessing }
+TAsyncStream >> for: aDuration [
+	<return: #TAsyncStream>
+
+	^ AsyncWithTimeoutStream stream: self for: aDuration
+]
+
 { #category : #'api - stream' }
 TAsyncStream >> forEach: aBlock [
 	"Runs this stream to completion, executing the provided asynchronous closure for each element on the stream.
