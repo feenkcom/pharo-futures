@@ -119,9 +119,24 @@ TAsyncStream >> isAsyncStream [
 
 { #category : #'api - stream' }
 TAsyncStream >> map: aMapBlock [
+	"Maps this stream's object to a different object, returning a new stream.
+	The provided closure is executed over all elements of this stream as they are made available."
 	<return: #TAsyncStream>
 
 	^ AsyncMapStream stream: self mapBlock: aMapBlock
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> map: aMapBlock cache: anAsyncSharedDictionary [
+	"Maps this stream's object to a different object, returning a new stream,
+	caching the mapping result in a provided shared dictionary.
+	The provided closure is executed over all elements of this stream as they are made available."
+	<return: #TAsyncStream>
+
+	^ AsyncMapWithCacheStream
+		forStream: self
+		map: aMapBlock
+		cache: anAsyncSharedDictionary
 ]
 
 { #category : #'api - stream' }

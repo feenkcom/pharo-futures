@@ -154,6 +154,20 @@ AsyncStreamExamples >> map [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> mapCached [
+	<gtExample>
+	| evens result cache |
+	
+	cache := AsyncSharedDictionary new.
+	evens := (1 to: 5) asAsyncStream map: [ :x | x * 2 ] cache: cache.
+
+	result := evens toArray wait.
+	self assert: result equals: #(2 4 6 8 10).
+
+	^ cache
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> mapStream [
 	<gtExample>
 	| stream |
