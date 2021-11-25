@@ -170,11 +170,27 @@ TAsyncStream >> postSimilarCopy [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> relay: aBlock [
+	"Do something with each item of this stream, afterwards passing it on."
+	<return: #TAsyncStream>
+
+	^ self map: [ :eachItem | aBlock value: eachItem. eachItem ]
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> select: aFilterBlock [
 	"An alias to TAsyncStream>>#filter:"
 	<return: #TAsyncStream>
 
 	^ self filter: aFilterBlock
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> size [
+	"Return a future that resolves to the amount of items left in the stream"
+	<return: #TAsyncFutur>
+
+	^ self inject: 0 into: [ :aCounter :each | aCounter + 1 ]
 ]
 
 { #category : #'api - stream' }
