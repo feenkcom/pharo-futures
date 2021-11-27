@@ -26,6 +26,11 @@ Object >> isAsyncPromise [
 ]
 
 { #category : #'*Futures' }
+Object >> isAsyncSink [
+	^ false
+]
+
+{ #category : #'*Futures' }
 Object >> isAsyncStream [
 	^ false
 ]
