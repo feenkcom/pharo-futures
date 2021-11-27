@@ -214,7 +214,7 @@ TAsyncStream >> select: aFilterBlock [
 { #category : #'api - stream' }
 TAsyncStream >> size [
 	"Return a future that resolves to the amount of items left in the stream"
-	<return: #TAsyncFutur>
+	<return: #TAsyncFuture>
 
 	^ self inject: 0 into: [ :aCounter :each | aCounter + 1 ]
 ]
