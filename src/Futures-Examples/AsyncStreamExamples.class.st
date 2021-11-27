@@ -64,6 +64,20 @@ AsyncStreamExamples >> chunksStream [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> depthFirstTraversal [
+	<gtExample>
+	| stream classes |
+
+	stream := AsyncDepthFirstTraversalStream root: Collection children: #subclasses.
+	
+	classes := stream asyncSimilarCopy toArray wait asSet.
+	classes removeAll: Collection withAllSubclasses.
+	self assert: classes isEmpty.
+	
+	^ stream
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> filter [
 	<gtExample>
 	| stream evens result |
