@@ -43,6 +43,17 @@ AsyncStreamBuffer >> at: anIndex [
 		requestedItem ]
 ]
 
+{ #category : #'api - loading' }
+AsyncStreamBuffer >> bufferLoadingPromise [
+	"Return a promise that will be fulfilled when the buffer finishes preloading items"
+	<return: #TAsyncPromise>
+
+	^ monitor critical: [ 
+		loadingPromise
+			ifNil: [ true asAsyncPromise ]
+			ifNotNil: [ loadingPromise then: [ true ] ] ]
+]
+
 { #category : #accessing }
 AsyncStreamBuffer >> do: aBlock [
 	"Iterates over the collection trying to preload the items, stops as soon as it reaches
@@ -96,9 +107,11 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 
 { #category : #private }
 AsyncStreamBuffer >> privateLoadNewItems [
-	monitor critical: [ 
+	<return: #TAsyncPromise>
+
+	^ monitor critical: [ 
 		loadingPromise
-			ifNotNil: [ ^ self ].
+			ifNotNil: [ ^ loadingPromise ].
 		loadingPromise := ((stream for: 300 milliSeconds) take: 20) toArray asAsyncPromise
 			then: [ :newItems | newItems ifNotEmpty:  [ self privateOnItemsLoaded: newItems ] ]
 			otherwise: [ :anException | monitor critical: [
