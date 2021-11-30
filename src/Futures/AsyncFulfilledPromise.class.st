@@ -22,11 +22,6 @@ AsyncFulfilledPromise >> asyncThen: onFulfilledBlock [
 	^ AsyncFuturePromise new future: aFutureValue
 ]
 
-{ #category : #testing }
-AsyncFulfilledPromise >> isAsyncPromise [
-	^ true
-]
-
 { #category : #'api - promise' }
 AsyncFulfilledPromise >> then: onFulfilledBlock [
 	<return: #TAsyncPromise>

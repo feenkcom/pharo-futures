@@ -42,6 +42,11 @@ TAsyncSink >> fanout: anotherSink [
 ]
 
 { #category : #'api - sink' }
+TAsyncSink >> isAsyncSink [
+	^ true
+]
+
+{ #category : #'api - sink' }
 TAsyncSink >> pollClose: anAsynchronousContext [
 	"Flush any remaining output and close this sink, if necessary.
 	Returns AsyncPoll::Ready(true) when no buffered items remain and the sink has been successfully closed.

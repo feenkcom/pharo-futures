@@ -27,6 +27,11 @@ AsyncSharedDictionary >> at: aKey ifAbsentPut: aBlock [
 	^ monitor critical: [ dictionary at: aKey ifAbsentPut: aBlock ]
 ]
 
+{ #category : #enumerating }
+AsyncSharedDictionary >> do: aBlock [
+	monitor critical: [ dictionary do: aBlock ]
+]
+
 { #category : #initialization }
 AsyncSharedDictionary >> initialize [
 	super initialize.
@@ -43,4 +48,9 @@ AsyncSharedDictionary >> remove: anObject ifAbsent: exceptionBlock [
 { #category : #accessing }
 AsyncSharedDictionary >> removeAll [
 	^ monitor critical: [ dictionary removeAll ]
+]
+
+{ #category : #enumerating }
+AsyncSharedDictionary >> valuesDo: aBlock [
+	monitor critical: [ dictionary valuesDo: aBlock ]
 ]

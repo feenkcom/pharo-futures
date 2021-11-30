@@ -6,3 +6,17 @@ Class {
 	#superclass : #PackageManifest,
 	#category : #'Futures-Manifest'
 }
+
+{ #category : #accessing }
+ManifestFutures class >> mustOnlyDependOn [
+	^ {
+		'Announcements-Core'.
+		'Collections-Abstract'.
+		'Collections-Sequenceable'.
+		'Collections-Stack'.
+		'Collections-Streams'.
+		'Collections-Unordered'.
+		'Kernel'.
+		'TaskIt'.
+	}
+]
