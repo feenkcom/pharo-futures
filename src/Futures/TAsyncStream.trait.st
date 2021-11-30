@@ -135,6 +135,15 @@ TAsyncStream >> isAsyncStream [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> isNotEmpty [
+	"Creates a future that resolves to true if stream still has at least one item.
+	Note: this check tries to poll an item"
+	<return: #TAsyncFuture>
+
+	^ self hasNext
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> map: aMapBlock [
 	"Maps this stream's object to a different object, returning a new stream.
 	The provided closure is executed over all elements of this stream as they are made available."
@@ -205,7 +214,7 @@ TAsyncStream >> select: aFilterBlock [
 { #category : #'api - stream' }
 TAsyncStream >> size [
 	"Return a future that resolves to the amount of items left in the stream"
-	<return: #TAsyncFutur>
+	<return: #TAsyncFuture>
 
 	^ self inject: 0 into: [ :aCounter :each | aCounter + 1 ]
 ]

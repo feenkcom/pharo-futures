@@ -88,6 +88,14 @@ AsyncFanoutSink >> pollReady: anAsynchronousContext [
 
 { #category : #initialize }
 AsyncFanoutSink >> sinkA: aSinkA sinkB: aSinkB [
+	self
+		assert: [ aSinkA isAsyncSink ]
+		description: [ 'Sink `A` must be a sink, but was ', aSinkA class name ].
+
+	self
+		assert: [ aSinkB isAsyncSink ]
+		description: [ 'Sink `B` must be a sink, but was ', aSinkB class name ].
+
 	sinkA := aSinkA.
 	sinkB := aSinkB
 ]

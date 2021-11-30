@@ -72,11 +72,6 @@ AsyncDeferredPromise >> initialize [
 ]
 
 { #category : #testing }
-AsyncDeferredPromise >> isAsyncPromise [
-	^ true
-]
-
-{ #category : #testing }
 AsyncDeferredPromise >> isPending [
 	^ state isPending
 ]
