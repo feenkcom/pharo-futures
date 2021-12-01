@@ -1,24 +1,22 @@
 Class {
-	#name : #AsyncBehaviorAllMethodsStream,
+	#name : #AsyncBehaviorInstanceLocalMethodsStream,
 	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
 		'behavior',
-		'instanceStream',
-		'classStream',
-		'currentStream'
+		'stream'
 	],
 	#category : #'Futures-Extra'
 }
 
 { #category : #'instance creation' }
-AsyncBehaviorAllMethodsStream class >> forBehavior: aBehavior [
+AsyncBehaviorInstanceLocalMethodsStream class >> forBehavior: aBehavior [
 	^ self new behavior: aBehavior
 ]
 
 { #category : #comparing }
-AsyncBehaviorAllMethodsStream >> = anObject [
+AsyncBehaviorInstanceLocalMethodsStream >> = anObject [
 
 	"Answer whether the receiver and anObject represent the same object."
 
@@ -28,21 +26,19 @@ AsyncBehaviorAllMethodsStream >> = anObject [
 ]
 
 { #category : #accessing }
-AsyncBehaviorAllMethodsStream >> behavior [
+AsyncBehaviorInstanceLocalMethodsStream >> behavior [
 
 	^ behavior
 ]
 
-{ #category : #accessing }
-AsyncBehaviorAllMethodsStream >> behavior: aBehavior [
+{ #category : #initialization }
+AsyncBehaviorInstanceLocalMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
-	instanceStream := AsyncBehaviorInstanceTraitedMethodsStream forBehavior: aBehavior.
-	classStream := AsyncBehaviorClassMethodsStream forBehavior: aBehavior.
-	currentStream := instanceStream
+	stream := AsyncSequenceStream forCollection: [ behavior localSelectors sorted: GtMethodsSortFunction new ] asAsyncFuture
 ]
 
 { #category : #comparing }
-AsyncBehaviorAllMethodsStream >> hash [
+AsyncBehaviorInstanceLocalMethodsStream >> hash [
 
 	"Answer an integer value that is related to the identity of the receiver."
 
@@ -50,7 +46,7 @@ AsyncBehaviorAllMethodsStream >> hash [
 ]
 
 { #category : #'api - stream' }
-AsyncBehaviorAllMethodsStream >> pollNext: anAsynchronousContext [
+AsyncBehaviorInstanceLocalMethodsStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
 	 - Poll::Pending means that this stream's next value is not ready yet. Implementations will ensure that the current task will be notified when the next value may be ready.
@@ -58,23 +54,19 @@ AsyncBehaviorAllMethodsStream >> pollNext: anAsynchronousContext [
 	 - Poll::Ready(None) means that the stream has terminated, and poll_next should not be invoked again."
 	<return: #AsyncPoll>
 
-	currentStream
-		ifNil: [ ^ AsyncPoll ready: AsyncOptionalValue none ].
-		
-	^ (currentStream pollNext: anAsynchronousContext)
-		ifReady: [ :aReadyPoll |
-			aReadyPoll value
-				ifSome: [ aReadyPoll ]
-				ifNone: [
-					currentStream == classStream
-						ifTrue: [ ^ AsyncPoll ready: AsyncOptionalValue none ].
-					currentStream := classStream.
-					currentStream pollNext: anAsynchronousContext ] ]
-		ifPending: [ :aPendingPoll | aPendingPoll ]
+	stream ifNil: [
+		^ AsyncPoll ready: AsyncOptionalValue none ].
+	
+	^ (stream pollNext: anAsynchronousContext)
+		map: [ :aSelectorOption |
+			aSelectorOption map: [ :aSelector |
+				behavior
+					compiledMethodAt: aSelector
+					ifAbsent: [ ^ AsyncPoll pending ] ] ]
 ]
 
 { #category : #'api - stream copy' }
-AsyncBehaviorAllMethodsStream >> postSimilarCopy [
+AsyncBehaviorInstanceLocalMethodsStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
 	self behavior: behavior
