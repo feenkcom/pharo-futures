@@ -1,5 +1,5 @@
 Class {
-	#name : #AsyncBehaviorInstanceMethodsStream,
+	#name : #AsyncBehaviorInstanceTraitedMethodsStream,
 	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
@@ -11,12 +11,12 @@ Class {
 }
 
 { #category : #'instance creation' }
-AsyncBehaviorInstanceMethodsStream class >> forBehavior: aBehavior [
+AsyncBehaviorInstanceTraitedMethodsStream class >> forBehavior: aBehavior [
 	^ self new behavior: aBehavior
 ]
 
 { #category : #comparing }
-AsyncBehaviorInstanceMethodsStream >> = anObject [
+AsyncBehaviorInstanceTraitedMethodsStream >> = anObject [
 
 	"Answer whether the receiver and anObject represent the same object."
 
@@ -26,19 +26,19 @@ AsyncBehaviorInstanceMethodsStream >> = anObject [
 ]
 
 { #category : #accessing }
-AsyncBehaviorInstanceMethodsStream >> behavior [
+AsyncBehaviorInstanceTraitedMethodsStream >> behavior [
 
 	^ behavior
 ]
 
 { #category : #initialization }
-AsyncBehaviorInstanceMethodsStream >> behavior: aBehavior [
+AsyncBehaviorInstanceTraitedMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
-	stream := AsyncSequenceStream forCollection: [ behavior localSelectors sorted: GtMethodsSortFunction new ] asAsyncFuture
+	stream := AsyncSequenceStream forCollection: [ behavior selectors sorted: GtMethodsSortFunction new ] asAsyncFuture
 ]
 
 { #category : #comparing }
-AsyncBehaviorInstanceMethodsStream >> hash [
+AsyncBehaviorInstanceTraitedMethodsStream >> hash [
 
 	"Answer an integer value that is related to the identity of the receiver."
 
@@ -46,7 +46,7 @@ AsyncBehaviorInstanceMethodsStream >> hash [
 ]
 
 { #category : #'api - stream' }
-AsyncBehaviorInstanceMethodsStream >> pollNext: anAsynchronousContext [
+AsyncBehaviorInstanceTraitedMethodsStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
 	 - Poll::Pending means that this stream's next value is not ready yet. Implementations will ensure that the current task will be notified when the next value may be ready.
@@ -66,7 +66,7 @@ AsyncBehaviorInstanceMethodsStream >> pollNext: anAsynchronousContext [
 ]
 
 { #category : #'api - stream copy' }
-AsyncBehaviorInstanceMethodsStream >> postSimilarCopy [
+AsyncBehaviorInstanceTraitedMethodsStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
 	self behavior: behavior
