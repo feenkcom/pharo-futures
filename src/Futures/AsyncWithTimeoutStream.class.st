@@ -31,7 +31,9 @@ AsyncWithTimeoutStream >> pollNext: anAsynchronousContext [
 	 - Poll::Pending means that this stream's next value is not ready yet. Implementations will ensure that the current task will be notified when the next value may be ready.
 	 - Poll::Ready(Some(val)) means that the stream has successfully produced a value, val, and may produce further values on subsequent poll_next calls.
 	 - Poll::Ready(None) means that the stream has terminated or the timeout has been reached, and poll_next should not be invoked again."
-	| elapsedTime | 
+	| elapsedTime aPreviousStartedTime |
+	
+	aPreviousStartedTime := startedTime.
 	
 	elapsedTime := startedTime
 		ifNil: [
@@ -41,7 +43,11 @@ AsyncWithTimeoutStream >> pollNext: anAsynchronousContext [
 
 	^ elapsedTime > duration
 		ifTrue: [ AsyncPoll ready: AsyncOptionalValue none ]
-		ifFalse: [ stream pollNext: anAsynchronousContext ]
+		ifFalse: [
+			(stream pollNext: anAsynchronousContext)
+				ifPending: [ :aPendingPoll |
+					startedTime := aPreviousStartedTime.
+					aPendingPoll ] ]
 ]
 
 { #category : #'api - stream copy' }
