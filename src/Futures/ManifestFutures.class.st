@@ -15,8 +15,9 @@ ManifestFutures class >> mustOnlyDependOn [
 		'Collections-Sequenceable'.
 		'Collections-Stack'.
 		'Collections-Streams'.
+		'Collections-Strings'.
 		'Collections-Unordered'.
 		'Kernel'.
-		'TaskIt'.
+		'TaskIt'
 	}
 ]
