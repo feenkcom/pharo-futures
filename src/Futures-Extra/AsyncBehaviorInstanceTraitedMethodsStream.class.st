@@ -34,7 +34,7 @@ AsyncBehaviorInstanceTraitedMethodsStream >> behavior [
 { #category : #initialization }
 AsyncBehaviorInstanceTraitedMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
-	stream := AsyncSequenceStream forCollection: [ behavior selectors sorted: GtMethodsSortFunction new ] asAsyncFuture
+	stream := AsyncSequenceStream forCollection: [ behavior selectors ] asAsyncFuture
 ]
 
 { #category : #comparing }
