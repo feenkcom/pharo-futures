@@ -32,14 +32,18 @@ AsyncBehaviorSuperclassesStream >> pollNext: anAsynchronousContext [
 
 	^ currentSuperclass
 		ifSome: [ :aSuperclass |
-			aSuperclass superclass
-				ifNil: [ AsyncPoll ready: AsyncOptionalValue none ]
-				ifNotNil: [ :aSuperSuperclass |
-					currentSuperclass := AsyncOptionalValue some: aSuperSuperclass.
-					AsyncPoll ready: currentSuperclass ] ]
+			| aNextSuperclass |
+			aNextSuperclass := aSuperclass superclass.
+			(aNextSuperclass isNil or: [ aNextSuperclass = aSuperclass ])
+					ifTrue: [ AsyncPoll ready: AsyncOptionalValue none ]
+					ifFalse: [
+						currentSuperclass := AsyncOptionalValue some: aNextSuperclass.
+						AsyncPoll ready: currentSuperclass ] ]
 		ifNone: [
-			behavior superclass
-				ifNotNil: [ :aSuperclass | currentSuperclass := AsyncOptionalValue some: aSuperclass ].
+			| aNextSuperclass |
+			aNextSuperclass := behavior superclass.
+			(aNextSuperclass isNil or: [ aNextSuperclass = behavior ])
+				ifFalse: [ currentSuperclass := AsyncOptionalValue some: aNextSuperclass ].
 			AsyncPoll ready: currentSuperclass ]
 ]
 
