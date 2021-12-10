@@ -166,6 +166,21 @@ TAsyncStream >> map: aMapBlock cache: anAsyncSharedDictionary [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> map: aMapBlock key: aKeyBlock cache: anAsyncSharedDictionary [
+	"Maps this stream's object to a different object, returning a new stream,
+	caching the mapping result in a provided shared dictionary with a key being computed
+	based on the provided block.
+	The provided closure is executed over all elements of this stream as they are made available."
+	<return: #TAsyncStream>
+
+	^ AsyncMapWithCacheStream
+		forStream: self
+		map: aMapBlock
+		key: aKeyBlock
+		cache: anAsyncSharedDictionary
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> merge: aStream [
 	^ (AsyncSequenceStream forCollection: { self . aStream }) flatten
 ]

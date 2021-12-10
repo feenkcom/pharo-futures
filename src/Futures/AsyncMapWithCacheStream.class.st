@@ -13,16 +13,27 @@ Class {
 	#instVars : [
 		'stream',
 		'cache',
-		'mapBlock'
+		'mapBlock',
+		'keyBlock'
 	],
 	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'instance creation' }
 AsyncMapWithCacheStream class >> forStream: anAsyncStream map: aBlock cache: aSharedDictionary [
+	^ self
+		forStream: anAsyncStream
+		map: aBlock
+		key: [ :each | each ]
+		cache: aSharedDictionary
+]
+
+{ #category : #'instance creation' }
+AsyncMapWithCacheStream class >> forStream: anAsyncStream map: aBlock key: aKeyBlock cache: aSharedDictionary [
 	^ self new
 		stream: anAsyncStream
 		map: aBlock
+		key: aKeyBlock
 		cache: aSharedDictionary
 ]
 
@@ -41,7 +52,7 @@ AsyncMapWithCacheStream >> pollNext: anAsynchronousContext [
 				ifSome: [ :anItem |
 					| aMappedValue |
 					aMappedValue := cache
-						at: anItem
+						at: (keyBlock value: anItem)
 						ifAbsentPut: [ mapBlock value: anItem ].
 					AsyncPoll ready: (AsyncOptionalValue some: aMappedValue)  ]
 				ifNone: [ aReadyPoll ] ]
@@ -56,8 +67,9 @@ AsyncMapWithCacheStream >> postSimilarCopy [
 ]
 
 { #category : #initialization }
-AsyncMapWithCacheStream >> stream: anAsyncStream map: aBlock cache: aSharedDictionary [
+AsyncMapWithCacheStream >> stream: anAsyncStream map: aBlock key: aKeyBlock cache: aSharedDictionary [
 	cache := aSharedDictionary.
 	stream := anAsyncStream.
-	mapBlock := aBlock
+	mapBlock := aBlock.
+	keyBlock := aKeyBlock
 ]
