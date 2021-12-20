@@ -199,6 +199,25 @@ AsyncStreamExamples >> mapCached [
 ]
 
 { #category : #examples }
+AsyncStreamExamples >> mapIndexed [
+	<gtExample>
+	| evens result |
+	
+	evens := (1 to: 21 by: 5) asAsyncStream withIndexMap: [ :x :index | index -> x ].
+
+	result := evens toArray wait.
+	self assert: result equals: {
+		1-> 1.
+		2 -> 6.
+		3 -> 11.
+		4 -> 16.
+		5 -> 21
+	}.
+
+	^ result
+]
+
+{ #category : #examples }
 AsyncStreamExamples >> mapStream [
 	<gtExample>
 	| stream |

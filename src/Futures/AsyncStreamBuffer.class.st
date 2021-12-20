@@ -1,6 +1,6 @@
 "
 #Async stream buffer
-Loads more items from the supplied stream  when sender ask for an item {{gtMethod:AsyncStreamBuffer>>#at:}} a position close to the end of the buffered collection. In addition, it is possible to request the buffer to preload the items until an item matching the condition is found or the end of the stream is reached.
+Loads more items from the supplied stream  when sender asks for an item {{gtMethod:AsyncStreamBuffer>>#at:}} a position close to the end of the buffered collection. In addition, it is possible to request the buffer to preload the items until an item matching the condition is found or the end of the stream is reached.
 
 ##Announcements
 When new items are loaded, the buffer announces {{gtClass:AsyncStreamBufferChanged}} which indicates that new items were added to the buffer. It is useful when the UI should be notified when new items are ready to be displayed.
@@ -14,7 +14,9 @@ Class {
 		'stream',
 		'buffer',
 		'loadingPromise',
-		'pendingScanPromises'
+		'pendingScanPromises',
+		'preloadAmount',
+		'preloadDuration'
 	],
 	#category : #'Futures-Buffer'
 }
@@ -30,7 +32,7 @@ AsyncStreamBuffer >> announce: anAnnouncement [
 	announcer ifNotNil: [ :anAnnouncer | anAnnouncer announce: anAnnouncement ].
 ]
 
-{ #category : #accessing }
+{ #category : #'api - accessing' }
 AsyncStreamBuffer >> at: anIndex [
 	^ monitor critical: [ 
 		| requestedItem |
@@ -54,7 +56,25 @@ AsyncStreamBuffer >> bufferLoadingPromise [
 			ifNotNil: [ loadingPromise then: [ true ] ] ]
 ]
 
-{ #category : #accessing }
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> bufferSnapshot [
+	"Returns a snapshot copy of the current loaded items in the buffer"
+	<return: #Collection>
+
+	^ monitor critical: [ buffer copy ]
+]
+
+{ #category : #initialization }
+AsyncStreamBuffer >> defaultPreloadAmount [
+	^ 20
+]
+
+{ #category : #initialization }
+AsyncStreamBuffer >> defaultPreloadDuration [
+	^ 300 milliSeconds
+]
+
+{ #category : #'api - enumeration' }
 AsyncStreamBuffer >> do: aBlock [
 	"Iterates over the collection trying to preload the items, stops as soon as it reaches
 	the last loaded item."
@@ -76,6 +96,8 @@ AsyncStreamBuffer >> initialize [
 	stream := nil.
 	loadingPromise := nil.
 	pendingScanPromises := OrderedCollection new.
+	preloadAmount := self defaultPreloadAmount.
+	preloadDuration := self defaultPreloadDuration
 ]
 
 { #category : #testing }
@@ -83,6 +105,35 @@ AsyncStreamBuffer >> isDone [
 	"Return true if there are no more items to poll"
 
 	^ monitor critical: [ stream isDone ]
+]
+
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> preloadAmount [
+	"Return the maximum amount of items to be preloaded by the buffer"
+	<return:  #Number>
+
+	^ preloadAmount
+]
+
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> preloadAmount: aNumber [
+	preloadAmount := aNumber
+]
+
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> preloadDuration [
+	"Returns the amount of time the buffer should wait for new
+	items before stopping pre-loading. It is useful when it takes a lot of
+	time to fetch one item, which would result in a long delay before
+	#preloadAmount of items are ready"
+	<return: #Duration>
+
+	^ preloadDuration
+]
+
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> preloadDuration: anObject [
+	preloadDuration := anObject
 ]
 
 { #category : #'api - loading' }
@@ -112,7 +163,7 @@ AsyncStreamBuffer >> privateLoadNewItems [
 	^ monitor critical: [ 
 		loadingPromise
 			ifNotNil: [ ^ loadingPromise ].
-		loadingPromise := ((stream for: 300 milliSeconds) take: 20) toArray asAsyncPromise
+		loadingPromise := ((stream for: preloadDuration) take: preloadAmount) toArray asAsyncPromise
 			then: [ :newItems | newItems ifNotEmpty:  [ self privateOnItemsLoaded: newItems ] ]
 			otherwise: [ :anException | monitor critical: [
 				"Logging the error on the transcript only shows the exception, not where it came from.
@@ -159,7 +210,7 @@ AsyncStreamBuffer >> privateOnItemsLoaded: theNewItems [
 		self announce: (AsyncStreamBufferChanged new newItems: theNewItems; index: aPreviousBufferSize + 1) ]
 ]
 
-{ #category : #accessing }
+{ #category : #'api - enumeration' }
 AsyncStreamBuffer >> size [
 	"Return the current buffer length"
 
