@@ -1,3 +1,7 @@
+"
+#Buffer changed event
+Is sent by {{gtClass:AsyncStreamBuffer}} when new items were loaded and added to the buffer. The event contains a collection of new items and the index at which those new items were added.
+"
 Class {
 	#name : #AsyncStreamBufferChanged,
 	#superclass : #Announcement,

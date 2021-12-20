@@ -275,6 +275,23 @@ TAsyncStream >> toArray [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> withIndexCollect: aMapBlock [
+	"An alias to TAsyncStream>>#withIndexMap:"
+	<return: #TAsyncStream>
+
+	^ self withIndexMap: aMapBlock
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> withIndexMap: aMapBlock [
+	"Maps this stream's object and its index to a different object, returning a new stream.
+	The provided closure is executed over all elements of this stream as they are made available."
+	<return: #TAsyncStream>
+
+	^ AsyncMapWithIndexStream forStream: self map: aMapBlock
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> withoutDuplicates [
 	^ AsyncWithoutDuplicatesStream forStream: self
 ]
