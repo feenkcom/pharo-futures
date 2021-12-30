@@ -6,6 +6,9 @@ Class {
 
 { #category : #evaluating }
 AsyncFutureExecution >> doExecuteTask [
+
+	timeout ifNotNil:
+		[ TKTConfiguration runner scheduleTimeout: timeout on: self ].
 	[
 		| aPoll |
 		aPoll := task value.
