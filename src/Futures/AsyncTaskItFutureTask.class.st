@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'asyncFuture'
 	],
-	#category : #'Futures-Executor'
+	#category : #'Futures-Executor - TaskIt'
 }
 
 { #category : #'instance creation' }

@@ -1,7 +1,7 @@
 Class {
 	#name : #AsyncFutureExecution,
 	#superclass : #TKTFutureExecution,
-	#category : #'Futures-Executor'
+	#category : #'Futures-Executor - TaskIt'
 }
 
 { #category : #evaluating }

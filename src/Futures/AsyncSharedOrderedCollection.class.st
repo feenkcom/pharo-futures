@@ -22,6 +22,11 @@ AsyncSharedOrderedCollection >> asArray [
 	^ monitor critical: [ collection asArray ]
 ]
 
+{ #category : #accessing }
+AsyncSharedOrderedCollection >> at: anIndex [
+	^ monitor critical: [ self privateAt: anIndex ]
+]
+
 { #category : #'mutual exclusion' }
 AsyncSharedOrderedCollection >> critical: aBlock [
 	^ monitor critical: aBlock
@@ -52,6 +57,13 @@ AsyncSharedOrderedCollection >> initialize [
 { #category : #'private - adding / removing' }
 AsyncSharedOrderedCollection >> privateAdd: anObject [
 	collection add: anObject
+]
+
+{ #category : #'private - adding / removing' }
+AsyncSharedOrderedCollection >> privateAt: anIndex [
+	^ collection
+		at: anIndex
+		ifAbsent: [ nil ]
 ]
 
 { #category : #'private - adding / removing' }
