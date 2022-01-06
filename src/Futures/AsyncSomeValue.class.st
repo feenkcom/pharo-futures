@@ -55,6 +55,17 @@ AsyncSomeValue >> map: aBlock [
 	^ self class value: (aBlock value: self value)
 ]
 
+{ #category : #printing }
+AsyncSomeValue >> printOn: aStream [
+
+	"Append a sequence of characters to aStream that identify the receiver."
+
+	super printOn: aStream.
+	aStream
+		nextPutAll: ' value: ';
+		print: value
+]
+
 { #category : #accessing }
 AsyncSomeValue >> value [
 	^ value

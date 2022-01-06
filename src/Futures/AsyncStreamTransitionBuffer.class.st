@@ -11,7 +11,8 @@ Class {
 		'previousItems',
 		'newBuffer',
 		'preloadAmount',
-		'preloadDuration'
+		'preloadDuration',
+		'executionConfiguration'
 	],
 	#category : #'Futures-Buffer'
 }
@@ -36,6 +37,11 @@ AsyncStreamTransitionBuffer >> bufferLoadingPromise [
 { #category : #accessing }
 AsyncStreamTransitionBuffer >> bufferSnapshot [
 	^ previousItems
+]
+
+{ #category : #accessing }
+AsyncStreamTransitionBuffer >> executionConfiguration [
+	^ executionConfiguration
 ]
 
 { #category : #accessing }
@@ -72,10 +78,12 @@ AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuff
 	previousItems := anAsyncStreamBuffer bufferSnapshot.
 	preloadAmount := anAsyncStreamBuffer preloadAmount.
 	preloadDuration := anAsyncStreamBuffer preloadDuration.
-	
+	executionConfiguration := anAsyncStreamBuffer executionConfiguration.
+
 	newBuffer := AsyncStreamBuffer new
 		preloadAmount: (previousItems size max: preloadAmount);
 		preloadDuration: 1 minute;
+		executionConfiguration: executionConfiguration;
 		stream: aStream.
 
 	newBuffer bufferLoadingPromise then: [

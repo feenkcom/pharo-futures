@@ -39,7 +39,25 @@ TAsyncFuture >> asyncSimilarCopy [
 
 { #category : #'api - future' }
 TAsyncFuture >> await [
-	^ AsyncTaskItFutureTask forAsyncFuture: self
+	"Execute the future asynchronously and return a promise that will be resolved with the future's result"
+	<return: #TAsyncPromise>
+	
+	^ self await: AsyncFutureExecutionConfiguration default
+]
+
+{ #category : #'api - future' }
+TAsyncFuture >> await: anExecutionSpecification [
+	"Execute the future asynchronously and return a promise that will be resolved with the future's result"
+	<return: #TAsyncPromise>
+	| aPromise |
+
+	aPromise := AsyncPendingFuturePromise new
+		priority: anExecutionSpecification priority;
+		group: anExecutionSpecification group;
+		future: self.
+	AsyncFutureThreadPool current schedule: aPromise.
+
+	^ aPromise
 ]
 
 { #category : #'api - future' }
@@ -104,10 +122,10 @@ TAsyncFuture >> wait [
 	aSemaphore := Semaphore new.
 	
 	self await
-		onSuccessDo: [ :aResult |
+		then: [ :aResult |
 			anAwaitResult := aResult.
-			aSemaphore signal ];
-		onFailureDo: [ :anError |
+			aSemaphore signal ]
+		otherwise: [ :anError |
 			anAwaitError := anError freeze.
 			aSemaphore signal ].
 	

@@ -1,6 +1,8 @@
 Class {
 	#name : #AsyncFutureThreadPoolWaker,
 	#superclass : #Object,
+	#traits : 'TAsyncFutureExecutionWaker',
+	#classTraits : 'TAsyncFutureExecutionWaker classTrait',
 	#instVars : [
 		'worker',
 		'task'

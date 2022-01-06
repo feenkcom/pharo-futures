@@ -2,98 +2,280 @@ Class {
 	#name : #AsyncFutureThreadPoolWorker,
 	#superclass : #Object,
 	#instVars : [
+		'monitor',
 		'localQueue',
 		'pendingQueue',
-		'waker',
-		'process',
-		'shouldStop'
+		'currentTask',
+		'shouldStop',
+		'priority',
+		'group',
+		'process'
 	],
 	#category : #'Futures-Executor - Thread Pool'
 }
 
-{ #category : #'private - process' }
-AsyncFutureThreadPoolWorker >> executeTask: anAsyncFutureExecutionTask [
-	| aContext aWaker aSemaphore aFutureResult |
-	
-	aWaker := AsyncFutureThreadPoolWaker new
-		worker: self;
-		task: anAsyncFutureExecutionTask.
-	
-	aContext := AsyncFutureExecutionContext new
-		waker: aWaker.
-	
-	aSemaphore := Semaphore new.
-	[
-		aFutureResult := [ anAsyncFutureExecutionTask future poll: aContext ]
-			on: Exception
-			do: [ :anException |
-				aSemaphore signal.
-				aFutureResult := nil.
-				anException pass ].
-		aSemaphore signal ] forkAt: Processor userBackgroundPriority.
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> acceptsFutures [
+	<return: #Boolean>
 
-	aSemaphore wait.
+	^ self isRunning and: [ self isShuttingDown not ]
+]
 
-	"Failed to execute the future"
-	aFutureResult
-		ifNil: [ ^ self ].
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> amountOfFutures [
+	"Return the current amount of future in the local queue, does not take into account
+	pending futures within pending queue"
+	<return: #Number>
 
-	aFutureResult
-		ifReady: [ :aResultValue | anAsyncFutureExecutionTask result: aResultValue ]
-		ifPending: [ pendingQueue pushBack: anAsyncFutureExecutionTask ]
+	^ localQueue size
+]
+
+{ #category : #'api - worker' }
+AsyncFutureThreadPoolWorker >> group [
+	^ group
+]
+
+{ #category : #'api - worker' }
+AsyncFutureThreadPoolWorker >> group: aAsyncFutureExecutionGroup [
+	self
+		assert: [ self isRunning not ]
+		description: [ 'Can not change the group of a running worker' ].
+
+	group := aAsyncFutureExecutionGroup
+]
+
+{ #category : #'as yet unclassified' }
+AsyncFutureThreadPoolWorker >> gtLocalQueueFor: aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Local queue';
+		priority: 11;
+		object: [ localQueue ];
+		view: #gtItemsFor:
+]
+
+{ #category : #'as yet unclassified' }
+AsyncFutureThreadPoolWorker >> gtPendingQueueFor: aView [
+	<gtView>
+
+	^ aView forward
+		title: 'Pending queue';
+		priority: 12;
+		object: [ pendingQueue ];
+		view: #gtItemsFor:
 ]
 
 { #category : #initialization }
 AsyncFutureThreadPoolWorker >> initialize [
 	super initialize.
 	
+	monitor := Monitor new.
+	
 	"local queue contains futures that should be executed"
 	localQueue := AsyncFutureThreadPoolQueue new.
 	pendingQueue := AsyncFutureThreadPoolQueue new.
-	
-	shouldStop := false
+
+	group := AsyncFutureExecutionUnspecifiedGroup uniqueInstance.
+	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
+
+	shouldStop := nil.
+	process := nil.
+	currentTask := AsyncOptionalValue none
 ]
 
-{ #category : #'api - worker' }
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> isBusy [
+	"Return true if the worker is executing a task, false otherwise.
+	When the worker is waiting for a new task or performing a maintanance work it is not considered to be busy"
+	<return: #Boolean>
+
+	^ monitor critical: [ currentTask isSome ]
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> isRunning [
+	"Return true if the pool worker is currently running. Please note that the worker is considered running
+	even if it is in the process of shutting down, because it still has to finish the execution of all futures"
+	<return: #Boolean>
+
+	^ monitor critical: [ process notNil ]
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> isShuttingDown [
+	"Return true if the worker in the process of shutting down. The shutdown does not happen instantaneously as workers have to wait
+	for all futures, including pending, to finish execution."
+	<return: #Boolean>
+
+	^ monitor critical: [ shouldStop notNil and: [ process notNil ] ]
+]
+
+{ #category : #'api - lifecycle' }
 AsyncFutureThreadPoolWorker >> maintanance [
 ]
 
 { #category : #'api - worker' }
-AsyncFutureThreadPoolWorker >> schedule: anAsyncFutureExecutionTask [
-	localQueue pushBack: anAsyncFutureExecutionTask
+AsyncFutureThreadPoolWorker >> priority [
+	<return: #AsyncFutureExecutionPriority>
+
+	^ priority
 ]
 
 { #category : #'api - worker' }
-AsyncFutureThreadPoolWorker >> shutdown [
-	shouldStop := true
-]
-
-{ #category : #'api - worker' }
-AsyncFutureThreadPoolWorker >> startup [
+AsyncFutureThreadPoolWorker >> priority: anAsyncFutureExecutionPriority [
 	self
-		assert: [ process isNil ]
-		description: [ 'Worker process already exists' ].
+		assert: [ self isRunning not ]
+		description: [ 'Can not change the priority of a running worker' ].
+		
+	priority := anAsyncFutureExecutionPriority
+]
 
-	process := [ self workerLoop ] newProcess
-		priority: Processor userSchedulingPriority - 5;
-		name: 'Futures worker';
-		resume
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateExecuteTask: aAsyncPendingFuturePromise [
+	"Execute a given task from within the worker process"
+	| aPendingTask aContext aWaker aSemaphore aFutureResult aFutureError |
+		
+	aPendingTask := AsyncFutureThreadPoolPendingTask new task: aAsyncPendingFuturePromise.
+	
+	currentTask := AsyncOptionalValue some: aPendingTask.
+	
+	aWaker := AsyncFutureThreadPoolWaker new
+		worker: self;
+		task: aAsyncPendingFuturePromise.
+	
+	aContext := AsyncFutureExecutionContext new
+		waker: aWaker.
+	
+	aSemaphore := Semaphore new.
+	[
+		aFutureResult := nil.
+		aFutureError := nil.
+
+		"Errors are explicitly handled and frozen, exceptions are forked and passed"
+		[ [
+				pendingQueue pushBack: aPendingTask.
+				aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
+				aSemaphore signal
+			]
+				on: Error
+				do: [ :anError |
+					aFutureError := anError freeze.
+					aSemaphore signal ] ]
+						on: Exception
+						fork: [ :anException |
+						aFutureError := anException.
+						aSemaphore signal.
+						anException pass ].
+		] forkAt: Processor userBackgroundPriority.
+	
+	aSemaphore wait.
+
+	currentTask := AsyncOptionalValue none.
+
+	aFutureResult
+		ifNil: [ 
+			"Failed to execute the future"
+			pendingQueue pop: aPendingTask.
+			self
+				assert: [ aFutureError notNil ]
+				description: [ 'Error must not be nil' ].
+			aAsyncPendingFuturePromise rejectWithError: aFutureError ]
+		ifNotNil: [
+			aFutureResult
+				ifReady: [ :aResultValue |
+					pendingQueue pop: aPendingTask.
+					aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
+				ifPending: [ "it is already in the queue" ] ]
+]
+
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateWakeUpWorkerLoop [
+	"Wake up the worker loop by enqueuing a future that does nothing"
+	
+	monitor critical: [ localQueue pushBack: (AsyncPendingFuturePromise new future: #wakeup asAsyncFuture) ]
+]
+
+{ #category : #'api - worker' }
+AsyncFutureThreadPoolWorker >> schedule: aAsyncPendingFuturePromise [
+	"Return true if the promised future was scheduled, false otherwise.
+	If a worker is not running or is shutting down, the scheduling is forbidden"
+	<return: #Boolean>
+
+	^ monitor critical: [
+		self acceptsFutures
+			ifFalse: [ ^ false ].
+
+		localQueue pushBack: aAsyncPendingFuturePromise.
+		
+		true ]
+]
+
+{ #category : #'api - lifecycle' }
+AsyncFutureThreadPoolWorker >> shutdown [
+	"Request the worker to shutdown and return a promise which is resolved as soon as the worker is shutdown.
+	When in the shutting down state, the worker does not allow new futures to be scheduled and will wait
+	until all futures are processed before shutting down"
+	<return: #TAsyncPromise>
+	| aShutdownPromise |
+	
+	aShutdownPromise := AsyncPendingFuturePromise new future: #shutdown asAsyncFuture.
+	
+	monitor critical: [	
+		self isRunning
+			ifFalse: [ ^ aShutdownPromise fulfillWithValue: #notRunning ].
+
+		self isShuttingDown
+			ifTrue: [ ^ aShutdownPromise fulfillWithValue: #shuttingDown ].
+
+		shouldStop := aShutdownPromise.
+		self privateWakeUpWorkerLoop ].
+
+	^ aShutdownPromise
+]
+
+{ #category : #'api - lifecycle' }
+AsyncFutureThreadPoolWorker >> startup [
+	<return: #TAsyncPromise>
+	| aStartupPromise |
+
+	monitor critical: [ 
+		self
+			assert: [ process isNil ]
+			description: [ 'Worker process already exists' ].
+
+		process := [
+				self workerLoop.
+				monitor critical: [
+					| aShouldStopPromise |
+					aShouldStopPromise := shouldStop.
+					process := nil.
+					shouldStop := nil.
+					aShouldStopPromise fulfillWithValue: #shutdown ] ] newProcess
+			priority: priority asPharoProcessPriority;
+			name: 'Futures worker ', '(',group label, ')';
+			resume ].
+
+	aStartupPromise := AsyncPendingFuturePromise new future: #startup asAsyncFuture.
+	self schedule: aStartupPromise.
+	^ aStartupPromise
 ]
 
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> wakeUp: anAsyncFutureExecutionTask [
-	"Wake up the worker by placing all pending futures into a local queue.
+	"Wake up the worker by placing a pending future into a local queue.
 	Can be executed from an arbitrary process"
 	
-	(pendingQueue pop: anAsyncFutureExecutionTask)
-		ifNotNil: [ :aTask | localQueue pushBackAll: aTask ]
+	monitor critical: [
+		(pendingQueue popSuchThat: [ :eachPendingTask | eachPendingTask task == anAsyncFutureExecutionTask ])
+			ifNotNil: [ :aPendingTask | localQueue pushBack: aPendingTask task ] ]
 ]
 
 { #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> workerLoop [
-	"Execute tasks until asked to stop"
+	"Execute futures until asked to stop"
 
-	[ shouldStop ] whileFalse: [
-		self maintanance.
-		self executeTask: localQueue popAndWait ]
+	[ monitor critical: [ shouldStop notNil and: [ localQueue isEmpty and: [ pendingQueue isEmpty ] ] ] ] whileFalse: [
+			self maintanance.
+			self privateExecuteTask: localQueue popAndWait ]
 ]

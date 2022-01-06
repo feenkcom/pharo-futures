@@ -33,6 +33,21 @@ AsyncSharedOrderedCollection >> critical: aBlock [
 ]
 
 { #category : #enumerating }
+AsyncSharedOrderedCollection >> detect: aBlock ifFound: aFoundBlock ifNone: aNoneBlock [
+	^ monitor critical: [
+		collection
+			detect: aBlock
+			ifFound: aFoundBlock
+			ifNone: aNoneBlock ]
+]
+
+{ #category : #enumerating }
+AsyncSharedOrderedCollection >> detectMin: aBlock [
+	^ monitor critical: [
+		collection detectMin: aBlock ]
+]
+
+{ #category : #enumerating }
 AsyncSharedOrderedCollection >> do: aBlock [ 
 	"Evaluate aBlock with each of the receiver's elements as the argument."
 	| anIndex |
@@ -74,6 +89,13 @@ AsyncSharedOrderedCollection >> privateRemoveAll [
 { #category : #'adding / removing' }
 AsyncSharedOrderedCollection >> removeAll [
 	monitor critical: [ self privateRemoveAll ]
+]
+
+{ #category : #enumerating }
+AsyncSharedOrderedCollection >> select: aBlock [ 
+	"Evaluate aBlock with each of the receiver's elements as the argument."
+
+	^ self asArray select: aBlock 
 ]
 
 { #category : #accessing }

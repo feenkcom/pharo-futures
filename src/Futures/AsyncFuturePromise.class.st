@@ -2,7 +2,8 @@ Class {
 	#name : #AsyncFuturePromise,
 	#superclass : #AsyncDeferredPromise,
 	#instVars : [
-		'future'
+		'future',
+		'executionConfiguration'
 	],
 	#category : #'Futures-Base - Promises'
 }
@@ -14,13 +15,18 @@ AsyncFuturePromise >> fulfillWithValue: aValue [
 
 { #category : #initialization }
 AsyncFuturePromise >> future: anAsyncFuture [
+	self future: anAsyncFuture configuration: AsyncFutureExecutionConfiguration default
+]
+
+{ #category : #initialization }
+AsyncFuturePromise >> future: anAsyncFuture configuration: anExecutionConfiguration [
 	future := anAsyncFuture asAsyncFuture.
-	future await
-		onSuccessDo: [ :aValue |
+	(future await: anExecutionConfiguration)
+		then: [ :aValue |
 			aValue isAsyncPromise
 				ifTrue: [ aValue asyncThen: [ :aPromiseValue | self fulfillWithValue: aPromiseValue ] ]
-				ifFalse: [ self fulfillWithValue: aValue ] ];
-		onFailureDo: [ :anError | self rejectWithError: anError ]
+				ifFalse: [ self fulfillWithValue: aValue ] ]
+		otherwise: [ :anError | self rejectWithError: anError ]
 ]
 
 { #category : #'private - state' }

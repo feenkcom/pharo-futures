@@ -65,6 +65,7 @@ TAsyncPromise >> wait [
 	| aSemaphore anAwaitResult anAwaitError |
 	
 	aSemaphore := Semaphore new.
+	anAwaitResult := anAwaitError := nil.
 	
 	self
 		then: [ :aResult |
@@ -75,6 +76,6 @@ TAsyncPromise >> wait [
 			aSemaphore signal ].
 	
 	aSemaphore wait.
-	anAwaitError ifNotNil: [ AsyncFutureError signalForException: anAwaitError ].
+	anAwaitError ifNotNil: [ ^ anAwaitError ].
 	^ anAwaitResult
 ]

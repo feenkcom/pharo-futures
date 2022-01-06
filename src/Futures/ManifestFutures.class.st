@@ -11,13 +11,14 @@ Class {
 ManifestFutures class >> mustOnlyDependOn [
 	^ {
 		'Announcements-Core'.
+		'Beacon-Core'.
 		'Collections-Abstract'.
+		'Collections-Atomic'.
 		'Collections-Sequenceable'.
 		'Collections-Stack'.
 		'Collections-Streams'.
 		'Collections-Strings'.
 		'Collections-Unordered'.
 		'Kernel'.
-		'TaskIt'
 	}
 ]
