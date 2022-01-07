@@ -57,9 +57,11 @@ AsyncFutureThreadPool >> pickWorkerFor: aAsyncFutureThreadPoolTask [
 		eachWorker acceptsFutures and: [
 			eachWorker group = aAsyncFutureThreadPoolTask group
 				and: [ eachWorker priority = aAsyncFutureThreadPoolTask priority ] ] ].
+		
+	runningWorkers := runningWorkers sorted: [ :a :b | a amountOfFutures < b amountOfFutures ].
 
 	runningWorkers
-		detect: [ :eachWorker | eachWorker acceptsFutures and: [ eachWorker amountOfFutures isZero ] ]
+		detect: [ :eachWorker | eachWorker isBusy not and: [ eachWorker acceptsFutures and: [ eachWorker amountOfFutures isZero ] ] ]
 		ifFound: [ :aWorker | ^ aWorker ]
 		ifNone: [
 			| anAllowedMaxWorkers |
@@ -71,14 +73,18 @@ AsyncFutureThreadPool >> pickWorkerFor: aAsyncFutureThreadPoolTask [
 			runningWorkers size < anAllowedMaxWorkers
 				ifTrue: [
 					| aNewWorker |
-					
+
 					aNewWorker := AsyncFutureThreadPoolWorker new
 						priority: aAsyncFutureThreadPoolTask priority;
 						group: aAsyncFutureThreadPoolTask group.
 					aNewWorker startup.
 					workers add: aNewWorker.
 					^ aNewWorker ]
-				ifFalse: [ ^ runningWorkers detectMin: [ :eachWorker | eachWorker amountOfFutures ] ] ]
+				ifFalse: [	
+					^ runningWorkers
+						detect: [ :eachWorker | eachWorker isBusy not ]
+						ifFound: [ :aWorker | aWorker ]
+						ifNone: [ runningWorkers first ] ] ]
 ]
 
 { #category : #'api - execution' }

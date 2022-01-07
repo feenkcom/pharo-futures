@@ -9,7 +9,8 @@ Class {
 		'shouldStop',
 		'priority',
 		'group',
-		'process'
+		'process',
+		'currentTaskProcess'
 	],
 	#category : #'Futures-Executor - Thread Pool'
 }
@@ -81,7 +82,8 @@ AsyncFutureThreadPoolWorker >> initialize [
 
 	shouldStop := nil.
 	process := nil.
-	currentTask := AsyncOptionalValue none
+	currentTask := AsyncOptionalValue none.
+	currentTaskProcess := nil
 ]
 
 { #category : #'api - accessing' }
@@ -134,7 +136,7 @@ AsyncFutureThreadPoolWorker >> priority: anAsyncFutureExecutionPriority [
 { #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privateExecuteTask: aAsyncPendingFuturePromise [
 	"Execute a given task from within the worker process"
-	| aPendingTask aContext aWaker aSemaphore aFutureResult aFutureError |
+	| aPendingTask aContext aWaker aSemaphore aFutureResult |
 		
 	aPendingTask := AsyncFutureThreadPoolPendingTask new task: aAsyncPendingFuturePromise.
 	
@@ -148,44 +150,42 @@ AsyncFutureThreadPoolWorker >> privateExecuteTask: aAsyncPendingFuturePromise [
 		waker: aWaker.
 	
 	aSemaphore := Semaphore new.
-	[
+
+	currentTaskProcess := [
 		aFutureResult := nil.
-		aFutureError := nil.
 
 		"Errors are explicitly handled and frozen, exceptions are forked and passed"
 		[ [
 				pendingQueue pushBack: aPendingTask.
 				aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
+				aFutureResult
+						ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
+						ifPending: [ "it is already in the queue" ].
 				aSemaphore signal
 			]
 				on: Error
 				do: [ :anError |
-					aFutureError := anError freeze.
+					aAsyncPendingFuturePromise rejectWithError: anError.
 					aSemaphore signal ] ]
 						on: Exception
 						fork: [ :anException |
-						aFutureError := anException.
-						aSemaphore signal.
-						anException pass ].
+							aAsyncPendingFuturePromise rejectWithError: anException.
+							aSemaphore signal.
+							anException pass ]
 		] forkAt: Processor userBackgroundPriority.
-	
+
 	aSemaphore wait.
 
 	currentTask := AsyncOptionalValue none.
+	currentTaskProcess := nil.
 
 	aFutureResult
 		ifNil: [ 
 			"Failed to execute the future"
-			pendingQueue pop: aPendingTask.
-			self
-				assert: [ aFutureError notNil ]
-				description: [ 'Error must not be nil' ].
-			aAsyncPendingFuturePromise rejectWithError: aFutureError ]
+			pendingQueue pop: aPendingTask ]
 		ifNotNil: [
 			aFutureResult
-				ifReady: [ :aResultValue |
-					pendingQueue pop: aPendingTask.
-					aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
+				ifReady: [ :aResultValue | pendingQueue pop: aPendingTask ]
 				ifPending: [ "it is already in the queue" ] ]
 ]
 

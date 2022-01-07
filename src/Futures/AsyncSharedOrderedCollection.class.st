@@ -102,3 +102,8 @@ AsyncSharedOrderedCollection >> select: aBlock [
 AsyncSharedOrderedCollection >> size [
 	^ monitor critical: [ collection size ]
 ]
+
+{ #category : #enumerating }
+AsyncSharedOrderedCollection >> sorted: aBlock [
+	^ self asArray sorted: aBlock
+]
