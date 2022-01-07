@@ -160,17 +160,24 @@ AsyncFutureThreadPoolWorker >> privateExecuteTask: aAsyncPendingFuturePromise [
 				pendingQueue pushBack: aPendingTask.
 				aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
 				aFutureResult
-						ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
-						ifPending: [ "it is already in the queue" ].
+					ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
+					ifPending: [ "it is already in the queue" ].
 				aSemaphore signal
 			]
 				on: Error
 				do: [ :anError |
-					aAsyncPendingFuturePromise rejectWithError: anError.
-					aSemaphore signal ] ]
+					"Error handling is a user code that we should handle"
+					[ aAsyncPendingFuturePromise rejectWithError: anError ]
 						on: Exception
-						fork: [ :anException |
-							aAsyncPendingFuturePromise rejectWithError: anException.
+						do: [ :anException |
+							aSemaphore signal.
+							anException pass ] ] ]
+						on: Exception
+						do: [ :anException |
+							"Error handling is a user code that we should handle"
+							[ aAsyncPendingFuturePromise rejectWithError: anException ]
+								on: Exception
+								fork: [ :anInnerException | anInnerException pass ].
 							aSemaphore signal.
 							anException pass ]
 		] forkAt: self priority asPharoProcessPriority - 1.

@@ -25,8 +25,10 @@ AsyncFuturePromise >> future: anAsyncFuture configuration: anExecutionConfigurat
 		then: [ :aValue |
 			aValue isAsyncPromise
 				ifTrue: [ aValue asyncThen: [ :aPromiseValue | self fulfillWithValue: aPromiseValue ] ]
-				ifFalse: [ self fulfillWithValue: aValue ] ]
-		otherwise: [ :anError | self rejectWithError: anError ]
+				ifFalse: [ self fulfillWithValue: aValue ].
+			aValue ]
+		"make sure that we do not return a promise from the otherwise: block"
+		otherwise: [ :anError | self rejectWithError: anError. anError ]
 ]
 
 { #category : #'private - state' }

@@ -10,15 +10,9 @@ Class {
 
 { #category : #asserting }
 AsyncPromiseComputation class >> assertNotPromise: aValue [
-	[ self
+	self
 		assert: [ aValue isAsyncPromise not ]
-		description: [ 'Must not be a promise!' ] ] on: Error do: [ :anError |
-			Smalltalk logStdOutDuring: [ :logger |
-				logger
-					nextPutAll: '*** EXCEPTION ***'; cr;
-					nextPutAll: anError printString; cr;
-					nextPutAll: (String
-						streamContents: [ :stream | anError signalerContext errorReportOn: stream ]); cr ] ].
+		description: [ 'Must not be a promise: ', aValue printString ]
 ]
 
 { #category : #accessing }
