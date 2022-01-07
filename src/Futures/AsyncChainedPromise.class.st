@@ -2,6 +2,7 @@ Class {
 	#name : #AsyncChainedPromise,
 	#superclass : #AsyncDeferredPromise,
 	#instVars : [
+		'previousPromise',
 		'fulfilledComputation',
 		'rejectedComputation'
 	],
@@ -37,6 +38,12 @@ AsyncChainedPromise >> fulfilledComputation [
 AsyncChainedPromise >> fulfilledComputation: anObject [
 
 	fulfilledComputation := anObject
+]
+
+{ #category : #'private - state' }
+AsyncChainedPromise >> previousPromise: anObject [
+
+	previousPromise := anObject
 ]
 
 { #category : #'private - state' }

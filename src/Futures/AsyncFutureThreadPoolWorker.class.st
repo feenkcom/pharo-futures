@@ -10,8 +10,8 @@ Class {
 		'shouldStop',
 		'priority',
 		'group',
-		'process',
-		'currentTaskProcess'
+		'currentTaskProcess',
+		'workerProcess'
 	],
 	#category : #'Futures-Executor - Thread Pool'
 }
@@ -68,6 +68,17 @@ AsyncFutureThreadPoolWorker >> gtPendingQueueFor: aView [
 		view: #gtItemsFor:
 ]
 
+{ #category : #'as yet unclassified' }
+AsyncFutureThreadPoolWorker >> gtShutdownActionFor: anAction [
+	<gtAction>
+
+	^ anAction button
+		tooltip: 'Shutdown';
+		priority: 30;
+		icon: BrGlamorousVectorIcons shutdown;
+		action: [ self shutdown ]
+]
+
 { #category : #initialization }
 AsyncFutureThreadPoolWorker >> initialize [
 	super initialize.
@@ -82,7 +93,7 @@ AsyncFutureThreadPoolWorker >> initialize [
 	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
 
 	shouldStop := nil.
-	process := nil.
+	workerProcess := nil.
 	currentTask := AsyncOptionalValue none.
 	currentTaskProcess := nil
 ]
@@ -102,7 +113,7 @@ AsyncFutureThreadPoolWorker >> isRunning [
 	even if it is in the process of shutting down, because it still has to finish the execution of all futures"
 	<return: #Boolean>
 
-	^ monitor critical: [ process notNil ]
+	^ monitor critical: [ workerProcess notNil ]
 ]
 
 { #category : #'api - accessing' }
@@ -111,7 +122,7 @@ AsyncFutureThreadPoolWorker >> isShuttingDown [
 	for all futures, including pending, to finish execution."
 	<return: #Boolean>
 
-	^ monitor critical: [ shouldStop notNil and: [ process notNil ] ]
+	^ monitor critical: [ shouldStop notNil and: [ workerProcess notNil ] ]
 ]
 
 { #category : #'api - lifecycle' }
@@ -248,23 +259,31 @@ AsyncFutureThreadPoolWorker >> startup [
 	| aStartupPromise |
 
 	monitor critical: [ 
+		| aPharoProcess |
 		self
-			assert: [ process isNil ]
+			assert: [ workerProcess isNil ]
 			description: [ 'Worker process already exists' ].
 
-		process := [
+		aPharoProcess := [
 				self workerLoop.
 				monitor critical: [
 					| aShouldStopPromise |
 					aShouldStopPromise := shouldStop.
-					process := nil.
+					workerProcess := nil.
 					shouldStop := nil.
 					aShouldStopPromise fulfillWithValue: #shutdown ] ] newProcess
 			priority: priority asPharoProcessPriority;
 			name: self workerProcessName.
+	
+		workerProcess := AsyncFutureExecutionProcess new
+			process: aPharoProcess;
+			worker: self.
 
-		"AsyncProcessProperties workerOfProcess: process put: self."
-		process resume ].
+		AsyncProcessProperties
+			reifyProcess: aPharoProcess
+			as: workerProcess.
+
+		aPharoProcess resume ].
 
 	aStartupPromise := AsyncPendingFuturePromise new future: #startup asAsyncFuture.
 	self schedule: aStartupPromise.

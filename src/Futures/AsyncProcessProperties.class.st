@@ -16,7 +16,7 @@ AsyncProcessProperties class >> initialize [
 AsyncProcessProperties class >> process: aProcess property: aPropertyKey ifAbsent: anAbsentBlock [
 	^ (Properties
 		at: aProcess
-		ifAbsent: [ ^ anAbsentBlock ])
+		ifAbsent: [ ^ anAbsentBlock value ])
 			at: aPropertyKey
 			ifAbsent: anAbsentBlock
 ]
@@ -31,17 +31,17 @@ AsyncProcessProperties class >> process: aProcess property: aPropertyKey put: aP
 ]
 
 { #category : #'accessing - properties' }
-AsyncProcessProperties class >> workerOfProcess: aProcess ifAbsent: anAbsentBlock [
+AsyncProcessProperties class >> reifiedProcess: aProcess ifAbsent: anAbsentBlock [
 	^ self
 		process: aProcess
-		property: #worker
+		property: #reifiedProcess
 		ifAbsent: anAbsentBlock
 ]
 
 { #category : #'accessing - properties' }
-AsyncProcessProperties class >> workerOfProcess: aProcess put: aProcessWorker [
+AsyncProcessProperties class >> reifyProcess: aProcess as: aProcessWorker [
 	^ self
 		process: aProcess
-		property: #worker
+		property: #reifiedProcess
 		put: aProcessWorker
 ]

@@ -25,9 +25,11 @@ AsyncDeferredPromise >> asyncThen: onFulfilledBlock [
 				| aResolvedPromise |
 				
 				aResolvedPromise := AsyncChainedPromise new
+					previousPromise: self;
 					fulfilledComputation: onFulfilledBlock.
 
 				whenResolvedPromises add: aResolvedPromise.
+				whenRejectedPromises add: aResolvedPromise.
 				^ aResolvedPromise ] ].
 
 	state isFulfilled
@@ -105,6 +107,7 @@ AsyncDeferredPromise >> then: onFulfilledBlock [
 				| aResolvedPromise |
 
 				aResolvedPromise := AsyncChainedPromise new
+					previousPromise: self;
 					fulfilledComputation: onFulfilledBlock.
 
 				whenResolvedPromises add: aResolvedPromise.
@@ -136,6 +139,7 @@ AsyncDeferredPromise >> then: onFulfilledBlock otherwise: onRejectedBlock [
 				| aDeferredPromise |
 
 				aDeferredPromise := AsyncChainedPromise new
+					previousPromise: self;
 					fulfilledComputation: onFulfilledBlock;
 					rejectedComputation: onRejectedBlock.
 
