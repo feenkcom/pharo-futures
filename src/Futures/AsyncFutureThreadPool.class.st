@@ -75,6 +75,7 @@ AsyncFutureThreadPool >> pickWorkerFor: aAsyncFutureThreadPoolTask [
 					| aNewWorker |
 
 					aNewWorker := AsyncFutureThreadPoolWorker new
+						threadPool: self;
 						priority: aAsyncFutureThreadPoolTask priority;
 						group: aAsyncFutureThreadPoolTask group.
 					aNewWorker startup.

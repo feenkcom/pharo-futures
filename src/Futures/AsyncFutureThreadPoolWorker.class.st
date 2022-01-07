@@ -2,6 +2,7 @@ Class {
 	#name : #AsyncFutureThreadPoolWorker,
 	#superclass : #Object,
 	#instVars : [
+		'threadPool',
 		'monitor',
 		'localQueue',
 		'pendingQueue',
@@ -172,7 +173,7 @@ AsyncFutureThreadPoolWorker >> privateExecuteTask: aAsyncPendingFuturePromise [
 							aAsyncPendingFuturePromise rejectWithError: anException.
 							aSemaphore signal.
 							anException pass ]
-		] forkAt: Processor userBackgroundPriority.
+		] forkAt: self priority asPharoProcessPriority - 1.
 
 	aSemaphore wait.
 
@@ -253,15 +254,22 @@ AsyncFutureThreadPoolWorker >> startup [
 					shouldStop := nil.
 					aShouldStopPromise fulfillWithValue: #shutdown ] ] newProcess
 			priority: priority asPharoProcessPriority;
-			name: 'Futures worker ', '(',group label, ')';
-			resume ].
+			name: self workerProcessName.
+
+		"AsyncProcessProperties workerOfProcess: process put: self."
+		process resume ].
 
 	aStartupPromise := AsyncPendingFuturePromise new future: #startup asAsyncFuture.
 	self schedule: aStartupPromise.
 	^ aStartupPromise
 ]
 
-{ #category : #'api - worker' }
+{ #category : #initialization }
+AsyncFutureThreadPoolWorker >> threadPool: anAsyncFutureThreadPool [
+	threadPool := anAsyncFutureThreadPool
+]
+
+{ #category : #'api - lifecycle' }
 AsyncFutureThreadPoolWorker >> wakeUp: anAsyncFutureExecutionTask [
 	"Wake up the worker by placing a pending future into a local queue.
 	Can be executed from an arbitrary process"
@@ -278,4 +286,19 @@ AsyncFutureThreadPoolWorker >> workerLoop [
 	[ monitor critical: [ shouldStop notNil and: [ localQueue isEmpty and: [ pendingQueue isEmpty ] ] ] ] whileFalse: [
 			self maintanance.
 			self privateExecuteTask: localQueue popAndWait ]
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> workerProcessLabel [
+	^ group label
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> workerProcessName [
+	^ String streamContents: [ :aStream |
+		aStream
+			nextPutAll: 'Futures worker ';
+			nextPut: $(;
+			nextPutAll: self workerProcessLabel;
+			nextPut: $) ]
 ]

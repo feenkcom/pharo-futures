@@ -27,6 +27,11 @@ AsyncSharedDictionary >> at: aKey ifAbsentPut: aBlock [
 	^ monitor critical: [ dictionary at: aKey ifAbsentPut: aBlock ]
 ]
 
+{ #category : #accessing }
+AsyncSharedDictionary >> at: aKey put: anObject [
+	^ monitor critical: [ dictionary at: aKey put: anObject ]
+]
+
 { #category : #enumerating }
 AsyncSharedDictionary >> do: aBlock [
 	monitor critical: [ dictionary do: aBlock ]
