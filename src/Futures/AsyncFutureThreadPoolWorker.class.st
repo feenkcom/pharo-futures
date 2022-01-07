@@ -46,39 +46,6 @@ AsyncFutureThreadPoolWorker >> group: aAsyncFutureExecutionGroup [
 	group := aAsyncFutureExecutionGroup
 ]
 
-{ #category : #'as yet unclassified' }
-AsyncFutureThreadPoolWorker >> gtLocalQueueFor: aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Local queue';
-		priority: 11;
-		object: [ localQueue ];
-		view: #gtItemsFor:
-]
-
-{ #category : #'as yet unclassified' }
-AsyncFutureThreadPoolWorker >> gtPendingQueueFor: aView [
-	<gtView>
-
-	^ aView forward
-		title: 'Pending queue';
-		priority: 12;
-		object: [ pendingQueue ];
-		view: #gtItemsFor:
-]
-
-{ #category : #'as yet unclassified' }
-AsyncFutureThreadPoolWorker >> gtShutdownActionFor: anAction [
-	<gtAction>
-
-	^ anAction button
-		tooltip: 'Shutdown';
-		priority: 30;
-		icon: BrGlamorousVectorIcons shutdown;
-		action: [ self shutdown ]
-]
-
 { #category : #initialization }
 AsyncFutureThreadPoolWorker >> initialize [
 	super initialize.
