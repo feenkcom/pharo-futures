@@ -195,20 +195,17 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationWithReturnValueInRunn
 { #category : #'examples - exceptions' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleUnhandledExceptionInRunningWorker [
 	<gtExample>
-	| aWorker aPendingFuturePromise aResult anExceptionSemaphore |
+	| aWorker aPendingFuturePromise aResult |
 
 	aWorker := self startupNewWorker.
 	
-	anExceptionSemaphore := Semaphore new.
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ (AsyncFutureExampleUnhandledException new semaphore: anExceptionSemaphore) signal ] asAsyncFuture.
+	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ AsyncFutureExampleUnhandledException signal ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	
 	"an exception is passed after we signal the promise semaphore"
 	aResult := aPendingFuturePromise wait.
-	anExceptionSemaphore wait.
 
 	self assert: aResult class equals: AsyncFutureExampleUnhandledException.
-	self assert: aResult errorActionCalled equals: 1.
 	self assert: aResult isFrozen equals: true.
 
 	self assert: aWorker isRunning.

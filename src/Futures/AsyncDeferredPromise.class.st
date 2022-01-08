@@ -47,10 +47,13 @@ AsyncDeferredPromise >> asyncThen: onFulfilledBlock [
 { #category : #'private - state' }
 AsyncDeferredPromise >> fulfillWithTransformedValue: anObject [
 	| theFulfillmentPromises |
-
+	
 	AsyncPromiseComputation assertNotPromise: anObject.
 
 	mutex critical: [
+		self
+			assert: [ state isPending ]
+			description: [ 'Promise must be pending, but was ', state printString ].
 		state := (AsyncFulfilledPromiseState new value: anObject).
 		theFulfillmentPromises := whenResolvedPromises.
 		whenResolvedPromises := OrderedCollection new ].
@@ -93,6 +96,9 @@ AsyncDeferredPromise >> rejectWithTransformedError: anError [
 	| theRejectionPromises |
 	
 	mutex critical: [
+		self
+			assert: [ state isPending ]
+			description: [ 'Promise must be pending, but was ', state printString ].
 		state := (AsyncRejectedPromiseState new error: anError).
 		theRejectionPromises := whenRejectedPromises.
 		whenRejectedPromises := OrderedCollection new ].
