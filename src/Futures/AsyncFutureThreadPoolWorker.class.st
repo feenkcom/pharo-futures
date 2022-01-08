@@ -113,59 +113,21 @@ AsyncFutureThreadPoolWorker >> priority: anAsyncFutureExecutionPriority [
 ]
 
 { #category : #'private - process' }
-AsyncFutureThreadPoolWorker >> privateExecuteTask: aAsyncPendingFuturePromise [
+AsyncFutureThreadPoolWorker >> privateExecuteFuture: aAsyncPendingFuturePromise [
 	"Execute a given task from within the worker process"
-	| aPendingTask aContext aWaker aSemaphore aFutureResult |
+	| aPendingTask aSemaphore aFutureResult |
 		
 	aPendingTask := AsyncFutureThreadPoolPendingTask new task: aAsyncPendingFuturePromise.
 	
 	currentTask := AsyncOptionalValue some: aPendingTask.
 	
-	aWaker := AsyncFutureThreadPoolWaker new
-		worker: self;
-		task: aAsyncPendingFuturePromise.
-	
-	aContext := AsyncFutureExecutionContext new
-		waker: aWaker.
-	
 	aSemaphore := Semaphore new.
 
-	currentTaskProcess := [
-		aFutureResult := nil.
-
-		"Errors are explicitly handled and frozen, exceptions are forked and passed"
-		[ [
-				pendingQueue pushBack: aPendingTask.
-				aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
-				currentTask := AsyncOptionalValue none.
-				aFutureResult
-					ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
-					ifPending: [ "it is already in the queue" ].
-				aSemaphore signal
-			]
-				on: Error
-				do: [ :anError |
-					currentTask := AsyncOptionalValue none.
-					"Error handling is a user code that we should handle"
-					[ aAsyncPendingFuturePromise rejectWithError: anError ]
-						on: Exception
-						do: [ :anException |
-							aSemaphore signal.
-							anException pass ].
-					aSemaphore signal ]
-			]
-				on: Exception
-				do: [ :anException |
-					currentTask := AsyncOptionalValue none.
-					"Error handling is a user code that we should handle"
-					[ aAsyncPendingFuturePromise rejectWithError: anException ]
-						on: Exception
-						do: [ :anInnerException |
-							aSemaphore signal.
-							anInnerException pass ].
-					aSemaphore signal.
-					anException pass ]
-		] forkAt: self priority asPharoProcessPriority - 1.
+	currentTaskProcess := [		
+		pendingQueue pushBack: aPendingTask.
+		
+		aFutureResult := self privateExecutePendingFuture: aAsyncPendingFuturePromise signalling: aSemaphore
+	] forkAt: self priority asPharoProcessPriority - 1.
 
 	[
 		| isPending |
@@ -187,6 +149,65 @@ AsyncFutureThreadPoolWorker >> privateExecuteTask: aAsyncPendingFuturePromise [
 			aFutureResult
 				ifReady: [ :aResultValue | pendingQueue pop: aPendingTask ]
 				ifPending: [ "it is already in the queue" ] ]
+]
+
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFuturePromise signalling: aSemaphore [
+	"Errors are explicitly handled and frozen, exceptions are forked and passed"
+	| aFutureResult aWaker aContext |
+	
+	aWaker := AsyncFutureThreadPoolWaker new
+		worker: self;
+		task: aAsyncPendingFuturePromise.
+	
+	aContext := AsyncFutureExecutionContext new
+		waker: aWaker.
+	
+	[ [ [
+		aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
+		currentTask := AsyncOptionalValue none.
+		aFutureResult
+			ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
+			ifPending: [ "it is already in the queue" ].
+		aSemaphore signal
+	]
+	on: Error do: [ :anError |
+		currentTask := AsyncOptionalValue none.
+		self
+			privateRejectPendingFuture: aAsyncPendingFuturePromise
+			withException: anError
+			signalling: aSemaphore
+	] ]
+	on: UnhandledException do: [ :anUnhandledException |
+		currentTask := AsyncOptionalValue none.
+		self
+			privateRejectPendingFuture: aAsyncPendingFuturePromise
+			withException: anUnhandledException
+			signalling: aSemaphore.
+		anUnhandledException pass
+	] ]
+	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
+	However, we should signal the semaphore to unblock the worker"
+	on: Exception do: [ :anException |
+		currentTask := AsyncOptionalValue none.
+		aSemaphore signal.
+		anException pass ].
+
+	^ aFutureResult
+]
+
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePromise withException: anException signalling: aSemaphore [
+	"Error handling is a user code that we should handle"
+
+	[ aAsyncPendingFuturePromise rejectWithError: anException ]
+		on: Error
+		do: [ :anError |
+			aSemaphore signal.
+			anError pass ].
+	
+	"If rejecting error happened without problems we signal the semaphore normally"
+	aSemaphore signal
 ]
 
 { #category : #'private - process' }
@@ -292,7 +313,7 @@ AsyncFutureThreadPoolWorker >> workerLoop [
 
 	[ monitor critical: [ shouldStop notNil and: [ localQueue isEmpty and: [ pendingQueue isEmpty ] ] ] ] whileFalse: [
 			self maintanance.
-			self privateExecuteTask: localQueue popAndWait ]
+			self privateExecuteFuture: localQueue popAndWait ]
 ]
 
 { #category : #'api - accessing' }

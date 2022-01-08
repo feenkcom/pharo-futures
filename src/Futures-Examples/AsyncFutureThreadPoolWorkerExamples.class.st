@@ -29,7 +29,7 @@ AsyncFutureThreadPoolWorkerExamples >> newWorker [
 	^ worker
 ]
 
-{ #category : #examples }
+{ #category : #'examples - exceptions' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleErroneousInRunningWorker [
 	<gtExample>
 	| aWorker aPendingFuturePromise |
@@ -49,16 +49,18 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleErroneousInRunningWorker [
 	^ aWorker
 ]
 
-{ #category : #examples }
-AsyncFutureThreadPoolWorkerExamples >> scheduleExceptionInRunningWorker [
+{ #category : #'examples - exceptions' }
+AsyncFutureThreadPoolWorkerExamples >> scheduleHaltInRunningWorker [
 	<gtExample>
+	"No test, because halt opens a debugger"
+	<noTest>
 	| aWorker aPendingFuturePromise |
 
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ MyTestNotification signal  ] asAsyncFuture.
+	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ true asString . Halt now . 2 + 2 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
-	self assert: aPendingFuturePromise wait class equals: MyTestNotification.
+	self assert: aPendingFuturePromise wait class equals: 84.
 
 	self assert: aWorker isRunning.
 	self assert: aWorker isShuttingDown not.
@@ -145,6 +147,74 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInShuttingDownWorker [
 	self assert: aWorker isShuttingDown not.
 	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures not.
+	self assert: aWorker amountOfFutures equals: 0.
+
+	^ aWorker
+]
+
+{ #category : #'examples - exceptions' }
+AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationInRunningWorker [
+	<gtExample>
+	| aWorker aPendingFuturePromise |
+
+	aWorker := self startupNewWorker.
+
+	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ AsyncFutureExampleNotification new signal ] asAsyncFuture.
+	self assert: (aWorker schedule: aPendingFuturePromise).
+	self assert: aPendingFuturePromise wait equals: nil.
+
+	self assert: aWorker isRunning.
+	self assert: aWorker isShuttingDown not.
+	self assert: aWorker isBusy not.
+	self assert: aWorker acceptsFutures.
+	self assert: aWorker amountOfFutures equals: 0.
+
+	^ aWorker
+]
+
+{ #category : #'examples - exceptions' }
+AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationWithReturnValueInRunningWorker [
+	<gtExample>
+	| aWorker aPendingFuturePromise |
+
+	aWorker := self startupNewWorker.
+
+	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ (AsyncFutureExampleNotificationWithReturnValue new value: 42) signal * 2 ] asAsyncFuture.
+	self assert: (aWorker schedule: aPendingFuturePromise).
+	self assert: aPendingFuturePromise wait equals: 84.
+
+	self assert: aWorker isRunning.
+	self assert: aWorker isShuttingDown not.
+	self assert: aWorker isBusy not.
+	self assert: aWorker acceptsFutures.
+	self assert: aWorker amountOfFutures equals: 0.
+
+	^ aWorker
+]
+
+{ #category : #'examples - exceptions' }
+AsyncFutureThreadPoolWorkerExamples >> scheduleUnhandledExceptionInRunningWorker [
+	<gtExample>
+	| aWorker aPendingFuturePromise aResult anExceptionSemaphore |
+
+	aWorker := self startupNewWorker.
+	
+	anExceptionSemaphore := Semaphore new.
+	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ (AsyncFutureExampleUnhandledException new semaphore: anExceptionSemaphore) signal ] asAsyncFuture.
+	self assert: (aWorker schedule: aPendingFuturePromise).
+	
+	"an exception is passed after we signal the promise semaphore"
+	aResult := aPendingFuturePromise wait.
+	anExceptionSemaphore wait.
+
+	self assert: aResult class equals: AsyncFutureExampleUnhandledException.
+	self assert: aResult errorActionCalled equals: 1.
+	self assert: aResult isFrozen equals: true.
+
+	self assert: aWorker isRunning.
+	self assert: aWorker isShuttingDown not.
+	self assert: aWorker isBusy not.
+	self assert: aWorker acceptsFutures.
 	self assert: aWorker amountOfFutures equals: 0.
 
 	^ aWorker
