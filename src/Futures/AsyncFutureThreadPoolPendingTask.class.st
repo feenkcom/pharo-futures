@@ -13,9 +13,7 @@ AsyncFutureThreadPoolPendingTask >> printOn: aStream [
 
 	"Append a sequence of characters to aStream that identify the receiver."
 	aStream
-		nextPutAll: 'Pending ';
-		print: task.
-	aStream
+		print: task;
 		nextPutAll: ' since ';
 		nextPutAll: (DateAndTime now - sinceTime) humanReadablePrintString
 ]

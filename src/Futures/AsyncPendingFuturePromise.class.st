@@ -48,11 +48,9 @@ AsyncPendingFuturePromise >> initialize [
 
 { #category : #printing }
 AsyncPendingFuturePromise >> printOn: aStream [
-
 	"Append a sequence of characters to aStream that identify the receiver."
-
-	super printOn: aStream.
 	aStream
+		nextPutAll: 'Pending future promise';
 		nextPutAll: ' state: ';
 		print: state.
 	aStream

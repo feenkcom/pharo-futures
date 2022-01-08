@@ -21,3 +21,11 @@ AsyncRejectedPromiseState >> error: anError [
 AsyncRejectedPromiseState >> isRejected [
 	^ true
 ]
+
+{ #category : #printing }
+AsyncRejectedPromiseState >> printOn: aStream [
+	"Append a sequence of characters to aStream that identify the receiver."
+	aStream
+		nextPutAll: 'Rejected with ';
+		print: error
+]
