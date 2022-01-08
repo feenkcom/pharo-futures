@@ -149,18 +149,26 @@ AsyncFutureThreadPoolWorker >> privateExecuteTask: aAsyncPendingFuturePromise [
 						on: Exception
 						do: [ :anException |
 							aSemaphore signal.
-							anException pass ] ] ]
+							anException pass ] ]
+			]
+				on: Exception
+				do: [ :anException |
+					"Error handling is a user code that we should handle"
+					[ aAsyncPendingFuturePromise rejectWithError: anException ]
 						on: Exception
-						do: [ :anException |
-							"Error handling is a user code that we should handle"
-							[ aAsyncPendingFuturePromise rejectWithError: anException ]
-								on: Exception
-								fork: [ :anInnerException | anInnerException pass ].
-							aSemaphore signal.
-							anException pass ]
+						fork: [ :anInnerException | anInnerException pass ].
+					aSemaphore signal.
+					anException pass ]
 		] forkAt: self priority asPharoProcessPriority - 1.
 
-	aSemaphore wait.
+	[
+		| isPending |
+		isPending := aSemaphore waitTimeoutSeconds: 60.
+		isPending ifTrue: [
+			NonInteractiveTranscript stdout
+				nextPutAll: aPendingTask printString;
+				cr ].
+		isPending ] whileTrue.
 
 	currentTask := AsyncOptionalValue none.
 	currentTaskProcess := nil.
