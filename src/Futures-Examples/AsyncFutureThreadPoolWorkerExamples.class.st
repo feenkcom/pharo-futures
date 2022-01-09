@@ -42,7 +42,6 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleErroneousInRunningWorker [
 
 	self assert: aWorker isRunning.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -60,11 +59,10 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleHaltInRunningWorker [
 
 	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ true asString . Halt now . 2 + 2 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
-	self assert: aPendingFuturePromise wait class equals: 84.
+	self assert: aPendingFuturePromise wait class equals: Halt.
 
 	self assert: aWorker isRunning.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -83,7 +81,6 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInNewWorker [
 
 	self assert: aWorker isRunning not.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures not.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -103,7 +100,6 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInRunningWorker [
 
 	self assert: aWorker isRunning.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -122,7 +118,6 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInShutdownWorker [
 
 	self assert: aWorker isRunning not.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures not.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -145,7 +140,6 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInShuttingDownWorker [
 
 	self assert: aWorker isRunning not.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures not.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -210,7 +204,6 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleUnhandledExceptionInRunningWorker
 
 	self assert: aWorker isRunning.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -228,7 +221,6 @@ AsyncFutureThreadPoolWorkerExamples >> shutdownNewWorker [
 
 	self assert: aWorker isRunning not.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures not.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -246,7 +238,6 @@ AsyncFutureThreadPoolWorkerExamples >> shutdownRunningWorker [
 
 	self assert: aWorker isRunning not.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures not.
 	self assert: aWorker amountOfFutures equals: 0.
 
@@ -264,7 +255,6 @@ AsyncFutureThreadPoolWorkerExamples >> startupNewWorker [
 
 	self assert: aWorker isRunning.
 	self assert: aWorker isShuttingDown not.
-	self assert: aWorker isBusy not.
 	self assert: aWorker acceptsFutures.
 	self assert: aWorker amountOfFutures equals: 0.
 

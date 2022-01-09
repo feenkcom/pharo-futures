@@ -4,7 +4,7 @@ Class {
 	#classInstVars : [
 		'uniqueInstance'
 	],
-	#category : 'Futures-Utilities'
+	#category : #'Futures-Utilities'
 }
 
 { #category : #cleanup }
@@ -33,4 +33,11 @@ AsyncPollPending >> map: aBlock [
 	<return: #AsyncPoll>
 	
 	^ self
+]
+
+{ #category : #printing }
+AsyncPollPending >> printOn: aStream [
+	"Append a sequence of characters to aStream that identify the receiver."
+	aStream
+		nextPutAll: 'Pending poll'
 ]

@@ -115,7 +115,7 @@ AsyncFutureThreadPoolWorker >> priority: anAsyncFutureExecutionPriority [
 { #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privateExecuteFuture: aAsyncPendingFuturePromise [
 	"Execute a given task from within the worker process"
-	| aPendingTask aSemaphore aFutureResult |
+	| aPendingTask aSemaphore aFutureResultHolder aFutureResult |
 		
 	aPendingTask := AsyncFutureThreadPoolPendingTask new task: aAsyncPendingFuturePromise.
 	
@@ -123,10 +123,14 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: aAsyncPendingFuturePromise 
 	
 	aSemaphore := Semaphore new.
 
-	currentTaskProcess := [		
+	currentTaskProcess := [
 		pendingQueue pushBack: aPendingTask.
-		
-		aFutureResult := self privateExecutePendingFuture: aAsyncPendingFuturePromise signalling: aSemaphore
+
+		aFutureResultHolder := Array with: nil.
+		self
+			privateExecutePendingFuture: aAsyncPendingFuturePromise
+			storingResultIn: aFutureResultHolder
+			signalling: aSemaphore.
 	] forkAt: self priority asPharoProcessPriority - 1.
 
 	[
@@ -141,6 +145,7 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: aAsyncPendingFuturePromise 
 	currentTask := AsyncOptionalValue none.
 	currentTaskProcess := nil.
 
+	aFutureResult := aFutureResultHolder at: 1.	
 	aFutureResult
 		ifNil: [ 
 			"Failed to execute the future"
@@ -152,9 +157,9 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: aAsyncPendingFuturePromise 
 ]
 
 { #category : #'private - process' }
-AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFuturePromise signalling: aSemaphore [
+AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFuturePromise storingResultIn: aResultValueHolder signalling: aSemaphore [
 	"Errors are explicitly handled and frozen, exceptions are forked and passed"
-	| aFutureResult aWaker aContext |
+	| aWaker aContext |
 	
 	aWaker := AsyncFutureThreadPoolWaker new
 		worker: self;
@@ -164,22 +169,25 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 		waker: aWaker.
 	
 	[ [ [
+		| aFutureResult |
 		aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
-		currentTask := AsyncOptionalValue none.
+
+		"we must `return` the result before signalling the semaphore, otherwise the waiting process will continue before result is return from the method"
+		aResultValueHolder at: 1 put: aFutureResult.
+
 		aFutureResult
 			ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
 			ifPending: [ "it is already in the queue" ].
+
 		aSemaphore signal
 	]
 	on: Error do: [ :anError |
-		currentTask := AsyncOptionalValue none.
 		self
 			privateRejectPendingFuture: aAsyncPendingFuturePromise
 			withException: anError
 			signalling: aSemaphore
 	] ]
 	on: UnhandledException do: [ :anUnhandledException |
-		currentTask := AsyncOptionalValue none.
 		self
 			privateRejectPendingFuture: aAsyncPendingFuturePromise
 			withException: anUnhandledException
@@ -189,11 +197,8 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
 	However, we should signal the semaphore to unblock the worker"
 	on: Exception do: [ :anException |
-		currentTask := AsyncOptionalValue none.
 		aSemaphore signal.
-		anException pass ].
-
-	^ aFutureResult
+		anException pass ]
 ]
 
 { #category : #'private - process' }

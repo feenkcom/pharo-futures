@@ -56,7 +56,8 @@ AsyncDeferredPromise >> fulfillWithTransformedValue: anObject [
 			description: [ 'Promise must be pending, but was ', state printString ].
 		state := (AsyncFulfilledPromiseState new value: anObject).
 		theFulfillmentPromises := whenResolvedPromises.
-		whenResolvedPromises := OrderedCollection new ].
+		whenResolvedPromises := OrderedCollection new.
+		whenRejectedPromises := OrderedCollection new ].
 
 	theFulfillmentPromises do: [ :eachPromise | eachPromise fulfillWithValue: anObject ]
 ]
@@ -101,7 +102,8 @@ AsyncDeferredPromise >> rejectWithTransformedError: anError [
 			description: [ 'Promise must be pending, but was ', state printString ].
 		state := (AsyncRejectedPromiseState new error: anError).
 		theRejectionPromises := whenRejectedPromises.
-		whenRejectedPromises := OrderedCollection new ].
+		whenRejectedPromises := OrderedCollection new.
+		whenResolvedPromises := OrderedCollection new ].
 	theRejectionPromises do: [ :eachPromise | eachPromise rejectWithError: anError ]
 ]
 

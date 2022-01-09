@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'value'
 	],
-	#category : 'Futures-Utilities'
+	#category : #'Futures-Utilities'
 }
 
 { #category : #generated }
@@ -28,6 +28,14 @@ AsyncPollReady >> map: aBlock [
 	<return: #AsyncPoll>
 	
 	^ self class value: (aBlock cull: self value)
+]
+
+{ #category : #printing }
+AsyncPollReady >> printOn: aStream [
+	"Append a sequence of characters to aStream that identify the receiver."
+	aStream
+		nextPutAll: 'Ready poll with value: ';
+		print: value
 ]
 
 { #category : #accessing }
