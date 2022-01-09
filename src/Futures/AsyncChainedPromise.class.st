@@ -11,21 +11,18 @@ Class {
 
 { #category : #'private - state' }
 AsyncChainedPromise >> fulfillWithValue: aValue [
-	| aTransformedValue  |
-
 	AsyncPromiseComputation assertNotPromise: aValue.
 
-	aTransformedValue := (AsyncPromiseComputation new
+	(AsyncPromiseComputation new
 		computation: fulfilledComputation;
 		isSynchronous: false)
-			value: aValue.
-
-	aTransformedValue isAsyncPromise
-		ifTrue: [
-			aTransformedValue
-				then: [ :aPromiseValue | self fulfillWithTransformedValue:  aPromiseValue ]
-				otherwise: [ :anError | self rejectWithTransformedError: anError ] ]
-		ifFalse: [ self fulfillWithTransformedValue:  aTransformedValue ]
+			value: aValue
+			ifSuccess: [ :aSuccessValue | self fulfillWithTransformedValue: aSuccessValue ]
+			ifError: [ :anError | self rejectWithTransformedError: anError ]
+			ifPromise: [ :aPromise |
+				aPromise
+					then: [ :aPromiseValue | self fulfillWithTransformedValue:  aPromiseValue ]
+					otherwise: [ :anError | self rejectWithTransformedError: anError ] ]
 ]
 
 { #category : #accessing }
@@ -48,18 +45,21 @@ AsyncChainedPromise >> previousPromise: anObject [
 
 { #category : #'private - state' }
 AsyncChainedPromise >> rejectWithError: anError [
+	AsyncPromiseComputation assertNotPromise: anError.
 
 	rejectedComputation
 		ifNil: [ self rejectWithTransformedError: anError ]
 		ifNotNil: [ :anErrorHandlingBlock |
-			| aTransformedValue |
-
-			aTransformedValue := (AsyncPromiseComputation new
+			(AsyncPromiseComputation new
 				computation: anErrorHandlingBlock;
 				isSynchronous: false)
-					value: anError.
-
-			self fulfillWithTransformedValue: aTransformedValue ]
+					value: anError
+					ifSuccess: [ :aSuccessValue | self fulfillWithTransformedValue: aSuccessValue ]
+					ifError: [ :aHandlerError | self rejectWithTransformedError: aHandlerError ]
+					ifPromise: [ :aPromise |
+						aPromise
+							then: [ :aPromiseValue | self fulfillWithTransformedValue:  aPromiseValue ]
+							otherwise: [ :aHandlerError | self rejectWithTransformedError: aHandlerError ] ] ]
 ]
 
 { #category : #accessing }

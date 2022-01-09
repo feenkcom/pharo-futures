@@ -2,8 +2,7 @@ Class {
 	#name : #AsyncFuturePromise,
 	#superclass : #AsyncDeferredPromise,
 	#instVars : [
-		'future',
-		'executionConfiguration'
+		'future'
 	],
 	#category : #'Futures-Base - Promises'
 }

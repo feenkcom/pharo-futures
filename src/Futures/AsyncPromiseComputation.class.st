@@ -53,3 +53,17 @@ AsyncPromiseComputation >> value: aValue [
 
 	^ computation cull: aValue cull: isSynchronous
 ]
+
+{ #category : #generated }
+AsyncPromiseComputation >> value: aValue ifSuccess: aSuccessBlock ifError: anErrorBlock ifPromise: aPromiseBlock [
+	self class assertNotPromise: aValue.
+
+	^ [
+			| aResultValue |
+			aResultValue := computation cull: aValue cull: isSynchronous.
+			aResultValue isAsyncPromise
+				ifTrue: [ aPromiseBlock value: aResultValue ]
+				ifFalse: [ aSuccessBlock value: aResultValue ] ]
+		on: Error
+		do: [ :anError | anErrorBlock value: anError ]
+]
