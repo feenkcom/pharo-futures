@@ -119,22 +119,23 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 	
 	aSemaphore := Semaphore new.
 
-	anAsyncPendingFuturePromise isCancelled
-		ifTrue: [ ^ self privateRejectCancelledPendingFuture: anAsyncPendingFuturePromise signalling: aSemaphore ].
-	
 	aPendingTask := AsyncFutureThreadPoolPendingTask new task: anAsyncPendingFuturePromise.
 
+	aFutureResultHolder := Array with: nil.
+	
 	monitor critical: [
 		currentTask := AsyncOptionalValue some: aPendingTask.
 
 		currentTaskProcess := [
-			pendingQueue pushBack: aPendingTask.
+			anAsyncPendingFuturePromise isCancelled
+				ifTrue: [ self privateRejectCancelledPendingFuture: anAsyncPendingFuturePromise signalling: aSemaphore ]
+				ifFalse: [
+					pendingQueue pushBack: aPendingTask.
 
-			aFutureResultHolder := Array with: nil.
-			self
-				privateExecutePendingFuture: anAsyncPendingFuturePromise
-				storingResultIn: aFutureResultHolder
-				signalling: aSemaphore.
+					self
+						privateExecutePendingFuture: anAsyncPendingFuturePromise
+						storingResultIn: aFutureResultHolder
+						signalling: aSemaphore ]
 		] forkAt: self priority asPharoProcessPriority - 1 ].
 
 	[
@@ -146,6 +147,7 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 				cr ].
 		isPending ] whileTrue.
 
+	"At this point the promise is resolved"
 	monitor critical: [
 		currentTask := AsyncOptionalValue none.
 		currentTaskProcess := nil ].
@@ -212,7 +214,7 @@ AsyncFutureThreadPoolWorker >> privateRejectCancelledPendingFuture: aAsyncPendin
 
 	[ aAsyncPendingFuturePromise rejectWithCancellation ]
 		on: Error
-		fork: [ :anError |
+		do: [ :anError |
 			aSemaphore signal.
 			anError pass ].
 	
@@ -232,6 +234,14 @@ AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePr
 	
 	"If rejecting error happened without problems we signal the semaphore normally"
 	aSemaphore signal
+]
+
+{ #category : #'api - worker' }
+AsyncFutureThreadPoolWorker >> privateUnschedule: anAsyncPendingFuturePromise [
+	"Must be called from within the critical block"
+
+	localQueue pop: anAsyncPendingFuturePromise.
+	pendingQueue popSuchThat: [ :eachPendingTask | eachPendingTask task == anAsyncPendingFuturePromise ]
 ]
 
 { #category : #'private - process' }
@@ -324,8 +334,35 @@ AsyncFutureThreadPoolWorker >> startup [
 
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> terminate: anAsyncPendingFuturePromise [
-	^ monitor critical: [
-		self unschedule: anAsyncPendingFuturePromise ]
+	monitor critical: [
+		| activeContext timeoutContext |
+
+		self privateUnschedule: anAsyncPendingFuturePromise.
+
+		"make sure that there is a process for the task and that the current running task is the one we want to terminate"
+		currentTaskProcess ifNil: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].
+		currentTask
+			ifSome: [ :aPendingTask |
+				aPendingTask task == anAsyncPendingFuturePromise
+					ifFalse: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ] ]
+			ifNone: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].
+
+		"#isSuspended may be too broad, ideally we should have something like #isBeingDebugged.
+		The suspended check prevents errors when terminating a task that is debugged or suspended due to an exception.
+		See https://github.com/feenkcom/gtoolkit/issues/1823"
+		currentTaskProcess isSuspended
+			ifTrue: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].
+	
+		currentTaskProcess == Processor activeProcess
+			ifTrue: [ AsyncFutureCancelled new signal ].
+
+		currentTaskProcess suspend.
+		activeContext := currentTaskProcess suspendedContext.
+		timeoutContext := [ AsyncFutureCancelled new signal ] asContext.
+		timeoutContext privSender: activeContext.
+		currentTaskProcess suspendedContext: timeoutContext.
+		currentTaskProcess priority: (Processor lowIOPriority min: currentTaskProcess priority + 5).
+		currentTaskProcess resume ]
 ]
 
 { #category : #initialization }
@@ -335,9 +372,14 @@ AsyncFutureThreadPoolWorker >> threadPool: anAsyncFutureThreadPool [
 
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> unschedule: anAsyncPendingFuturePromise [
-	^ monitor critical: [
-		localQueue pop: anAsyncPendingFuturePromise.
-		pendingQueue popSuchThat: [ :eachPendingTask | eachPendingTask task == anAsyncPendingFuturePromise ] ]
+	monitor critical: [
+		self privateUnschedule: anAsyncPendingFuturePromise.
+		currentTask
+			ifSome: [ :aPendingTask |
+				aPendingTask task == anAsyncPendingFuturePromise
+					ifTrue: [ ^ self ] ] ].
+
+	anAsyncPendingFuturePromise rejectWithCancellation
 ]
 
 { #category : #'api - lifecycle' }

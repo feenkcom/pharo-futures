@@ -15,22 +15,36 @@ Class {
 AsyncPendingFuturePromise >> cancel: anAsyncFutureExecutionCancellation [
 	"Cancel the future according to the given cancellation strategy"
 	| aWorker |
-	
+
 	self critical: [
 		"Is already cancelled"
 		executionState isCancelled
 			ifTrue: [ ^ self ].
-		
+
+		"can not cancel a successful promise"
+		executionState isSuccess
+			ifTrue: [ ^ self ].
+
 		executionState := AsyncFutureExecutionCancelledState uniqueInstance.
 		worker
 			"Worker is not assigned yet, meaning that the future is not yet scheduled"
 			ifNil: [ ^ self ].
-			
-		aWorker := worker ].
 
-	anAsyncFutureExecutionCancellation
-		cancel: self
-		worker: aWorker
+		aWorker := worker.
+
+		anAsyncFutureExecutionCancellation
+			cancel: self
+			worker: aWorker ]
+]
+
+{ #category : #'api - promise' }
+AsyncPendingFuturePromise >> cancelHard [
+	self cancel: AsyncFutureExecutionHardCancellation uniqueInstance
+]
+
+{ #category : #'api - promise' }
+AsyncPendingFuturePromise >> cancelSoft [
+	self cancel: AsyncFutureExecutionSoftCancellation uniqueInstance
 ]
 
 { #category : #'api - promise' }

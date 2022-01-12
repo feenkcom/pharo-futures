@@ -21,3 +21,18 @@ AsyncFutureExecutionState class >> uniqueInstance [
 AsyncFutureExecutionState >> isCancelled [
 	^ false
 ]
+
+{ #category : #testing }
+AsyncFutureExecutionState >> isPending [
+	^ false
+]
+
+{ #category : #testing }
+AsyncFutureExecutionState >> isRunning [
+	^ false
+]
+
+{ #category : #testing }
+AsyncFutureExecutionState >> isSuccess [
+	^ false
+]
