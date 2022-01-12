@@ -186,6 +186,27 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationWithReturnValueInRunn
 	^ aWorker
 ]
 
+{ #category : #examples }
+AsyncFutureThreadPoolWorkerExamples >> scheduleSoftCancelledInRunningWorker [
+	<gtExample>
+	| aWorker aPendingFuturePromise |
+
+	aWorker := self startupNewWorker.
+
+	aPendingFuturePromise := AsyncPendingFuturePromise new future: 42 asAsyncFuture.
+	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
+
+	self assert: (aWorker schedule: aPendingFuturePromise) not.
+	self assert: aPendingFuturePromise wait class equals: AsyncFutureCancelled.
+
+	self assert: aWorker isRunning.
+	self assert: aWorker isShuttingDown not.
+	self assert: aWorker acceptsFutures.
+	self assert: aWorker amountOfFutures equals: 0.
+
+	^ aWorker
+]
+
 { #category : #'examples - exceptions' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleUnhandledExceptionInRunningWorker [
 	<gtExample>

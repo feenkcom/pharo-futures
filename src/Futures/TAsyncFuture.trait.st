@@ -130,6 +130,6 @@ TAsyncFuture >> wait [
 			aSemaphore signal ].
 	
 	aSemaphore wait.
-	anAwaitError ifNotNil: [ AsyncFutureError signalForException: anAwaitError ].
+	anAwaitError ifNotNil: [ AsyncFutureExecutionError signalForException: anAwaitError ].
 	^ anAwaitResult
 ]

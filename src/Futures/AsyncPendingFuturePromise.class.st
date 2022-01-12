@@ -4,13 +4,43 @@ Class {
 	#instVars : [
 		'future',
 		'group',
-		'priority'
+		'priority',
+		'worker',
+		'executionState'
 	],
 	#category : #'Futures-Base - Promises'
 }
 
+{ #category : #'api - promise' }
+AsyncPendingFuturePromise >> cancel: anAsyncFutureExecutionCancellation [
+	"Cancel the future according to the given cancellation strategy"
+	| aWorker |
+	
+	self critical: [
+		"Is already cancelled"
+		executionState isCancelled
+			ifTrue: [ ^ self ].
+		
+		executionState := AsyncFutureExecutionCancelledState uniqueInstance.
+		worker
+			"Worker is not assigned yet, meaning that the future is not yet scheduled"
+			ifNil: [ ^ self ].
+			
+		aWorker := worker ].
+
+	anAsyncFutureExecutionCancellation
+		cancel: self
+		worker: aWorker
+]
+
+{ #category : #'api - promise' }
+AsyncPendingFuturePromise >> critical: aBlock [
+	^ mutex critical: aBlock
+]
+
 { #category : #'private - state' }
 AsyncPendingFuturePromise >> fulfillWithValue: aValue [
+	worker := nil.
 	self fulfillWithTransformedValue: aValue
 ]
 
@@ -43,7 +73,13 @@ AsyncPendingFuturePromise >> initialize [
 	super initialize.
 
 	group := AsyncFutureExecutionUnspecifiedGroup uniqueInstance.
-	priority := AsyncFutureExecutionDefaultPriority uniqueInstance
+	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
+	executionState := AsyncFutureExecutionPendingState uniqueInstance
+]
+
+{ #category : #'api - promise' }
+AsyncPendingFuturePromise >> isCancelled [
+	^ self critical: [ executionState isCancelled ]
 ]
 
 { #category : #printing }
@@ -71,6 +107,25 @@ AsyncPendingFuturePromise >> priority: anAsyncFutureExecutionPriority [
 ]
 
 { #category : #'private - state' }
+AsyncPendingFuturePromise >> rejectWithCancellation [
+	self rejectWithError: AsyncFutureCancelled new
+]
+
+{ #category : #'private - state' }
 AsyncPendingFuturePromise >> rejectWithError: anError [
+	worker := nil.
 	self rejectWithTransformedError: anError
+]
+
+{ #category : #accessing }
+AsyncPendingFuturePromise >> worker [
+
+	^ worker
+]
+
+{ #category : #accessing }
+AsyncPendingFuturePromise >> worker: aWorker [
+	"Assign a worker when the futures is scheduled"
+
+	self critical: [ worker := aWorker ]
 ]

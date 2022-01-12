@@ -1,14 +1,14 @@
 Class {
-	#name : #AsyncFutureError,
+	#name : #AsyncFutureExecutionError,
 	#superclass : #Error,
 	#instVars : [
 		'exception'
 	],
-	#category : 'Futures-Utilities'
+	#category : #'Futures-Utilities'
 }
 
 { #category : #signalling }
-AsyncFutureError class >> signalForException: anError [
+AsyncFutureExecutionError class >> signalForException: anError [
 
 	^ self new
 		exception: anError;
@@ -16,13 +16,13 @@ AsyncFutureError class >> signalForException: anError [
 ]
 
 { #category : #accessing }
-AsyncFutureError >> exception [
+AsyncFutureExecutionError >> exception [
 
 	^ exception
 ]
 
 { #category : #accessing }
-AsyncFutureError >> exception: anObject [
+AsyncFutureExecutionError >> exception: anObject [
 
 	exception := anObject
 ]

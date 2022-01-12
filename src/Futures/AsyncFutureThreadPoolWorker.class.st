@@ -113,25 +113,29 @@ AsyncFutureThreadPoolWorker >> priority: anAsyncFutureExecutionPriority [
 ]
 
 { #category : #'private - process' }
-AsyncFutureThreadPoolWorker >> privateExecuteFuture: aAsyncPendingFuturePromise [
+AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise [
 	"Execute a given task from within the worker process"
 	| aPendingTask aSemaphore aFutureResultHolder aFutureResult |
-		
-	aPendingTask := AsyncFutureThreadPoolPendingTask new task: aAsyncPendingFuturePromise.
-	
-	currentTask := AsyncOptionalValue some: aPendingTask.
 	
 	aSemaphore := Semaphore new.
 
-	currentTaskProcess := [
-		pendingQueue pushBack: aPendingTask.
+	anAsyncPendingFuturePromise isCancelled
+		ifTrue: [ ^ self privateRejectCancelledPendingFuture: anAsyncPendingFuturePromise signalling: aSemaphore ].
+	
+	aPendingTask := AsyncFutureThreadPoolPendingTask new task: anAsyncPendingFuturePromise.
 
-		aFutureResultHolder := Array with: nil.
-		self
-			privateExecutePendingFuture: aAsyncPendingFuturePromise
-			storingResultIn: aFutureResultHolder
-			signalling: aSemaphore.
-	] forkAt: self priority asPharoProcessPriority - 1.
+	monitor critical: [
+		currentTask := AsyncOptionalValue some: aPendingTask.
+
+		currentTaskProcess := [
+			pendingQueue pushBack: aPendingTask.
+
+			aFutureResultHolder := Array with: nil.
+			self
+				privateExecutePendingFuture: anAsyncPendingFuturePromise
+				storingResultIn: aFutureResultHolder
+				signalling: aSemaphore.
+		] forkAt: self priority asPharoProcessPriority - 1 ].
 
 	[
 		| isPending |
@@ -142,8 +146,9 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: aAsyncPendingFuturePromise 
 				cr ].
 		isPending ] whileTrue.
 
-	currentTask := AsyncOptionalValue none.
-	currentTaskProcess := nil.
+	monitor critical: [
+		currentTask := AsyncOptionalValue none.
+		currentTaskProcess := nil ].
 
 	aFutureResult := aFutureResultHolder at: 1.	
 	aFutureResult
@@ -202,6 +207,20 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 ]
 
 { #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateRejectCancelledPendingFuture: aAsyncPendingFuturePromise signalling: aSemaphore [
+	"Error handling is a user code that we should handle"
+
+	[ aAsyncPendingFuturePromise rejectWithCancellation ]
+		on: Error
+		fork: [ :anError |
+			aSemaphore signal.
+			anError pass ].
+	
+	"If rejecting error happened without problems we signal the semaphore normally"
+	aSemaphore signal
+]
+
+{ #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePromise withException: anException signalling: aSemaphore [
 	"Error handling is a user code that we should handle"
 
@@ -223,16 +242,22 @@ AsyncFutureThreadPoolWorker >> privateWakeUpWorkerLoop [
 ]
 
 { #category : #'api - worker' }
-AsyncFutureThreadPoolWorker >> schedule: aAsyncPendingFuturePromise [
+AsyncFutureThreadPoolWorker >> schedule: anAsyncPendingFuturePromise [
 	"Return true if the promised future was scheduled, false otherwise.
 	If a worker is not running or is shutting down, the scheduling is forbidden"
 	<return: #Boolean>
+	
+	anAsyncPendingFuturePromise isCancelled
+		ifTrue: [
+			anAsyncPendingFuturePromise rejectWithCancellation.
+			^ false ]
+		ifFalse: [ anAsyncPendingFuturePromise worker: self ].
 
 	^ monitor critical: [
 		self acceptsFutures
 			ifFalse: [ ^ false ].
 
-		localQueue pushBack: aAsyncPendingFuturePromise.
+		localQueue pushBack: anAsyncPendingFuturePromise.
 		
 		true ]
 ]
@@ -297,9 +322,22 @@ AsyncFutureThreadPoolWorker >> startup [
 	^ aStartupPromise
 ]
 
+{ #category : #'api - worker' }
+AsyncFutureThreadPoolWorker >> terminate: anAsyncPendingFuturePromise [
+	^ monitor critical: [
+		self unschedule: anAsyncPendingFuturePromise ]
+]
+
 { #category : #initialization }
 AsyncFutureThreadPoolWorker >> threadPool: anAsyncFutureThreadPool [
 	threadPool := anAsyncFutureThreadPool
+]
+
+{ #category : #'api - worker' }
+AsyncFutureThreadPoolWorker >> unschedule: anAsyncPendingFuturePromise [
+	^ monitor critical: [
+		localQueue pop: anAsyncPendingFuturePromise.
+		pendingQueue popSuchThat: [ :eachPendingTask | eachPendingTask task == anAsyncPendingFuturePromise ] ]
 ]
 
 { #category : #'api - lifecycle' }

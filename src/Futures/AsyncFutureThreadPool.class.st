@@ -89,9 +89,14 @@ AsyncFutureThreadPool >> pickWorkerFor: aAsyncFutureThreadPoolTask [
 ]
 
 { #category : #'api - execution' }
-AsyncFutureThreadPool >> schedule: aAsyncPendingFuturePromise [
-	(self pickWorkerFor: aAsyncPendingFuturePromise)
-		schedule: aAsyncPendingFuturePromise
+AsyncFutureThreadPool >> schedule: anAsyncPendingFuturePromise [
+	anAsyncPendingFuturePromise isCancelled
+		ifTrue: [
+			anAsyncPendingFuturePromise rejectWithCancellation.
+			^ self ].
+
+	(self pickWorkerFor: anAsyncPendingFuturePromise)
+		schedule: anAsyncPendingFuturePromise
 ]
 
 { #category : #'api - execution' }
