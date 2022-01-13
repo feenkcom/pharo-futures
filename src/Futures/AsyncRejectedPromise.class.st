@@ -16,7 +16,12 @@ AsyncRejectedPromise >> asyncThen: onFulfilledBlock [
 	^ self
 ]
 
-{ #category : #accessing }
+{ #category : #'private - accessing' }
+AsyncRejectedPromise >> error [
+	^ error
+]
+
+{ #category : #'private - accessing' }
 AsyncRejectedPromise >> error: anError [
 	anError signalContext
 		ifNotNil: [ anError freeze ].
@@ -33,12 +38,12 @@ AsyncRejectedPromise >> then: aFulfillmentBlock [
 { #category : #'api - promise' }
 AsyncRejectedPromise >> then: onFulfilledBlock otherwise: onRejectedBlock [
 	<return: #TAsyncPromise>
-	| aTransformedValue |
-
-	aTransformedValue := (AsyncPromiseComputation new
+	
+	^ (AsyncPromiseComputation new
 		computation: onRejectedBlock;
 		isSynchronous: true)
-			value: error.
-
-	^ AsyncFulfilledPromise new value: aTransformedValue
+			value: error
+			ifSuccess: [ :aSuccessValue | AsyncFulfilledPromise new value: aSuccessValue ]
+			ifError: [ :anError | AsyncRejectedPromise new error: anError ]
+			ifPromise: [ :aPromise | aPromise ]
 ]

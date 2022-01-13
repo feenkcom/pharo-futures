@@ -23,18 +23,16 @@ AsyncFulfilledPromise >> asyncThen: onFulfilledBlock [
 ]
 
 { #category : #'api - promise' }
-AsyncFulfilledPromise >> then: onFulfilledBlock [
+AsyncFulfilledPromise >> then: aFulfillmentBlock [
 	<return: #TAsyncPromise>
-	| aTransformedValue |
-
-	aTransformedValue := (AsyncPromiseComputation new
-		computation: onFulfilledBlock;
+	
+	^ (AsyncPromiseComputation new
+		computation: aFulfillmentBlock;
 		isSynchronous: true)
-			value: value.
-
-	^ aTransformedValue isAsyncPromise
-		ifTrue: [ aTransformedValue ]
-		ifFalse: [ AsyncFulfilledPromise new value: aTransformedValue ]
+			value: value
+			ifSuccess: [ :aSuccessValue | AsyncFulfilledPromise new value: aSuccessValue ]
+			ifError: [ :anError | AsyncRejectedPromise new error: anError ]
+			ifPromise: [ :aPromise | aPromise ]
 ]
 
 { #category : #'api - promise' }
@@ -44,7 +42,12 @@ AsyncFulfilledPromise >> then: aFulfillmentBlock otherwise: aRejectionBlock [
 	^ self then: aFulfillmentBlock
 ]
 
-{ #category : #initialization }
+{ #category : #'private - accessing' }
+AsyncFulfilledPromise >> value [
+	^ value
+]
+
+{ #category : #'private - accessing' }
 AsyncFulfilledPromise >> value: anObject [
 	AsyncPromiseComputation assertNotPromise: anObject.
 

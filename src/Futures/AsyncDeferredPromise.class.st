@@ -4,10 +4,9 @@ Class {
 	#traits : 'TAsyncPromise',
 	#classTraits : 'TAsyncPromise classTrait',
 	#instVars : [
-		'state',
 		'mutex',
-		'whenResolvedPromises',
-		'whenRejectedPromises'
+		'state',
+		'chainedPromises'
 	],
 	#category : #'Futures-Base - Promises'
 }
@@ -25,9 +24,10 @@ AsyncDeferredPromise >> asyncThen: onFulfilledBlock [
 				| aResolvedPromise |
 				
 				aResolvedPromise := AsyncChainedPromise new
+					previousPromise: self;
 					fulfilledComputation: onFulfilledBlock.
 
-				whenResolvedPromises add: aResolvedPromise.
+				chainedPromises add: aResolvedPromise.
 				^ aResolvedPromise ] ].
 
 	state isFulfilled
@@ -45,13 +45,16 @@ AsyncDeferredPromise >> asyncThen: onFulfilledBlock [
 { #category : #'private - state' }
 AsyncDeferredPromise >> fulfillWithTransformedValue: anObject [
 	| theFulfillmentPromises |
-
+	
 	AsyncPromiseComputation assertNotPromise: anObject.
 
 	mutex critical: [
+		self
+			assert: [ state isPending ]
+			description: [ 'Promise must be pending, but was ', state printString ].
 		state := (AsyncFulfilledPromiseState new value: anObject).
-		theFulfillmentPromises := whenResolvedPromises.
-		whenResolvedPromises := OrderedCollection new ].
+		theFulfillmentPromises := chainedPromises.
+		chainedPromises := self newChainedPromises ].
 
 	theFulfillmentPromises do: [ :eachPromise | eachPromise fulfillWithValue: anObject ]
 ]
@@ -67,8 +70,12 @@ AsyncDeferredPromise >> initialize [
 	
 	state := AsyncPendingPromiseState new.
 	mutex := Monitor new.
-	whenResolvedPromises := OrderedCollection new.
-	whenRejectedPromises := OrderedCollection new.
+	chainedPromises := self newChainedPromises
+]
+
+{ #category : #testing }
+AsyncDeferredPromise >> isFulfilled [
+	^ state isFulfilled
 ]
 
 { #category : #testing }
@@ -77,8 +84,18 @@ AsyncDeferredPromise >> isPending [
 ]
 
 { #category : #testing }
+AsyncDeferredPromise >> isRejected [
+	^ state isRejected
+]
+
+{ #category : #testing }
 AsyncDeferredPromise >> isSettled [
 	^ state isPending not
+]
+
+{ #category : #initialization }
+AsyncDeferredPromise >> newChainedPromises [
+	^ AsyncErrorSafeOrderedCollection new
 ]
 
 { #category : #'private - state' }
@@ -91,10 +108,21 @@ AsyncDeferredPromise >> rejectWithTransformedError: anError [
 	| theRejectionPromises |
 	
 	mutex critical: [
-		state := (AsyncRejectedPromiseState new error: anError).
-		theRejectionPromises := whenRejectedPromises.
-		whenRejectedPromises := OrderedCollection new ].
+		self
+			assert: [ state isPending ]
+			description: [ 'Promise must be pending, but was ', state printString ].
+		state := (AsyncRejectedPromiseState new error: anError freeze).
+		theRejectionPromises := chainedPromises.
+		chainedPromises := self newChainedPromises ].
+
 	theRejectionPromises do: [ :eachPromise | eachPromise rejectWithError: anError ]
+]
+
+{ #category : #'private - accessing' }
+AsyncDeferredPromise >> state [
+	<return: #AsyncPromiseState>
+
+	^ state
 ]
 
 { #category : #'api - promise' }
@@ -105,10 +133,10 @@ AsyncDeferredPromise >> then: onFulfilledBlock [
 				| aResolvedPromise |
 
 				aResolvedPromise := AsyncChainedPromise new
+					previousPromise: self;
 					fulfilledComputation: onFulfilledBlock.
 
-				whenResolvedPromises add: aResolvedPromise.
-				whenRejectedPromises add: aResolvedPromise.
+				chainedPromises add: aResolvedPromise.
 				^ aResolvedPromise ] ].
 
 	state isFulfilled
@@ -136,11 +164,11 @@ AsyncDeferredPromise >> then: onFulfilledBlock otherwise: onRejectedBlock [
 				| aDeferredPromise |
 
 				aDeferredPromise := AsyncChainedPromise new
+					previousPromise: self;
 					fulfilledComputation: onFulfilledBlock;
 					rejectedComputation: onRejectedBlock.
 
-				whenResolvedPromises add: aDeferredPromise.
-				whenRejectedPromises add: aDeferredPromise.
+				chainedPromises add: aDeferredPromise.
 				^ aDeferredPromise ] ].
 
 	state isFulfilled
@@ -161,4 +189,25 @@ AsyncDeferredPromise >> then: onFulfilledBlock otherwise: onRejectedBlock [
 				otherwise: onRejectedBlock ].
 
 	^ self error: ('Unexpected state: {1}' format: { state })
+]
+
+{ #category : #'api - promise' }
+AsyncDeferredPromise >> wait [
+	| aCurrentState aSemaphore anAwaitResult anAwaitError  |
+	
+	aSemaphore := Semaphore new.
+	anAwaitResult := anAwaitError := nil.
+	
+	aCurrentState := state.
+	self
+		then: [ :aResult |
+			anAwaitResult := aResult.
+			aSemaphore signal ]
+		otherwise: [ :anError |
+			anAwaitError := anError freeze.
+			aSemaphore signal ].
+	
+	aSemaphore wait.
+	anAwaitError ifNotNil: [ ^ anAwaitError ].
+	^ anAwaitResult
 ]

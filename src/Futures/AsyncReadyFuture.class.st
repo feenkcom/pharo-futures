@@ -52,6 +52,17 @@ AsyncReadyFuture >> postSimilarCopy [
 	takenValue := AsyncOptionalValue none
 ]
 
+{ #category : #printing }
+AsyncReadyFuture >> printOn: aStream [
+
+	"Append a sequence of characters to aStream that identify the receiver."
+
+	super printOn: aStream.
+	aStream
+		nextPutAll: ' value: ';
+		print: value
+]
+
 { #category : #'api - future' }
 AsyncReadyFuture >> takeOutput [
 	^ self

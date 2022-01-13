@@ -22,9 +22,29 @@ AsyncSharedOrderedCollection >> asArray [
 	^ monitor critical: [ collection asArray ]
 ]
 
+{ #category : #accessing }
+AsyncSharedOrderedCollection >> at: anIndex [
+	^ monitor critical: [ self privateAt: anIndex ]
+]
+
 { #category : #'mutual exclusion' }
 AsyncSharedOrderedCollection >> critical: aBlock [
 	^ monitor critical: aBlock
+]
+
+{ #category : #enumerating }
+AsyncSharedOrderedCollection >> detect: aBlock ifFound: aFoundBlock ifNone: aNoneBlock [
+	^ monitor critical: [
+		collection
+			detect: aBlock
+			ifFound: aFoundBlock
+			ifNone: aNoneBlock ]
+]
+
+{ #category : #enumerating }
+AsyncSharedOrderedCollection >> detectMin: aBlock [
+	^ monitor critical: [
+		collection detectMin: aBlock ]
 ]
 
 { #category : #enumerating }
@@ -55,6 +75,13 @@ AsyncSharedOrderedCollection >> privateAdd: anObject [
 ]
 
 { #category : #'private - adding / removing' }
+AsyncSharedOrderedCollection >> privateAt: anIndex [
+	^ collection
+		at: anIndex
+		ifAbsent: [ nil ]
+]
+
+{ #category : #'private - adding / removing' }
 AsyncSharedOrderedCollection >> privateRemoveAll [
 	collection removeAll
 ]
@@ -64,7 +91,19 @@ AsyncSharedOrderedCollection >> removeAll [
 	monitor critical: [ self privateRemoveAll ]
 ]
 
+{ #category : #enumerating }
+AsyncSharedOrderedCollection >> select: aBlock [ 
+	"Evaluate aBlock with each of the receiver's elements as the argument."
+
+	^ self asArray select: aBlock 
+]
+
 { #category : #accessing }
 AsyncSharedOrderedCollection >> size [
 	^ monitor critical: [ collection size ]
+]
+
+{ #category : #enumerating }
+AsyncSharedOrderedCollection >> sorted: aBlock [
+	^ self asArray sorted: aBlock
 ]

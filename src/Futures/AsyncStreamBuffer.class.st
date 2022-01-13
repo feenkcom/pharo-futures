@@ -16,7 +16,8 @@ Class {
 		'loadingPromise',
 		'pendingScanPromises',
 		'preloadAmount',
-		'preloadDuration'
+		'preloadDuration',
+		'executionConfiguration'
 	],
 	#category : #'Futures-Buffer'
 }
@@ -65,6 +66,11 @@ AsyncStreamBuffer >> bufferSnapshot [
 ]
 
 { #category : #initialization }
+AsyncStreamBuffer >> defaultExecutionConfiguration [
+	^ AsyncFutureExecutionConfiguration default
+]
+
+{ #category : #initialization }
 AsyncStreamBuffer >> defaultPreloadAmount [
 	^ 20
 ]
@@ -87,6 +93,18 @@ AsyncStreamBuffer >> do: aBlock [
 			aCurrentIndex := aCurrentIndex + 1 ]
 ]
 
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> executionConfiguration [
+
+	^ executionConfiguration
+]
+
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> executionConfiguration: anObject [
+
+	executionConfiguration := anObject
+]
+
 { #category : #initialization }
 AsyncStreamBuffer >> initialize [
 	super initialize.
@@ -97,7 +115,8 @@ AsyncStreamBuffer >> initialize [
 	loadingPromise := nil.
 	pendingScanPromises := OrderedCollection new.
 	preloadAmount := self defaultPreloadAmount.
-	preloadDuration := self defaultPreloadDuration
+	preloadDuration := self defaultPreloadDuration.
+	executionConfiguration := self defaultExecutionConfiguration
 ]
 
 { #category : #testing }
@@ -163,7 +182,7 @@ AsyncStreamBuffer >> privateLoadNewItems [
 	^ monitor critical: [ 
 		loadingPromise
 			ifNotNil: [ ^ loadingPromise ].
-		loadingPromise := ((stream for: preloadDuration) take: preloadAmount) toArray asAsyncPromise
+		loadingPromise := (AsyncFuturePromise new future: ((stream for: preloadDuration) take: preloadAmount) toArray configuration: executionConfiguration)
 			then: [ :newItems | newItems ifNotEmpty:  [ self privateOnItemsLoaded: newItems ] ]
 			otherwise: [ :anException | monitor critical: [
 				"Logging the error on the transcript only shows the exception, not where it came from.
