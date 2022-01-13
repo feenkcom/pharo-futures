@@ -209,10 +209,10 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 ]
 
 { #category : #'private - process' }
-AsyncFutureThreadPoolWorker >> privateRejectCancelledPendingFuture: aAsyncPendingFuturePromise signalling: aSemaphore [
+AsyncFutureThreadPoolWorker >> privateRejectCancelledPendingFuture: anAsyncPendingFuturePromise signalling: aSemaphore [
 	"Error handling is a user code that we should handle"
-
-	[ aAsyncPendingFuturePromise rejectWithCancellation ]
+	
+	[ anAsyncPendingFuturePromise rejectWithCancellation ]
 		on: Error
 		do: [ :anError |
 			aSemaphore signal.
@@ -372,14 +372,12 @@ AsyncFutureThreadPoolWorker >> threadPool: anAsyncFutureThreadPool [
 
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> unschedule: anAsyncPendingFuturePromise [
-	monitor critical: [
-		self privateUnschedule: anAsyncPendingFuturePromise.
-		currentTask
-			ifSome: [ :aPendingTask |
-				aPendingTask task == anAsyncPendingFuturePromise
-					ifTrue: [ ^ self ] ] ].
+	"if it was in the local queue it means that the worker didn't start to process it yet"
+	(localQueue pop: anAsyncPendingFuturePromise)
+		ifNotNil: [ :aPromise | ^ aPromise rejectWithCancellation ].
 
-	anAsyncPendingFuturePromise rejectWithCancellation
+	"if the promise is not in the local queue, it means that it is being executed or is about to be executed"
+	self privateUnschedule: anAsyncPendingFuturePromise
 ]
 
 { #category : #'api - lifecycle' }
