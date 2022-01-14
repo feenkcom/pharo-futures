@@ -179,11 +179,16 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 AsyncStreamBuffer >> privateLoadNewItems [
 	<return: #TAsyncPromise>
 
-	^ monitor critical: [ 
+	^ monitor critical: [
 		loadingPromise
 			ifNotNil: [ ^ loadingPromise ].
-		loadingPromise := (AsyncFuturePromise new future: ((stream for: preloadDuration) take: preloadAmount) toArray configuration: executionConfiguration)
-			then: [ :newItems | newItems ifNotEmpty:  [ self privateOnItemsLoaded: newItems ] ]
+
+		"Watch out! We must first assign the promise and only then handle then:otherwise:"
+		(self setLoadingPromise: (((stream for: preloadDuration) take: preloadAmount) toArray await: executionConfiguration))
+			then: [ :newItems |
+				newItems
+					ifNotEmpty:  [ self privateOnItemsLoaded: newItems ]
+					ifEmpty: [ self setLoadingPromise: nil ] ]
 			otherwise: [ :anException | monitor critical: [
 				"Logging the error on the transcript only shows the exception, not where it came from.
 				Emit the exception as well so that it can be found with a beacon logger (which includes the stack)."
@@ -195,7 +200,7 @@ AsyncStreamBuffer >> privateLoadNewItems [
 						nextPutAll: (String
 							streamContents: [ :aStream | anException signalerContext errorReportOn: aStream ]); cr ] ].
 
-				loadingPromise := nil ] ]
+				self setLoadingPromise: nil ] ]
 ]
 
 { #category : #private }
@@ -206,7 +211,8 @@ AsyncStreamBuffer >> privateOnItemsLoaded: theNewItems [
 		aPreviousBufferSize := buffer size.
 
 		buffer addAll: theNewItems.
-		loadingPromise := nil.
+		
+		self setLoadingPromise: nil.
 
 		pendingScanPromises := pendingScanPromises reject: [ :eachPendingScanAssociation |
 			| eachScanPromise eachScanBlock eachItemFound eachItemIndex |
@@ -227,6 +233,12 @@ AsyncStreamBuffer >> privateOnItemsLoaded: theNewItems [
 			eachItemFound ].
 		pendingScanPromises ifNotEmpty: [ self privateLoadNewItems ].
 		self announce: (AsyncStreamBufferChanged new newItems: theNewItems; index: aPreviousBufferSize + 1) ]
+]
+
+{ #category : #private }
+AsyncStreamBuffer >> setLoadingPromise: aPromise [
+	monitor critical: [ loadingPromise := aPromise ].
+	^ aPromise
 ]
 
 { #category : #'api - enumeration' }
