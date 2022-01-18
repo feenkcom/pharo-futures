@@ -1,7 +1,7 @@
 Class {
 	#name : #AsyncStreamExamples,
 	#superclass : #Object,
-	#category : #'Futures-Examples'
+	#category : #'Futures-Examples-Streams'
 }
 
 { #category : #documentation }

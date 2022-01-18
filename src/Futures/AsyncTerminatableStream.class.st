@@ -3,8 +3,10 @@
 Creates a new Terminatable stream. When {{gtMethod:AsyncTerminatableStream>>#terminate}} is sent to the terminatable stream, the stream will complete immediately without making any further progress. Please note, that if the {{gtMethod:AsyncTerminatableStream>>#terminate}} is sent while the stream is being polled, that stream will finish the current polling step.
  
 ##Example
+{{gtExample:AsyncStreamExamples>>#terminatable}} 
 
-{{gtExample:AsyncStreamExamples>>#terminatable}}
+###Implementation details
+Terminatable stream registers a waker to wake up the worker thread if the underlying stream returned a pending item.
 "
 Class {
 	#name : #AsyncTerminatableStream,
@@ -13,7 +15,8 @@ Class {
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
 		'stream',
-		'isTerminated'
+		'isTerminated',
+		'waker'
 	],
 	#category : #'Futures-Base - Streams'
 }
@@ -21,6 +24,13 @@ Class {
 { #category : #'instance creation' }
 AsyncTerminatableStream class >> forStream: anAsyncStream [
 	^ self new stream: anAsyncStream
+]
+
+{ #category : #initialization }
+AsyncTerminatableStream >> initialize [
+	super initialize.
+	
+	waker := AsyncFutureExecutionAtomicWaker new
 ]
 
 { #category : #'api - stream' }
@@ -32,9 +42,27 @@ AsyncTerminatableStream >> pollNext: anAsynchronousContext [
 	 - Poll::Ready(None) means that the stream has terminated, and poll_next should not be invoked again."
 	<return: #AsyncPoll>
 
-	^ isTerminated
-		ifTrue: [ AsyncPoll ready: AsyncOptionalValue none ]
-		ifFalse: [ stream pollNext: anAsynchronousContext ]
+	isTerminated
+		ifTrue: [ ^ AsyncPoll ready: AsyncOptionalValue none ].
+
+	(stream pollNext: anAsynchronousContext)
+		ifReady: [ :aReadyPoll | ^ aReadyPoll ].
+	
+	waker register: anAsynchronousContext waker.
+
+	isTerminated
+		ifTrue: [ ^ AsyncPoll ready: AsyncOptionalValue none ].
+	
+	^ AsyncPoll pending
+]
+
+{ #category : #'api - stream copy' }
+AsyncTerminatableStream >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	isTerminated := isTerminated copy.
+	waker := AsyncFutureExecutionAtomicWaker new.
+	stream := stream asyncSimilarCopy
 ]
 
 { #category : #initialization }
@@ -45,5 +73,6 @@ AsyncTerminatableStream >> stream: anAsyncStream [
 
 { #category : #'api - actions' }
 AsyncTerminatableStream >> terminate [
-	isTerminated := true
+	isTerminated := true.
+	waker wakeUp
 ]
