@@ -145,6 +145,9 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 			NonInteractiveTranscript stdout
 				nextPutAll: aPendingTask printString;
 				cr ].
+		"if the process is terminated, then there is no reason to wait for it even if the semaphore was not signalled "
+		isPending := isPending
+			and: [ currentTaskProcess isTerminated not ].
 		isPending ] whileTrue.
 
 	"At this point the promise is resolved"

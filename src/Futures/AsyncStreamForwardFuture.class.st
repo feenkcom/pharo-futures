@@ -38,6 +38,7 @@ AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 		bufferedItem ifSome: [ :anItem |
 			(aSink pollReady: anAsynchronousContext)
 				ifPending: [ :aPendingPoll | ^ aPendingPoll ].
+			bufferedItem := AsyncOptionalValue none.
 			aSink startSend: anItem ].
 		
 		(stream pollNext: anAsynchronousContext)

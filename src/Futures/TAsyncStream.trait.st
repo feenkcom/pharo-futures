@@ -11,6 +11,18 @@ Trait {
 }
 
 { #category : #'api - stream' }
+TAsyncStream >> asAsyncSink [
+	| aSink |
+
+	aSink := AsyncValueSink new.
+	(self forward: aSink) await
+		then: [ :aValue | ]
+		otherwise: [ :anError | anError debug ].
+		
+	^ aSink
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> asAsyncStream [
 	^ self
 ]
@@ -77,7 +89,7 @@ TAsyncStream >> flatten [
 	^ AsyncFlattenStream stream: self
 ]
 
-{ #category : #accessing }
+{ #category : #'api - stream' }
 TAsyncStream >> for: aDuration [
 	<return: #TAsyncStream>
 
