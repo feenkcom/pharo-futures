@@ -1,7 +1,7 @@
 Class {
 	#name : #AsyncPoll,
 	#superclass : #Object,
-	#category : 'Futures-Utilities'
+	#category : #'Futures-Utilities'
 }
 
 { #category : #accessing }
@@ -19,6 +19,13 @@ AsyncPoll >> ifPending: aPendingBlock [
 	^ self isReady
 		ifTrue: [ self ]
 		ifFalse: [ aPendingBlock cull: self ]
+]
+
+{ #category : #'operators-mapping' }
+AsyncPoll >> ifReady: aReadyBlock [
+	^ self isReady
+		ifTrue: [ aReadyBlock cull: self ]
+		ifFalse: [ self ]
 ]
 
 { #category : #'operators-mapping' }
