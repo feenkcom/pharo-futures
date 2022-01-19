@@ -1,7 +1,7 @@
 Class {
 	#name : #AsyncSinkExamples,
 	#superclass : #Object,
-	#category : #'Futures-Examples'
+	#category : #'Futures-Examples-Sinks'
 }
 
 { #category : #examples }
@@ -86,6 +86,21 @@ AsyncSinkExamples >> fanoutSink [
 ]
 
 { #category : #examples }
+AsyncSinkExamples >> foldSink [
+	<gtExample>
+	| stream sink |
+	
+	stream := (1 to: 5) asAsyncStream.
+
+	sink := AsyncFoldSink fold: [ :sum :each | sum + each ].
+	(sink sendAll: stream) wait.
+
+	self assert: sink value equals: 1 + 2 + 3 + 4 + 5.
+
+	^ sink
+]
+
+{ #category : #examples }
 AsyncSinkExamples >> groupBySink [
 	<gtExample>
 	| stream even odd sink |
@@ -105,5 +120,35 @@ AsyncSinkExamples >> groupBySink [
 	self assert: even collection equals: { 2. 4. 6. 8. 10 } asOrderedCollection.
 	self assert: odd collection equals: { 1. 3. 5. 7. 9 } asOrderedCollection.
 	
+	^ sink
+]
+
+{ #category : #examples }
+AsyncSinkExamples >> injectIntoSink [
+	<gtExample>
+	| stream sink |
+	
+	stream := (1 to: 5) asAsyncStream.
+	
+	sink := AsyncFoldSink inject: 0 into: [ :sum :each | sum + each ].
+	(sink sendAll: stream) wait.
+
+	self assert: sink value equals: 1 + 2 + 3 + 4 + 5.
+	
+	^ sink
+]
+
+{ #category : #examples }
+AsyncSinkExamples >> peakSink [
+	<gtExample>
+	| stream sink |
+	
+	stream := (1 to: 5) asAsyncStream.
+
+	sink := AsyncPeakSink new.
+	(sink sendAll: stream) wait.
+
+	self assert: sink value equals: 5.
+
 	^ sink
 ]

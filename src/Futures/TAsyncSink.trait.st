@@ -54,7 +54,7 @@ TAsyncSink >> pollClose: anAsynchronousContext [
 	If this function encounters an error, the sink should be considered to have failed permanently, and no more Sink methods should be called."
 	<return: #AsyncPoll>
 	
-	^ self explicitRequirement
+	^ AsyncPoll ready: true
 ]
 
 { #category : #'api - sink' }
@@ -65,7 +65,7 @@ TAsyncSink >> pollFlush: anAsynchronousContext [
 	In most cases, if the sink encounters an error, the sink will permanently be unable to receive items."
 	<return: #AsyncPoll>
 
-	^ self explicitRequirement
+	^ AsyncPoll ready: true
 ]
 
 { #category : #'api - sink' }
@@ -76,7 +76,7 @@ TAsyncSink >> pollReady: anAsynchronousContext [
 	In most cases, if the sink encounters an error, the sink will permanently be unable to receive items."
 	<return: #AsyncPoll>
 	
-	^ self explicitRequirement
+	^ AsyncPoll ready: true
 ]
 
 { #category : #'api - sink' }
