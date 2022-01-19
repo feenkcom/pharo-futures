@@ -6,7 +6,9 @@ Class {
 	#instVars : [
 		'item',
 		'waker',
-		'sinks'
+		'sinks',
+		'promise',
+		'stream'
 	],
 	#category : #'Futures-Base - Synthesis'
 }
@@ -71,7 +73,7 @@ AsyncObservableValue >> observe [
 
 { #category : #'api - obervable' }
 AsyncObservableValue >> observe: anAsyncSink [
-	"Use provided sink as an observer instead of creating a new one"
+	"Use provided sink as a weak observer"
 	<return: #TAsyncSink>
 	| anObserver |
 
@@ -91,9 +93,7 @@ AsyncObservableValue >> pollClose: anAsynchronousContext [
 	| isReady |
 	
 	isReady := true.
-	sinks
-		select: [ :eachSink | eachSink notNil ]
-		thenDo: [ :eachSink | isReady := (eachSink pollClose: anAsynchronousContext) isReady and: [ isReady ] ].	
+	self privateSinksDo: [ :eachSink | isReady := (eachSink pollClose: anAsynchronousContext) isReady and: [ isReady ] ].	
 	
 	^ isReady
 		ifTrue: [ AsyncPoll ready: true ]
@@ -110,9 +110,7 @@ AsyncObservableValue >> pollFlush: anAsynchronousContext [
 	| isReady |
 	
 	isReady := true.
-	sinks
-		select: [ :eachSink | eachSink notNil ]
-		thenDo: [ :eachSink | isReady := (eachSink pollFlush: anAsynchronousContext) isReady and: [ isReady ] ].	
+	self privateSinksDo: [ :eachSink | isReady := (eachSink pollFlush: anAsynchronousContext) isReady and: [ isReady ] ].	
 	^ isReady
 		ifTrue: [ AsyncPoll ready: true ]
 		ifFalse: [ AsyncPoll pending ]
@@ -144,9 +142,7 @@ AsyncObservableValue >> pollReady: anAsynchronousContext [
 	| isReady |
 	
 	isReady := true.
-	sinks
-		select: [ :eachSink | eachSink notNil ]
-		thenDo: [ :eachSink | isReady := (eachSink pollReady: anAsynchronousContext) isReady and: [ isReady ] ].	
+	self privateSinksDo: [ :eachSink | isReady := (eachSink pollReady: anAsynchronousContext) isReady and: [ isReady ] ].	
 	^ isReady
 		ifTrue: [ AsyncPoll ready: true ]
 		ifFalse: [ AsyncPoll pending ]
@@ -161,9 +157,16 @@ AsyncObservableValue >> postSimilarCopy [
 	sinks := AsyncSharedWeakOrderedCollection new
 ]
 
+{ #category : #private }
+AsyncObservableValue >> privateSinksDo: aBlock [
+	sinks do: [ :eachSinkReference |
+		eachSinkReference ifNotNil: aBlock ]
+]
+
 { #category : #initialization }
 AsyncObservableValue >> setupStream: aStream [
-	((AsyncWeakStream forStream: aStream) forward: self) await
+	stream := aStream.
+	(promise := ((AsyncWeakStream forStream: aStream) forward: self) await)
 		"Do not use block closures here, otherwise it will start to leak"
 		then: #yourself
 		otherwise: #debug
@@ -182,9 +185,7 @@ AsyncObservableValue >> startSend: anObject [
 	In most cases, if the sink encounters an error, the sink will permanently be unable to receive items."
 
 	self value: anObject.
-	sinks
-		select: [ :eachSink | eachSink notNil ]
-		thenDo: [ :eachSink | eachSink startSend: anObject ]
+	self privateSinksDo: [ :eachSink | eachSink startSend: anObject ]
 ]
 
 { #category : #'api - obervable' }
