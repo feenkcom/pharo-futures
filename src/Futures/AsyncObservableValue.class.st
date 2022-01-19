@@ -91,7 +91,10 @@ AsyncObservableValue >> pollClose: anAsynchronousContext [
 	| isReady |
 	
 	isReady := true.
-	sinks do: [ :eachSink | isReady := (eachSink pollClose: anAsynchronousContext) isReady and: [ isReady ] ].	
+	sinks
+		select: [ :eachSink | eachSink notNil ]
+		thenDo: [ :eachSink | isReady := (eachSink pollClose: anAsynchronousContext) isReady and: [ isReady ] ].	
+	
 	^ isReady
 		ifTrue: [ AsyncPoll ready: true ]
 		ifFalse: [ AsyncPoll pending ]
@@ -107,7 +110,9 @@ AsyncObservableValue >> pollFlush: anAsynchronousContext [
 	| isReady |
 	
 	isReady := true.
-	sinks do: [ :eachSink | isReady := (eachSink pollFlush: anAsynchronousContext) isReady and: [ isReady ] ].	
+	sinks
+		select: [ :eachSink | eachSink notNil ]
+		thenDo: [ :eachSink | isReady := (eachSink pollFlush: anAsynchronousContext) isReady and: [ isReady ] ].	
 	^ isReady
 		ifTrue: [ AsyncPoll ready: true ]
 		ifFalse: [ AsyncPoll pending ]
@@ -139,7 +144,9 @@ AsyncObservableValue >> pollReady: anAsynchronousContext [
 	| isReady |
 	
 	isReady := true.
-	sinks do: [ :eachSink | isReady := (eachSink pollReady: anAsynchronousContext) isReady and: [ isReady ] ].	
+	sinks
+		select: [ :eachSink | eachSink notNil ]
+		thenDo: [ :eachSink | isReady := (eachSink pollReady: anAsynchronousContext) isReady and: [ isReady ] ].	
 	^ isReady
 		ifTrue: [ AsyncPoll ready: true ]
 		ifFalse: [ AsyncPoll pending ]
@@ -175,7 +182,9 @@ AsyncObservableValue >> startSend: anObject [
 	In most cases, if the sink encounters an error, the sink will permanently be unable to receive items."
 
 	self value: anObject.
-	sinks do: [ :eachSink | eachSink startSend: anObject ]
+	sinks
+		select: [ :eachSink | eachSink notNil ]
+		thenDo: [ :eachSink | eachSink startSend: anObject ]
 ]
 
 { #category : #'api - obervable' }
