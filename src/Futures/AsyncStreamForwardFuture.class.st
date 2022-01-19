@@ -27,11 +27,18 @@ AsyncStreamForwardFuture class >> forStream: anAsynStream sink: anAsyncSink [
 { #category : #'api - future' }
 AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 	<return: #AsyncPoll>
-	| aSink |
+	| aWeakSink aSink |
 	
-	aSink := sink
+	aWeakSink := sink
 		ifSome: #yourself
 		ifNone: [ self error: 'Polled Forward after completion' ].
+
+	aSink := (aWeakSink at: 1)
+		"Sink was garbage collected"
+		ifNil: [
+			bufferedItem := AsyncOptionalValue none.
+			sink := AsyncOptionalValue none.
+			^ AsyncPoll ready: true ].
 
 	[ 
 		"If we've got an item buffered already, we need to write it to the sink before we can do anything else"
@@ -60,6 +67,6 @@ AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 { #category : #initialization }
 AsyncStreamForwardFuture >> stream: anAsynStream sink: anAsyncSink [
 	stream := AsyncFuseStream forStream: anAsynStream.
-	sink := AsyncOptionalValue some: anAsyncSink.
+	sink := AsyncOptionalValue some: anAsyncSink asWeakReference.
 	bufferedItem := AsyncOptionalValue none
 ]

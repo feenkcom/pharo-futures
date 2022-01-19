@@ -11,15 +11,8 @@ Trait {
 }
 
 { #category : #'api - stream' }
-TAsyncStream >> asAsyncSink [
-	| aSink |
-
-	aSink := AsyncValueSink new.
-	(self forward: aSink) await
-		then: [ :aValue | ]
-		otherwise: [ :anError | anError debug ].
-		
-	^ aSink
+TAsyncStream >> asAsyncObservable [
+	^ AsyncObservableValue observe: self
 ]
 
 { #category : #'api - stream' }
@@ -111,6 +104,7 @@ TAsyncStream >> forEach: aBlock [
 TAsyncStream >> forward: anAsyncSink [
 	"A future that completes after this stream has been fully processed into the sink and the sink has been flushed and closed.
 	This future will drive the stream to keep producing items until it is exhausted, sending each item to the sink.
+	The future references the Sink weakly and will stop polling the stream.
 	It will complete once the stream is exhausted, the sink has received and flushed all items, and the sink is closed."
 	<return: #TAsyncFuture>
 
