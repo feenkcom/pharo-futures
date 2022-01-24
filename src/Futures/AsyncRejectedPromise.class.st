@@ -24,7 +24,7 @@ AsyncRejectedPromise >> error [
 { #category : #'private - accessing' }
 AsyncRejectedPromise >> error: anError [
 	anError signalContext
-		ifNotNil: [ anError freeze ].
+		ifNotNil: [ anError copy freeze ].
 	error := anError
 ]
 
