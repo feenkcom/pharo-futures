@@ -111,7 +111,7 @@ AsyncDeferredPromise >> rejectWithTransformedError: anError [
 		self
 			assert: [ state isPending ]
 			description: [ 'Promise must be pending, but was ', state printString ].
-		state := (AsyncRejectedPromiseState new error: anError freeze).
+		state := (AsyncRejectedPromiseState new error: anError copy freeze).
 		theRejectionPromises := chainedPromises.
 		chainedPromises := self newChainedPromises ].
 
