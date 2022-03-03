@@ -180,6 +180,7 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 	
 	[ [ [
 		| aFutureResult |
+		(BrFuturePolledSignal new queue: localQueue copy; worker: self workerProcessName; pendingQueue: pendingQueue size) emit.
 		aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
 
 		"we must `return` the result before signalling the semaphore, otherwise the waiting process will continue before result is return from the method"
