@@ -96,6 +96,12 @@ AsyncFutureThreadPoolWorker >> isShuttingDown [
 AsyncFutureThreadPoolWorker >> maintanance [
 ]
 
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> pendingQueueSize [
+	
+	^ pendingQueue size
+]
+
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> priority [
 	<return: #AsyncFutureExecutionPriority>
