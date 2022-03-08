@@ -1,6 +1,11 @@
 Extension { #name : #SharedQueue }
 
 { #category : #'*Futures' }
+SharedQueue >> itemArray [
+	^ monitor critical: [ items asArray ]
+]
+
+{ #category : #'*Futures' }
 SharedQueue >> nextAllOrEmpty [
 	^ monitor critical: [
 		items

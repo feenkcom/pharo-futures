@@ -61,6 +61,11 @@ TAsyncFuture >> await: anExecutionSpecification [
 ]
 
 { #category : #'api - future' }
+TAsyncFuture >> delayed: aDuration [
+	^ AsyncDelayedFuture forFuture: self delay: aDuration
+]
+
+{ #category : #'api - future' }
 TAsyncFuture >> flatten [
 	"Flatten the execution of this future when the output of this future is itself another future.
 	This can be useful when combining futures together to flatten the computation out the final result."
