@@ -172,6 +172,43 @@ AsyncStreamExamples >> fuse [
 	^ result
 ]
 
+{ #category : #accessing }
+AsyncStreamExamples >> iterator [
+
+	<gtExample>
+	| iterator iterated |
+	iterator := self iteratorStream.
+
+	iterated := (iterator to: Array) wait.
+	self assert: iterated equals: { 
+			$h.
+			$e.
+			$l.
+			$l.
+			$o.
+			$,.
+			Character space.
+			$f.
+			$r.
+			$i.
+			$e.
+			$n.
+			$d.
+			$! }.
+	^ iterator
+]
+
+{ #category : #accessing }
+AsyncStreamExamples >> iteratorStream [
+
+	<gtExample>
+	| stream |
+	stream := AsyncIteratorStream forIterator:
+		          'hello, friend!' asRopedText iterator.
+
+	^ stream
+]
+
 { #category : #examples }
 AsyncStreamExamples >> map [
 	<gtExample>
