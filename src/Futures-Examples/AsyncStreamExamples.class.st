@@ -195,7 +195,7 @@ AsyncStreamExamples >> iterator [
 			$n.
 			$d.
 			$! }.
-	^ iterator
+	^ iterated
 ]
 
 { #category : #accessing }
