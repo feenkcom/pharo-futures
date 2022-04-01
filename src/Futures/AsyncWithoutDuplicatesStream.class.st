@@ -5,7 +5,8 @@ Class {
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
 		'stream',
-		'seenItems'
+		'seenItems',
+		'comparisonBlock'
 	],
 	#category : #'Futures-Base - Streams'
 }
@@ -13,6 +14,16 @@ Class {
 { #category : #'instance creation' }
 AsyncWithoutDuplicatesStream class >> forStream: anAsyncStream [
 	^ self new stream: anAsyncStream
+]
+
+{ #category : #'instance creation' }
+AsyncWithoutDuplicatesStream class >> forStream: anAsyncStream basedOn: aBlock [
+	^ self new stream: anAsyncStream; comparisonBlock: aBlock
+]
+
+{ #category : #accessing }
+AsyncWithoutDuplicatesStream >> comparisonBlock: aBlock [
+	comparisonBlock := aBlock
 ]
 
 { #category : #'api - stream' }
@@ -29,9 +40,11 @@ AsyncWithoutDuplicatesStream >> pollNext: anAsynchronousContext [
 			ifReady: [ :aReadyPoll |
 				aReadyPoll value
 					ifSome: [ :aValue |
-						(seenItems includes: aValue)
+						| compareValue |
+						compareValue := comparisonBlock ifNil: [ aValue ] ifNotNil: [ comparisonBlock value: aValue ].
+						(seenItems includes: compareValue)
 							ifFalse: [
-								seenItems add: aValue.
+								seenItems add: compareValue.
 								^ aReadyPoll ] ]
 					ifNone: [
 						seenItems := nil.
