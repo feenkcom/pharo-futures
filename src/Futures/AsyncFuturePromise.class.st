@@ -34,3 +34,8 @@ AsyncFuturePromise >> future: anAsyncFuture configuration: anExecutionConfigurat
 AsyncFuturePromise >> rejectWithError: anError [
 	self rejectWithTransformedError: anError
 ]
+
+{ #category : #accessing }
+AsyncFuturePromise >> relatedFutures [
+	^ { future }
+]
