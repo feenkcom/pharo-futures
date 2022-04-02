@@ -13,3 +13,12 @@ AsyncFutureExecutionGroup >> isUnspecified [
 AsyncFutureExecutionGroup >> label [
 	^ self subclassResponsibility
 ]
+
+{ #category : #printing }
+AsyncFutureExecutionGroup >> printOn: aStream [
+	super printOn: aStream.
+	aStream	
+		<< '(';
+		<< self label;
+		<< ')' 
+]
