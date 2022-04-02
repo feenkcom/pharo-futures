@@ -301,3 +301,8 @@ TAsyncStream >> withIndexMap: aMapBlock [
 TAsyncStream >> withoutDuplicates [
 	^ AsyncWithoutDuplicatesStream forStream: self
 ]
+
+{ #category : #'api - stream' }
+TAsyncStream >> withoutDuplicatesBasedOn: aBlock [
+	^ AsyncWithoutDuplicatesStream forStream: self basedOn: aBlock
+]
