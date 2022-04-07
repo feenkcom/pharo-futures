@@ -40,3 +40,8 @@ AsyncDelayedFuture >> poll: anAsynchronousContext [
 	
 		ifFalse: [ ^ future poll: anAsynchronousContext ]
 ]
+
+{ #category : #private }
+AsyncDelayedFuture >> waitDuration [
+	^ DateAndTime now - (startTime ifNil:[ DateAndTime now ])
+]

@@ -28,6 +28,11 @@ TAsyncPromise >> isAsyncPromise [
 	^ true
 ]
 
+{ #category : #'accessing - utils' }
+TAsyncPromise >> relatedFutures [
+	^ #()
+]
+
 { #category : #'api - promise' }
 TAsyncPromise >> then: onFulfilledBlock [
 

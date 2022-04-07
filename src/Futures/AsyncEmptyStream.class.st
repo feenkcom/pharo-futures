@@ -8,7 +8,7 @@ Class {
 	#superclass : #Object,
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'api - stream' }
@@ -21,6 +21,10 @@ AsyncEmptyStream >> pollNext: anAsynchronousContext [
 	<return: #AsyncPoll>
 
 	^ AsyncPoll ready: AsyncOptionalValue none
+]
+
+{ #category : #'api - stream copy' }
+AsyncEmptyStream >> postSimilarCopy [
 ]
 
 { #category : #'api - stream' }

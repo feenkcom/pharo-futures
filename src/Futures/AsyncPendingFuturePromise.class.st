@@ -132,6 +132,11 @@ AsyncPendingFuturePromise >> rejectWithError: anError [
 ]
 
 { #category : #accessing }
+AsyncPendingFuturePromise >> relatedFutures [
+	^ { future }
+]
+
+{ #category : #accessing }
 AsyncPendingFuturePromise >> worker [
 
 	^ worker
