@@ -34,7 +34,7 @@ AsyncBehaviorInstanceTraitedMethodsStream >> behavior [
 { #category : #initialization }
 AsyncBehaviorInstanceTraitedMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
-	stream := AsyncSequenceStream forCollection: [ behavior selectors ] asAsyncFuture
+	stream := AsyncSequenceStream forCollection: [ behavior methods ] asAsyncFuture
 ]
 
 { #category : #comparing }
@@ -57,12 +57,7 @@ AsyncBehaviorInstanceTraitedMethodsStream >> pollNext: anAsynchronousContext [
 	stream ifNil: [
 		^ AsyncPoll ready: AsyncOptionalValue none ].
 	
-	^ (stream pollNext: anAsynchronousContext)
-		map: [ :aSelectorOption |
-			aSelectorOption map: [ :aSelector |
-				behavior
-					compiledMethodAt: aSelector
-					ifAbsent: [ ^ AsyncPoll pending ] ] ]
+	^ stream pollNext: anAsynchronousContext
 ]
 
 { #category : #'api - stream copy' }
