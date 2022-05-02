@@ -17,7 +17,9 @@ Class {
 		'pendingScanPromises',
 		'preloadAmount',
 		'preloadDuration',
-		'executionConfiguration'
+		'executionConfiguration',
+		'loadSinglesUntil',
+		'loadedItems'
 	],
 	#category : #'Futures-Buffer'
 }
@@ -71,6 +73,11 @@ AsyncStreamBuffer >> defaultExecutionConfiguration [
 ]
 
 { #category : #initialization }
+AsyncStreamBuffer >> defaultLoadSinglesUntil [
+	^ 0
+]
+
+{ #category : #initialization }
 AsyncStreamBuffer >> defaultPreloadAmount [
 	^ 20
 ]
@@ -116,7 +123,9 @@ AsyncStreamBuffer >> initialize [
 	pendingScanPromises := OrderedCollection new.
 	preloadAmount := self defaultPreloadAmount.
 	preloadDuration := self defaultPreloadDuration.
-	executionConfiguration := self defaultExecutionConfiguration
+	executionConfiguration := self defaultExecutionConfiguration.
+	loadSinglesUntil := self defaultLoadSinglesUntil.
+	loadedItems := 0.
 ]
 
 { #category : #testing }
@@ -124,6 +133,21 @@ AsyncStreamBuffer >> isDone [
 	"Return true if there are no more items to poll"
 
 	^ monitor critical: [ stream isDone ]
+]
+
+{ #category : #accessing }
+AsyncStreamBuffer >> loadSinglesUntil [
+	^ loadSinglesUntil
+]
+
+{ #category : #accessing }
+AsyncStreamBuffer >> loadSinglesUntil: aNumber [
+	loadSinglesUntil := aNumber
+]
+
+{ #category : #accessing }
+AsyncStreamBuffer >> loadedItems [
+	^ loadedItems
 ]
 
 { #category : #'api - accessing' }
@@ -177,30 +201,40 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 
 { #category : #private }
 AsyncStreamBuffer >> privateLoadNewItems [
+
 	<return: #TAsyncPromise>
+	| toLoad |
+	^ monitor critical: [ 
+		  loadingPromise ifNotNil: [ ^ loadingPromise ].
+		  self announce: AsyncStreamBufferStartedLoading new.
 
-	^ monitor critical: [
-		loadingPromise
-			ifNotNil: [ ^ loadingPromise ].
-
-		"Watch out! We must first assign the promise and only then handle then:otherwise:"
-		(self setLoadingPromise: (((stream for: preloadDuration) take: preloadAmount) toArray await: executionConfiguration))
-			then: [ :newItems |
-				newItems
-					ifNotEmpty:  [ self privateOnItemsLoaded: newItems ]
-					ifEmpty: [ self setLoadingPromise: nil ] ]
-			otherwise: [ :anException | monitor critical: [
-				"Logging the error on the transcript only shows the exception, not where it came from.
+		  "Watch out! We must first assign the promise and only then handle then:otherwise:"
+		  toLoad := loadedItems < loadSinglesUntil
+			            ifTrue: [ 1 ]
+			            ifFalse: [ preloadAmount ].
+		  (self setLoadingPromise:
+			   (((stream for: preloadDuration) take: toLoad) toArray await:
+				    executionConfiguration))
+			  then: [ :newItems | 
+				  loadedItems := loadedItems + newItems size.
+				  newItems
+					  ifNotEmpty: [ self privateOnItemsLoaded: newItems ]
+					  ifEmpty: [ self setLoadingPromise: nil ] ]
+			  otherwise: [ :anException | 
+				  monitor critical: [ "Logging the error on the transcript only shows the exception, not where it came from.
 				Emit the exception as well so that it can be found with a beacon logger (which includes the stack)."
-				anException emit.
-				Smalltalk logStdOutDuring: [ :aLogger |
-					aLogger
-						nextPutAll: '*** EXCEPTION ***'; cr;
-						nextPutAll: anException printString; cr;
-						nextPutAll: (String
-							streamContents: [ :aStream | anException signalerContext errorReportOn: aStream ]); cr ] ].
+					  anException emit.
+					  Smalltalk logStdOutDuring: [ :aLogger | 
+						  aLogger
+							  nextPutAll: '*** EXCEPTION ***';
+							  cr;
+							  nextPutAll: anException printString;
+							  cr;
+							  nextPutAll: (String streamContents: [ :aStream | 
+										   anException signalerContext errorReportOn: aStream ]);
+							  cr ] ].
 
-				self setLoadingPromise: nil ] ]
+				  self setLoadingPromise: nil ] ]
 ]
 
 { #category : #private }
@@ -237,7 +271,10 @@ AsyncStreamBuffer >> privateOnItemsLoaded: theNewItems [
 
 { #category : #private }
 AsyncStreamBuffer >> setLoadingPromise: aPromise [
-	monitor critical: [ loadingPromise := aPromise ].
+
+	monitor critical: [ 
+		loadingPromise := aPromise.
+		stream isDone ifTrue: [ self announce: AsyncStreamBufferDone new ] ].
 	^ aPromise
 ]
 
