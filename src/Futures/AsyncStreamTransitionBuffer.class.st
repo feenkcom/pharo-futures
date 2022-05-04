@@ -12,7 +12,8 @@ Class {
 		'newBuffer',
 		'preloadAmount',
 		'preloadDuration',
-		'executionConfiguration'
+		'executionConfiguration',
+		'loadSinglesUntil'
 	],
 	#category : #'Futures-Buffer'
 }
@@ -77,11 +78,13 @@ AsyncStreamTransitionBuffer >> size [
 AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuffer [
 	previousItems := anAsyncStreamBuffer bufferSnapshot.
 	preloadAmount := anAsyncStreamBuffer preloadAmount.
+	loadSinglesUntil := anAsyncStreamBuffer loadSinglesUntil.
 	preloadDuration := anAsyncStreamBuffer preloadDuration.
 	executionConfiguration := anAsyncStreamBuffer executionConfiguration.
 
 	newBuffer := AsyncStreamBuffer new
 		preloadAmount: (previousItems size max: preloadAmount);
+		loadSinglesUntil: loadSinglesUntil;
 		preloadDuration: 1 minute;
 		executionConfiguration: executionConfiguration;
 		stream: aStream.
@@ -89,6 +92,7 @@ AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuff
 	newBuffer bufferLoadingPromise then: [
 		newBuffer
 			preloadAmount: preloadAmount;
+			loadSinglesUntil: loadSinglesUntil;
 			preloadDuration: preloadDuration ]
 ]
 
