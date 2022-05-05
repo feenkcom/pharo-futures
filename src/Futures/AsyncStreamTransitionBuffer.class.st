@@ -46,6 +46,16 @@ AsyncStreamTransitionBuffer >> executionConfiguration [
 ]
 
 { #category : #accessing }
+AsyncStreamTransitionBuffer >> loadSinglesUntil [
+	^ loadSinglesUntil
+]
+
+{ #category : #accessing }
+AsyncStreamTransitionBuffer >> loadSinglesUntil: aNumber [
+	loadSinglesUntil := aNumber
+]
+
+{ #category : #accessing }
 AsyncStreamTransitionBuffer >> newBuffer [
 	^ newBuffer
 ]
