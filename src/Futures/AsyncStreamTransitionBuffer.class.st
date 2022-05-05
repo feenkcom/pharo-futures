@@ -57,9 +57,21 @@ AsyncStreamTransitionBuffer >> preloadAmount [
 ]
 
 { #category : #accessing }
+AsyncStreamTransitionBuffer >> preloadAmount: aNumber [
+
+	preloadAmount := aNumber
+]
+
+{ #category : #accessing }
 AsyncStreamTransitionBuffer >> preloadDuration [
 
 	^ preloadDuration
+]
+
+{ #category : #accessing }
+AsyncStreamTransitionBuffer >> preloadDuration: aNumber [
+
+	preloadDuration := aNumber
 ]
 
 { #category : #'api - loading' }
