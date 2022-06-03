@@ -201,7 +201,6 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 
 { #category : #private }
 AsyncStreamBuffer >> privateLoadNewItems [
-
 	<return: #TAsyncPromise>
 	| toLoad |
 	^ monitor critical: [ 
