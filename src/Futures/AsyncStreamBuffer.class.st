@@ -281,8 +281,14 @@ AsyncStreamBuffer >> setLoadingPromise: aPromise [
 { #category : #'api - enumeration' }
 AsyncStreamBuffer >> size [
 	"Return the current buffer length"
+	| aBufferSize |
+	
+	aBufferSize := monitor critical: [ buffer size ].
 
-	^ monitor critical: [ buffer size ]
+	(stream isDone not and: [ aBufferSize isZero ])
+		ifTrue: [ self privateLoadNewItems ].
+
+	^ aBufferSize
 ]
 
 { #category : #initialization }
@@ -292,8 +298,7 @@ AsyncStreamBuffer >> stream: aStream [
 		assert: [ stream isNil ]
 		description: [ 'Stream must not be already initialized' ].
 
-	stream := AsyncFuseStream forStream: aStream.
-	self privateLoadNewItems
+	stream := AsyncFuseStream forStream: aStream
 ]
 
 { #category : #'api - announcer' }
