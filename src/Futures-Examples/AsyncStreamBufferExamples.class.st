@@ -10,7 +10,8 @@ AsyncStreamBufferExamples >> bufferOnLargeStream [
 	| aBuffer |
 
 	aBuffer := AsyncStreamBuffer new stream: (1 to: 10000) asAsyncStream.
-	"buffer tries to load the first batch of items immediately"
+	self assert: aBuffer size equals: 0.
+	"buffer tries to load the first batch of items only after accessing the #size or #at:"
 	aBuffer wait.
 
 	self assert: aBuffer size equals: 20.
