@@ -92,7 +92,6 @@ AsyncStreamTransitionBuffer >> preloadUntilFoundSuchThat: aBlock [
 { #category : #accessing }
 AsyncStreamTransitionBuffer >> size [
 	"Return the current buffer length"
-
 	^ previousItems size
 ]
 
@@ -111,7 +110,7 @@ AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuff
 		executionConfiguration: executionConfiguration;
 		stream: aStream.
 
-	newBuffer bufferLoadingPromise then: [
+	newBuffer privateLoadNewItems then: [
 		newBuffer
 			preloadAmount: preloadAmount;
 			loadSinglesUntil: loadSinglesUntil;
