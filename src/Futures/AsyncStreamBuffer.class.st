@@ -205,15 +205,12 @@ AsyncStreamBuffer >> privateLoadNewItems [
 	| toLoad |
 	^ monitor critical: [ 
 		  loadingPromise ifNotNil: [ ^ loadingPromise ].
-		  self announce: AsyncStreamBufferStartedLoading new.
 
 		  "Watch out! We must first assign the promise and only then handle then:otherwise:"
 		  toLoad := loadedItems < loadSinglesUntil
 			            ifTrue: [ 1 ]
 			            ifFalse: [ preloadAmount ].
-		  (self setLoadingPromise:
-			   (((stream for: preloadDuration) take: toLoad) toArray await:
-				    executionConfiguration))
+		  (self setLoadingPromise: (((stream for: preloadDuration) take: toLoad) toArray await: executionConfiguration))
 			  then: [ :newItems | 
 				  loadedItems := loadedItems + newItems size.
 				  newItems
@@ -273,7 +270,9 @@ AsyncStreamBuffer >> setLoadingPromise: aPromise [
 
 	monitor critical: [ 
 		loadingPromise := aPromise.
+		aPromise ifNotNil: [ self announce: (AsyncStreamBufferStartedLoading new bufferLoadingPromise: aPromise) ].
 		stream isDone ifTrue: [ self announce: AsyncStreamBufferDone new ] ].
+
 	^ aPromise
 ]
 

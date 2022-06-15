@@ -204,13 +204,8 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 			withException: anError
 			signalling: aSemaphore
 	] ]
-	on: UnhandledException do: [ :anUnhandledException |
-		self
-			privateRejectPendingFuture: aAsyncPendingFuturePromise
-			withException: anUnhandledException
-			signalling: aSemaphore.
-		anUnhandledException pass
-	] ]
+	"Unhandled exceptions are passed, they mean the system is now broken - we need a debugger"
+	on: UnhandledException do: [ :anUnhandledException | anUnhandledException pass ] ]
 	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
 	However, we should signal the semaphore to unblock the worker"
 	on: Exception do: [ :anException |

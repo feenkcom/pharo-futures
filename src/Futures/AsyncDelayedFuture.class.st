@@ -32,7 +32,7 @@ AsyncDelayedFuture >> poll: anAsynchronousContext [
 	
 	(DateAndTime now - startTime) < delay
 		ifTrue: [
-			BlTaskAtQueue default
+			TaskAtQueue default
 				schedule: [ anAsynchronousContext waker wakeUp ]
 				at: startTime + delay
 				entryIdentifier: self.

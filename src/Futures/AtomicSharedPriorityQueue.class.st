@@ -27,7 +27,7 @@ Internal Representation and Key Implementation Points.
 Class {
 	#name : #AtomicSharedPriorityQueue,
 	#superclass : #AtomicSharedQueue,
-	#category : #'Futures-Collections'
+	#category : #'Futures-Collections - Queue'
 }
 
 { #category : #accessing }
