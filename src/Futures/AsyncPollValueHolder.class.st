@@ -6,7 +6,7 @@ Class {
 		'value',
 		'polled'
 	],
-	#category : #'Futures-Collections'
+	#category : #'Futures-Collections - Value'
 }
 
 { #category : #controlling }

@@ -1,7 +1,7 @@
 Class {
 	#name : #AsyncSharedWeakOrderedCollection,
 	#superclass : #AsyncAbstractOrderedCollection,
-	#category : #'Futures-Collections'
+	#category : #'Futures-Collections - Ordered Collection'
 }
 
 { #category : #accessing }

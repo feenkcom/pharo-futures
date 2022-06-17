@@ -141,7 +141,7 @@ TaskAtQueue >> processNextEntry [
 		[ [ [ entry value ]
 			on: Error 
 			do: [ :ex |				
-				BlTaskAtErrorSignal new 
+				TaskAtErrorSignal new 
 					exception: ex;
 					task: entry;
 					message: 'Entry execution exception - continuing';
@@ -187,7 +187,7 @@ TaskAtQueue >> queueReaderLoop [
 			[ self processNextEntry ]
 				on: Error 
 				do: [ :anError |
-					BlTaskAtErrorSignal new 
+					TaskAtErrorSignal new 
 						exception: anError;
 						message: 'Reader loop error - restarting';
 						emit.

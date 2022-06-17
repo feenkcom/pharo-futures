@@ -5,7 +5,7 @@ Class {
 		'monitor',
 		'collection'
 	],
-	#category : #'Futures-Collections'
+	#category : #'Futures-Collections - Ordered Collection'
 }
 
 { #category : #accessing }

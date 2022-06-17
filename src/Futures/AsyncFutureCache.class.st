@@ -5,7 +5,7 @@ Class {
 		'monitor',
 		'value'
 	],
-	#category : #'Futures-Collections'
+	#category : #'Futures-Collections - Value'
 }
 
 { #category : #controlling }

@@ -5,7 +5,7 @@ Is a thread-safe {{gtClass:OrderedCollection}} that synchronises the api calls w
 Class {
 	#name : #AsyncSharedOrderedCollection,
 	#superclass : #AsyncAbstractOrderedCollection,
-	#category : #'Futures-Collections'
+	#category : #'Futures-Collections - Ordered Collection'
 }
 
 { #category : #accessing }

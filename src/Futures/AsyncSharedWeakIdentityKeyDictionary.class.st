@@ -5,7 +5,7 @@ Class {
 		'monitor',
 		'dictionary'
 	],
-	#category : #'Futures-Collections'
+	#category : #'Futures-Collections - Dictionary'
 }
 
 { #category : #accessing }
