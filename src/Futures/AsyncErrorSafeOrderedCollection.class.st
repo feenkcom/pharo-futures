@@ -1,7 +1,7 @@
 Class {
 	#name : #AsyncErrorSafeOrderedCollection,
 	#superclass : #OrderedCollection,
-	#category : #'Futures-Collections'
+	#category : #'Futures-Collections - Ordered Collection'
 }
 
 { #category : #accessing }
