@@ -55,8 +55,8 @@ AsyncPendingFuturePromise >> critical: aBlock [
 { #category : #'private - state' }
 AsyncPendingFuturePromise >> fulfillWithValue: aValue [
 	self critical: [
-		"The future is cancelled, ignore the result"
-		executionState isCancelled
+		"The future is already fulfilled or rejected"
+		executionState isSuccess
 			ifTrue: [ ^ self ].
 
 		executionState := AsyncFutureExecutionSuccessfulState uniqueInstance ].
@@ -134,6 +134,13 @@ AsyncPendingFuturePromise >> rejectWithCancellation [
 
 { #category : #'private - state' }
 AsyncPendingFuturePromise >> rejectWithError: anError [
+	self critical: [
+		"The future is already fulfilled or rejected"
+		executionState isSuccess
+			ifTrue: [ ^ self ].
+
+		executionState := AsyncFutureExecutionSuccessfulState uniqueInstance ].
+
 	worker := nil.
 	self rejectWithTransformedError: anError
 ]
