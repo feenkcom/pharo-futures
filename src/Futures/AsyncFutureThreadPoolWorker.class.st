@@ -175,7 +175,9 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 { #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFuturePromise storingResultIn: aResultValueHolder signalling: aSemaphore [
 	"Errors are explicitly handled and frozen, exceptions are forked and passed"
-	| aWaker aContext |
+	| aWaker aContext wasRejected |
+	
+	wasRejected := false.
 	
 	aWaker := AsyncFutureThreadPoolWaker new
 		worker: self;
@@ -199,6 +201,7 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 		aSemaphore signal
 	]
 	on: Error do: [ :anError |
+		wasRejected := true.
 		self
 			privateRejectPendingFuture: aAsyncPendingFuturePromise
 			withException: anError
@@ -208,9 +211,9 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 	on: UnhandledException do: [ :anUnhandledException |
 		self
 			privateRejectPendingFuture: aAsyncPendingFuturePromise
-			withException: anUnhandledException
-			signalling: aSemaphore.
-		anUnhandledException pass ] ]
+			withUnhandledException: anUnhandledException
+			signalling: aSemaphore
+			ifRejected: wasRejected ] ]
 	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
 	However, we should signal the semaphore to unblock the worker"
 	on: Exception do: [ :anException |
@@ -244,6 +247,23 @@ AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePr
 	
 	"If rejecting error happened without problems we signal the semaphore normally"
 	aSemaphore signal
+]
+
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePromise withUnhandledException: anUnhandledException signalling: aSemaphore ifRejected: wasAlreadyRejected [
+	"Error handling is a user code that we should handle"
+
+	wasAlreadyRejected
+		"If promise was already rejected it means we already signalled a semaphore, do nothing here and just pass an error"
+		ifTrue: [ anUnhandledException pass ]
+		ifFalse: [
+			"If the promise is not rejected yet it means we didn't handle an error and this is our first try.
+			We give promise a chance to handle the error, if it does not work we pass."
+			[ aAsyncPendingFuturePromise rejectWithError: anUnhandledException ]
+				on: Error
+				do: [ :anError |
+					aSemaphore signal.
+					anError pass ] ]
 ]
 
 { #category : #'api - worker' }

@@ -16,6 +16,12 @@ AsyncFutureCancelled >> debug [
 		ifTrue: [ super debug ]
 ]
 
+{ #category : #accessing }
+AsyncFutureCancelled >> defaultAction [
+	"Do nothing, this is a special error that is injected into the stack of the process being cancelled.
+	We do not want to spawn a debugger on this error"
+]
+
 { #category : #handling }
 AsyncFutureCancelled >> freeze [
 	isSignalled

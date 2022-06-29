@@ -54,6 +54,13 @@ AsyncPendingFuturePromise >> critical: aBlock [
 
 { #category : #'private - state' }
 AsyncPendingFuturePromise >> fulfillWithValue: aValue [
+	self critical: [
+		"The future is cancelled, ignore the result"
+		executionState isCancelled
+			ifTrue: [ ^ self ].
+
+		executionState := AsyncFutureExecutionSuccessfulState uniqueInstance ].
+	
 	worker := nil.
 	self fulfillWithTransformedValue: aValue
 ]
