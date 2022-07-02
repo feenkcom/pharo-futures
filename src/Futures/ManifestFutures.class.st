@@ -19,6 +19,9 @@ ManifestFutures class >> mustOnlyDependOn [
 		'Collections-Streams'.
 		'Collections-Strings'.
 		'Collections-Unordered'.
+		'Collections-Weak'.
 		'Kernel'.
+		'System-Finalization'.
+		'Transcript-NonInteractive'
 	}
 ]
