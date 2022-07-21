@@ -210,7 +210,7 @@ AsyncStreamBuffer >> privateLoadNewItems [
 		  toLoad := loadedItems < loadSinglesUntil
 			            ifTrue: [ 1 ]
 			            ifFalse: [ preloadAmount ].
-		  (self setLoadingPromise: (((stream for: preloadDuration) take: toLoad) toArray await: executionConfiguration))
+		  ((self setLoadingPromise: (((stream for: preloadDuration) take: toLoad) toArray await: executionConfiguration))
 			  then: [ :newItems | 
 				  loadedItems := loadedItems + newItems size.
 				  newItems
@@ -230,7 +230,9 @@ AsyncStreamBuffer >> privateLoadNewItems [
 										   anException signalerContext errorReportOn: aStream ]);
 							  cr ] ].
 
-				  self setLoadingPromise: nil ] ]
+				  self setLoadingPromise: nil ])
+						then: [ "all good!" ]
+						otherwise: [ :anException | anException debug ] ]
 ]
 
 { #category : #private }
