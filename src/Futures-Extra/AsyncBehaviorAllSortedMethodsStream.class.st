@@ -37,7 +37,7 @@ AsyncBehaviorAllSortedMethodsStream >> behavior [
 AsyncBehaviorAllSortedMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
 	instanceStream := AsyncBehaviorInstanceTraitedSortedMethodsStream forBehavior: aBehavior.
-	classStream := AsyncBehaviorClassSortedMethodsStream forBehavior: aBehavior.
+	classStream := AsyncBehaviorClassTraitedSortedMethodsStream forBehavior: aBehavior.
 	currentStream := instanceStream
 ]
 

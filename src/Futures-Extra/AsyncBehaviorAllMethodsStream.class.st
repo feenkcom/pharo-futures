@@ -36,8 +36,9 @@ AsyncBehaviorAllMethodsStream >> behavior [
 { #category : #accessing }
 AsyncBehaviorAllMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
-	instanceStream := AsyncBehaviorInstanceTraitedMethodsStream forBehavior: aBehavior.
-	classStream := AsyncBehaviorClassMethodsStream forBehavior: aBehavior.
+	instanceStream := AsyncBehaviorInstanceTraitedMethodsStream
+			forBehavior: aBehavior.
+	classStream := AsyncBehaviorClassTraitedMethodsStream forBehavior: aBehavior.
 	currentStream := instanceStream
 ]
 
