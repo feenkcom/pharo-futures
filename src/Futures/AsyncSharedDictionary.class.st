@@ -45,6 +45,18 @@ AsyncSharedDictionary >> initialize [
 	dictionary := Dictionary new
 ]
 
+{ #category : #enumerating }
+AsyncSharedDictionary >> keysAndValuesDo: aBlock [
+	"
+	Evaluate aBlock for each of the receiver's keys and values. The block must accept two 
+	inputs, the first being the key and the second being the value. See keysDo: or valuesDo: 
+	if you only need to evaluate one or the other. Also see associationsDo: for a similar 
+	selector where the block accepts a single agrument.
+	"
+
+	monitor critical: [ dictionary keysAndValuesDo: aBlock ]
+]
+
 { #category : #accessing }
 AsyncSharedDictionary >> remove: anObject ifAbsent: exceptionBlock [
 	^ monitor critical: [ dictionary remove: anObject ifAbsent: exceptionBlock ]
