@@ -85,7 +85,7 @@ TAsyncSink >> sendAll: aStream [
 	The future will drive the stream to keep producing items until it is exhausted, sending each item to the sink.
 	It will complete once both the stream is exhausted, the sink has received all items, and the sink has been flushed.
 	
-	Note that the sink is not cloed. If the stream produces an error, that error will be returned by this future without flushing the sink."
+	Note that the sink is not closed. If the stream produces an error, that error will be returned by this future without flushing the sink."
 	<return: #TAsyncFuture>
 
 	^ AsyncSinkSendAllFuture forSink: self stream: aStream asAsyncStream

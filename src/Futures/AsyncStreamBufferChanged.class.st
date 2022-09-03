@@ -13,6 +13,11 @@ Class {
 }
 
 { #category : #accessing }
+AsyncStreamBufferChanged >> amountOfLoadedItems [
+	^ newItems size
+]
+
+{ #category : #accessing }
 AsyncStreamBufferChanged >> index [
 
 	^ index

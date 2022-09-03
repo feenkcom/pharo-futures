@@ -1,55 +1,52 @@
-"
-#Async stream buffer
-Loads more items from the supplied stream  when sender asks for an item {{gtMethod:AsyncStreamBuffer>>#at:}} a position close to the end of the buffered collection. In addition, it is possible to request the buffer to preload the items until an item matching the condition is found or the end of the stream is reached.
-
-##Announcements
-When new items are loaded, the buffer announces {{gtClass:AsyncStreamBufferChanged}} which indicates that new items were added to the buffer. It is useful when the UI should be notified when new items are ready to be displayed.
-"
 Class {
-	#name : #AsyncStreamBuffer,
+	#name : #AsyncSinkStreamBuffer,
 	#superclass : #Object,
 	#instVars : [
 		'announcer',
 		'monitor',
 		'stream',
-		'buffer',
+		'bufferSink',
+		'outputSinks',
 		'loadingPromise',
 		'pendingScanPromises',
 		'preloadAmount',
 		'preloadDuration',
-		'executionConfiguration',
 		'loadSinglesUntil',
-		'amountOfLoadedItems'
+		'executionConfiguration'
 	],
 	#category : #'Futures-Buffer'
 }
 
 { #category : #'instance creation' }
-AsyncStreamBuffer class >> forStream: anAsyncStream [
+AsyncSinkStreamBuffer class >> forStream: anAsyncStream [
 	^ self new stream: anAsyncStream
 ]
 
+{ #category : #'api - accessing' }
+AsyncSinkStreamBuffer >> amountOfLoadedItems [
+	^ bufferSink collection size
+]
+
 { #category : #'api - announcer' }
-AsyncStreamBuffer >> announce: anAnnouncement [
+AsyncSinkStreamBuffer >> announce: anAnnouncement [
 	<generatedFrom: #'TGtRobocoderAnnouncerTemplate>>#announceTemplate'>
 	announcer ifNotNil: [ :anAnnouncer | anAnnouncer announce: anAnnouncement ].
 ]
 
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> at: anIndex [
-	^ monitor critical: [ 
-		| requestedItem |
+AsyncSinkStreamBuffer >> at: anIndex [
+	| requestedItem |
 
-		requestedItem := buffer at: anIndex.
+	requestedItem := bufferSink collection at: anIndex.
 
-		(stream isDone not and: [ anIndex = buffer size ])
-			ifTrue: [ self privateLoadNewItems ].
+	(stream isDone not and: [ anIndex = self amountOfLoadedItems ])
+		ifTrue: [ self privateLoadNewItems ].
 
-		requestedItem ]
+	^ requestedItem
 ]
 
 { #category : #'api - loading' }
-AsyncStreamBuffer >> bufferLoadingPromise [
+AsyncSinkStreamBuffer >> bufferLoadingPromise [
 	"Return a promise that will be fulfilled when the buffer finishes preloading items"
 	<return: #TAsyncPromise>
 
@@ -60,35 +57,35 @@ AsyncStreamBuffer >> bufferLoadingPromise [
 ]
 
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> bufferSnapshot [
+AsyncSinkStreamBuffer >> bufferSnapshot [
 	"Returns a snapshot copy of the current loaded items in the buffer"
 	<return: #Collection>
 
-	^ monitor critical: [ buffer copy ]
+	^ bufferSink collection copy
 ]
 
 { #category : #initialization }
-AsyncStreamBuffer >> defaultExecutionConfiguration [
+AsyncSinkStreamBuffer >> defaultExecutionConfiguration [
 	^ AsyncFutureExecutionConfiguration default
 ]
 
-{ #category : #initialization }
-AsyncStreamBuffer >> defaultLoadSinglesUntil [
+{ #category : #private }
+AsyncSinkStreamBuffer >> defaultLoadSinglesUntil [
 	^ 0
 ]
 
 { #category : #initialization }
-AsyncStreamBuffer >> defaultPreloadAmount [
+AsyncSinkStreamBuffer >> defaultPreloadAmount [
 	^ 20
 ]
 
 { #category : #initialization }
-AsyncStreamBuffer >> defaultPreloadDuration [
+AsyncSinkStreamBuffer >> defaultPreloadDuration [
 	^ 300 milliSeconds
 ]
 
 { #category : #'api - enumeration' }
-AsyncStreamBuffer >> do: aBlock [
+AsyncSinkStreamBuffer >> do: aBlock [
 	"Iterates over the collection trying to preload the items, stops as soon as it reaches
 	the last loaded item."
 	| aCurrentIndex |
@@ -101,57 +98,55 @@ AsyncStreamBuffer >> do: aBlock [
 ]
 
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> executionConfiguration [
+AsyncSinkStreamBuffer >> executionConfiguration [
 
 	^ executionConfiguration
 ]
 
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> executionConfiguration: anObject [
+AsyncSinkStreamBuffer >> executionConfiguration: anObject [
 
 	executionConfiguration := anObject
 ]
 
 { #category : #initialization }
-AsyncStreamBuffer >> initialize [
+AsyncSinkStreamBuffer >> initialize [
 	super initialize.
 	
 	monitor := Monitor new.
-	buffer := OrderedCollection new.
 	stream := nil.
+
+	bufferSink := AsyncCollectionSink forCollection: AsyncSharedOrderedCollection new.
+	outputSinks := #().
+
 	loadingPromise := nil.
 	pendingScanPromises := OrderedCollection new.
+
 	preloadAmount := self defaultPreloadAmount.
 	preloadDuration := self defaultPreloadDuration.
 	executionConfiguration := self defaultExecutionConfiguration.
-	loadSinglesUntil := self defaultLoadSinglesUntil.
-	amountOfLoadedItems := 0.
+	loadSinglesUntil := self defaultLoadSinglesUntil
 ]
 
 { #category : #testing }
-AsyncStreamBuffer >> isDone [
+AsyncSinkStreamBuffer >> isDone [
 	"Return true if there are no more items to poll"
 
 	^ monitor critical: [ stream isDone ]
 ]
 
 { #category : #accessing }
-AsyncStreamBuffer >> loadSinglesUntil [
+AsyncSinkStreamBuffer >> loadSinglesUntil [
 	^ loadSinglesUntil
 ]
 
 { #category : #accessing }
-AsyncStreamBuffer >> loadSinglesUntil: aNumber [
+AsyncSinkStreamBuffer >> loadSinglesUntil: aNumber [
 	loadSinglesUntil := aNumber
 ]
 
-{ #category : #accessing }
-AsyncStreamBuffer >> loadedItems [
-	^ amountOfLoadedItems
-]
-
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> preloadAmount [
+AsyncSinkStreamBuffer >> preloadAmount [
 	"Return the maximum amount of items to be preloaded by the buffer"
 	<return:  #Number>
 
@@ -159,12 +154,12 @@ AsyncStreamBuffer >> preloadAmount [
 ]
 
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> preloadAmount: aNumber [
+AsyncSinkStreamBuffer >> preloadAmount: aNumber [
 	preloadAmount := aNumber
 ]
 
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> preloadDuration [
+AsyncSinkStreamBuffer >> preloadDuration [
 	"Returns the amount of time the buffer should wait for new
 	items before stopping pre-loading. It is useful when it takes a lot of
 	time to fetch one item, which would result in a long delay before
@@ -175,20 +170,25 @@ AsyncStreamBuffer >> preloadDuration [
 ]
 
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> preloadDuration: anObject [
+AsyncSinkStreamBuffer >> preloadDuration: anObject [
 	preloadDuration := anObject
 ]
 
 { #category : #'api - loading' }
-AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
+AsyncSinkStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 	<return: #TAsyncPromise>
 
 	monitor critical: [
 		| aPendingScanPromise |
-		"first let's try to find among existing buffered items"
-		buffer withIndexDo: [ :eachItem :eachIndex | 
-			(aBlock cull: eachItem cull: eachIndex)
-				ifTrue: [ ^ (AsyncStreamBufferItem new item: eachItem; index: eachIndex) asAsyncPromise ] ].
+		
+		bufferSink collection critical: [
+			| eachIndex |
+			eachIndex := 0.
+			"first let's try to find among existing buffered items"
+			bufferSink collection do: [ :eachItem | 
+				eachIndex := eachIndex + 1.
+				(aBlock cull: eachItem cull: eachIndex)
+					ifTrue: [ ^ (AsyncStreamBufferItem new item: eachItem; index: eachIndex) asAsyncPromise ] ] ].
 
 		"the value was not found, let's register a pending scan"
 		aPendingScanPromise := AsyncPendingPromise new.
@@ -200,23 +200,32 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 ]
 
 { #category : #private }
-AsyncStreamBuffer >> privateLoadNewItems [
+AsyncSinkStreamBuffer >> privateLoadNewItems [
 	<return: #TAsyncPromise>
 	| toLoad |
 	^ monitor critical: [ 
-		  loadingPromise ifNotNil: [ ^ loadingPromise ].
+		| aSink |
+		
+	 	loadingPromise ifNotNil: [ ^ loadingPromise ].
+		stream isDone ifTrue: [ ^ true asAsyncPromise ].
 
-		  "Watch out! We must first assign the promise and only then handle then:otherwise:"
-		  toLoad := amountOfLoadedItems < loadSinglesUntil
-			            ifTrue: [ 1 ]
-			            ifFalse: [ preloadAmount ].
-		  ((self setLoadingPromise: (((stream for: preloadDuration) take: toLoad) toArray await: executionConfiguration))
-			  then: [ :newItems | 
-				  amountOfLoadedItems := amountOfLoadedItems + newItems size.
-				  newItems
-					  ifNotEmpty: [ self privateOnItemsLoaded: newItems ]
-					  ifEmpty: [ self setLoadingPromise: nil ] ]
-			  otherwise: [ :anException | 
+		toLoad := self amountOfLoadedItems < loadSinglesUntil
+			ifTrue: [ 1 ]
+			ifFalse: [ preloadAmount ].
+		
+		aSink := AsyncSpreadSink forSinks: { 
+			bufferSink.
+			AsyncStreamBufferFlushedSink new streamBuffer: self.
+			AsyncStreamBufferScanningSink new streamBuffer: self.
+			AsyncSpreadSink forSinks: outputSinks }.
+
+		"Watch out! We must first assign the promise and only then handle then:otherwise:"
+		((self startLoadingFuture: (aSink sendAll: ((stream for: preloadDuration) take: toLoad)))
+			then: [ :newItems |
+				stream isDone
+					ifTrue: [ aSink close await: executionConfiguration ].
+				self setLoadingPromise: nil ]
+			otherwise: [ :anException | 
 				  monitor critical: [ "Logging the error on the transcript only shows the exception, not where it came from.
 				Emit the exception as well so that it can be found with a beacon logger (which includes the stack)."
 					  anException emit.
@@ -236,54 +245,46 @@ AsyncStreamBuffer >> privateLoadNewItems [
 ]
 
 { #category : #private }
-AsyncStreamBuffer >> privateOnItemsLoaded: theNewItems [
+AsyncSinkStreamBuffer >> privateOnScannedItemLoaded: anItem at: anIndex [
 	monitor critical: [
-		| aPreviousBufferSize |
-		
-		aPreviousBufferSize := buffer size.
-
-		buffer addAll: theNewItems.
-		
-		self setLoadingPromise: nil.
-
 		pendingScanPromises := pendingScanPromises reject: [ :eachPendingScanAssociation |
-			| eachScanPromise eachScanBlock eachItemFound eachItemIndex |
+			| eachScanPromise eachScanBlock eachItemFound |
 
 			eachScanPromise := eachPendingScanAssociation key.
 			eachScanBlock := eachPendingScanAssociation value.
 			
 			eachItemFound := false.
-			eachItemIndex := aPreviousBufferSize .
 
-			[ eachItemFound not and: [ eachItemIndex < buffer size  ] ] whileTrue: [
-				eachItemIndex := eachItemIndex + 1.
-				(eachScanBlock cull: (buffer at: eachItemIndex) cull: eachItemIndex)
+			(eachScanBlock cull: anItem cull: anIndex)
 					ifTrue: [
 						eachItemFound := true.
-						eachScanPromise fulfillWithValue: (AsyncStreamBufferItem new item: (buffer at: eachItemIndex); index: eachItemIndex) ] ].
+						eachScanPromise fulfillWithValue: (AsyncStreamBufferItem new item: anItem; index: anIndex) ].
 
-			eachItemFound ].
-		pendingScanPromises ifNotEmpty: [ self privateLoadNewItems ].
-		self announce: (AsyncStreamBufferChanged new newItems: theNewItems; index: aPreviousBufferSize + 1) ]
+			eachItemFound ] ]
 ]
 
 { #category : #private }
-AsyncStreamBuffer >> setLoadingPromise: aPromise [
+AsyncSinkStreamBuffer >> setLoadingPromise: aPromise [
 
 	monitor critical: [ 
 		loadingPromise := aPromise.
-		aPromise ifNotNil: [ self announce: (AsyncStreamBufferStartedLoading new bufferLoadingPromise: aPromise) ].
-		stream isDone ifTrue: [ self announce: AsyncStreamBufferDone new ] ].
+		stream isDone ifTrue: [ self announce: AsyncStreamBufferDone new ].
+		(aPromise isNil and: [ pendingScanPromises isNotEmpty ]) ifTrue: [ self privateLoadNewItems ] ].
 
 	^ aPromise
 ]
 
+{ #category : #'api - accessing' }
+AsyncSinkStreamBuffer >> sinks [
+	^ outputSinks
+]
+
 { #category : #'api - enumeration' }
-AsyncStreamBuffer >> size [
+AsyncSinkStreamBuffer >> size [
 	"Return the current buffer length"
 	| aBufferSize |
 	
-	aBufferSize := monitor critical: [ buffer size ].
+	aBufferSize := self amountOfLoadedItems.
 
 	(stream isDone not and: [ aBufferSize isZero ])
 		ifTrue: [ self privateLoadNewItems ].
@@ -291,18 +292,41 @@ AsyncStreamBuffer >> size [
 	^ aBufferSize
 ]
 
+{ #category : #private }
+AsyncSinkStreamBuffer >> startLoadingFuture: aFuture [
+	| aPromise anInitialAmountOfItems |
+		
+	anInitialAmountOfItems := self amountOfLoadedItems.
+	aPromise := self setLoadingPromise: (aFuture await: executionConfiguration).
+
+	self announce: (AsyncStreamBufferStartedLoading new
+		bufferLoadingPromise: aPromise;
+		initialAmountOfItems: anInitialAmountOfItems).
+
+	^ aPromise
+]
+
 { #category : #initialization }
-AsyncStreamBuffer >> stream: aStream [
+AsyncSinkStreamBuffer >> stream: aStream [
+
+	self
+		stream: aStream
+		sinks: #()
+]
+
+{ #category : #initialization }
+AsyncSinkStreamBuffer >> stream: aStream sinks: aCollectionOfSinks [
 
 	self
 		assert: [ stream isNil ]
 		description: [ 'Stream must not be already initialized' ].
 
-	stream := AsyncFuseStream forStream: aStream
+	stream := AsyncFuseStream forStream: aStream.
+	outputSinks := aCollectionOfSinks
 ]
 
 { #category : #'api - announcer' }
-AsyncStreamBuffer >> unsubscribe: anObject [
+AsyncSinkStreamBuffer >> unsubscribe: anObject [
 	"Unsubscribe all subscriptions of anObject from the receiver"
 
 	<generatedFrom: #'TGtRobocoderAnnouncerTemplate>>#unsubscribeTemplate'>
@@ -310,7 +334,7 @@ AsyncStreamBuffer >> unsubscribe: anObject [
 ]
 
 { #category : #'api - loading' }
-AsyncStreamBuffer >> wait [
+AsyncSinkStreamBuffer >> wait [
 	"Synchronously wait for the current loading to finish"
 	| aSemaphore |
 	
@@ -325,14 +349,14 @@ AsyncStreamBuffer >> wait [
 ]
 
 { #category : #'api - announcer' }
-AsyncStreamBuffer >> when: anAnnouncementClass do: aBlock [
+AsyncSinkStreamBuffer >> when: anAnnouncementClass do: aBlock [
 	<generatedFrom: #'TGtRobocoderAnnouncerTemplate>>#whenDoTemplate'>
 	^ (announcer ifNil: [ announcer := Announcer new ])
 		when: anAnnouncementClass do: aBlock
 ]
 
 { #category : #'api - announcer' }
-AsyncStreamBuffer >> when: anAnnouncementClass do: aBlock for: aSubscriber [
+AsyncSinkStreamBuffer >> when: anAnnouncementClass do: aBlock for: aSubscriber [
 	<generatedFrom: #'TGtRobocoderAnnouncerTemplate>>#whenDoForTemplate'>
 	^ (self when: anAnnouncementClass do: aBlock)
 		subscriber: aSubscriber;
@@ -340,7 +364,7 @@ AsyncStreamBuffer >> when: anAnnouncementClass do: aBlock for: aSubscriber [
 ]
 
 { #category : #'api - announcer' }
-AsyncStreamBuffer >> when: anAnnouncementClass send: aSelector to: anObject [
+AsyncSinkStreamBuffer >> when: anAnnouncementClass send: aSelector to: anObject [
 	<generatedFrom: #'TGtRobocoderAnnouncerTemplate>>#whenSendToTemplate'>
 	^ (announcer ifNil: [ announcer := Announcer new ]) weak
 		when: anAnnouncementClass send: aSelector to: anObject

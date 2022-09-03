@@ -70,6 +70,12 @@ AsyncAbstractOrderedCollection >> initialize [
 	collection := self class collectionType new
 ]
 
+{ #category : #copying }
+AsyncAbstractOrderedCollection >> postCopy [
+	monitor := Monitor new.
+	collection := collection copy
+]
+
 { #category : #'private - adding / removing' }
 AsyncAbstractOrderedCollection >> privateAdd: anObject [
 	collection add: anObject

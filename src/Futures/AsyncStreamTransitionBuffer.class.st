@@ -103,7 +103,7 @@ AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuff
 	preloadDuration := anAsyncStreamBuffer preloadDuration.
 	executionConfiguration := anAsyncStreamBuffer executionConfiguration.
 
-	newBuffer := AsyncStreamBuffer new
+	newBuffer := AsyncSinkStreamBuffer new
 		preloadAmount: (previousItems size max: preloadAmount);
 		loadSinglesUntil: loadSinglesUntil;
 		preloadDuration: 1 minute;

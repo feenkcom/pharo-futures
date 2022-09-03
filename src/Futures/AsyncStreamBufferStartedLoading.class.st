@@ -2,7 +2,8 @@ Class {
 	#name : #AsyncStreamBufferStartedLoading,
 	#superclass : #Announcement,
 	#instVars : [
-		'bufferLoadingPromise'
+		'bufferLoadingPromise',
+		'initialAmountOfItems'
 	],
 	#category : #'Futures-Buffer'
 }
@@ -17,4 +18,15 @@ AsyncStreamBufferStartedLoading >> bufferLoadingPromise [
 AsyncStreamBufferStartedLoading >> bufferLoadingPromise: anObject [
 
 	bufferLoadingPromise := anObject
+]
+
+{ #category : #accessing }
+AsyncStreamBufferStartedLoading >> initialAmountOfItems [
+
+	^ initialAmountOfItems
+]
+
+{ #category : #accessing }
+AsyncStreamBufferStartedLoading >> initialAmountOfItems: aNumber [
+	initialAmountOfItems := aNumber
 ]
