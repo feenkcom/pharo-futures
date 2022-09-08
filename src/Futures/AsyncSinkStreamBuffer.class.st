@@ -85,6 +85,12 @@ AsyncSinkStreamBuffer >> defaultPreloadDuration [
 ]
 
 { #category : #'api - enumeration' }
+AsyncSinkStreamBuffer >> detect: aBlock ifFound: foundBlock ifNone: exceptionBlock [
+	self do: [ :each | (aBlock value: each) ifTrue: [ ^ foundBlock cull: each ] ].
+	^ exceptionBlock value
+]
+
+{ #category : #'api - enumeration' }
 AsyncSinkStreamBuffer >> do: aBlock [
 	"Iterates over the collection trying to preload the items, stops as soon as it reaches
 	the last loaded item."
