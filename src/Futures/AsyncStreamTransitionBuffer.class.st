@@ -95,6 +95,11 @@ AsyncStreamTransitionBuffer >> size [
 	^ previousItems size
 ]
 
+{ #category : #'api - loading' }
+AsyncStreamTransitionBuffer >> stop [
+	newBuffer stop
+]
+
 { #category : #initialization }
 AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuffer [
 	previousItems := anAsyncStreamBuffer bufferSnapshot.

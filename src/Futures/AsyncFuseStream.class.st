@@ -69,6 +69,13 @@ AsyncFuseStream >> sizeHint [
 		ifFalse: [ stream sizeHint ]
 ]
 
+{ #category : #'api - stream' }
+AsyncFuseStream >> stop [
+	"Stop the stream even if there are more items available"
+
+	done := true
+]
+
 { #category : #initialization }
 AsyncFuseStream >> stream: anAsyncStream [
 	stream := anAsyncStream.

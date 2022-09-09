@@ -312,6 +312,11 @@ AsyncSinkStreamBuffer >> startLoadingFuture: aFuture [
 	^ aPromise
 ]
 
+{ #category : #'api - loading' }
+AsyncSinkStreamBuffer >> stop [
+	stream stop
+]
+
 { #category : #initialization }
 AsyncSinkStreamBuffer >> stream: aStream [
 
