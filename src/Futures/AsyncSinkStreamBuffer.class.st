@@ -1,3 +1,10 @@
+"
+#Async stream buffer
+Loads more items from the supplied stream  when sender asks for an item {{gtMethod:AsyncSinkStreamBuffer>>#at:}} a position close to the end of the buffered collection. In addition, it is possible to request the buffer to preload the items until an item matching the condition is found or the end of the stream is reached.
+
+##Announcements
+When new items are loaded, the buffer announces {{gtClass:AsyncStreamBufferChanged}} which indicates that new items were added to the buffer. It is useful when the UI should be notified when new items are ready to be displayed.
+"
 Class {
 	#name : #AsyncSinkStreamBuffer,
 	#superclass : #Object,
@@ -141,12 +148,12 @@ AsyncSinkStreamBuffer >> isDone [
 	^ monitor critical: [ stream isDone ]
 ]
 
-{ #category : #accessing }
+{ #category : #'api - accessing' }
 AsyncSinkStreamBuffer >> loadSinglesUntil [
 	^ loadSinglesUntil
 ]
 
-{ #category : #accessing }
+{ #category : #'api - accessing' }
 AsyncSinkStreamBuffer >> loadSinglesUntil: aNumber [
 	loadSinglesUntil := aNumber
 ]
