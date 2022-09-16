@@ -5,6 +5,7 @@ Class {
 		'future',
 		'group',
 		'priority',
+		'errorHandler',
 		'worker',
 		'executionState'
 	],
@@ -52,6 +53,18 @@ AsyncPendingFuturePromise >> critical: aBlock [
 	^ mutex critical: aBlock
 ]
 
+{ #category : #accessing }
+AsyncPendingFuturePromise >> errorHandler [
+
+	^ errorHandler
+]
+
+{ #category : #accessing }
+AsyncPendingFuturePromise >> errorHandler: anObject [
+
+	errorHandler := anObject
+]
+
 { #category : #'private - state' }
 AsyncPendingFuturePromise >> fulfillWithValue: aValue [
 	self critical: [
@@ -95,7 +108,8 @@ AsyncPendingFuturePromise >> initialize [
 
 	group := AsyncFutureExecutionUnspecifiedGroup uniqueInstance.
 	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
-	executionState := AsyncFutureExecutionPendingState uniqueInstance
+	executionState := AsyncFutureExecutionPendingState uniqueInstance.
+	errorHandler := AsyncNoneErrorHandler uniqueInstance.
 ]
 
 { #category : #'api - promise' }
@@ -142,6 +156,7 @@ AsyncPendingFuturePromise >> rejectWithError: anError [
 		executionState := AsyncFutureExecutionSuccessfulState uniqueInstance ].
 
 	worker := nil.
+	errorHandler handleError: anError.
 	self rejectWithTransformedError: anError
 ]
 

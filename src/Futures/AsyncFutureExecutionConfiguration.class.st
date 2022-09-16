@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'priority',
-		'group'
+		'group',
+		'errorHandler'
 	],
 	#category : #'Futures-Executor'
 }
@@ -31,6 +32,18 @@ AsyncFutureExecutionConfiguration >> customGroup: anObject [
 { #category : #accessing }
 AsyncFutureExecutionConfiguration >> defaultPriority [
 	self priority: AsyncFutureExecutionDefaultPriority uniqueInstance
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration >> errorHandler [
+
+	^ errorHandler
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration >> errorHandler: anObject [
+
+	errorHandler := anObject
 ]
 
 { #category : #accessing }
@@ -64,6 +77,7 @@ AsyncFutureExecutionConfiguration >> initialize [
 	
 	group := AsyncFutureExecutionUnspecifiedGroup uniqueInstance.
 	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
+	errorHandler := AsyncNoneErrorHandler uniqueInstance
 ]
 
 { #category : #accessing }

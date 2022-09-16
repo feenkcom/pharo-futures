@@ -54,6 +54,7 @@ TAsyncFuture >> await: anExecutionSpecification [
 	aPromise := AsyncPendingFuturePromise new
 		priority: anExecutionSpecification priority;
 		group: anExecutionSpecification group;
+		errorHandler: anExecutionSpecification errorHandler;
 		future: self.
 	AsyncFutureThreadPool current schedule: aPromise.
 
@@ -95,6 +96,14 @@ TAsyncFuture >> map: aBlock [
 	<return: #TAsyncFuture>
 
 	^ AsyncMapFuture future: self mapBlock: aBlock
+]
+
+{ #category : #'api - future' }
+TAsyncFuture >> on: anException do: anExceptionHandler [
+	^ AsyncErrorHandlingFuture
+		future: self
+		on: anException
+		do: anExceptionHandler
 ]
 
 { #category : #'api - future' }
