@@ -17,6 +17,13 @@ AsyncPausableSink class >> forSink: aSink [
 	^ self new sink: aSink
 ]
 
+{ #category : #'private - sink' }
+AsyncPausableSink >> fulfillPendingPromise [
+	promise lock: [ :anOptionalPromise |
+		promise value: AsyncOptionalValue none.
+		anOptionalPromise ifSome: [ :aPromise | aPromise fulfillWithValue: true ] ]
+]
+
 { #category : #'api - actions' }
 AsyncPausableSink >> pause [
 	remaining value: 0.
@@ -32,6 +39,8 @@ AsyncPausableSink >> pollClose: anAsynchronousContext [
 	<return: #AsyncPoll>
 	
 	remaining value: -1.
+	self fulfillPendingPromise.
+
 	^ sink pollClose: anAsynchronousContext
 ]
 
@@ -105,8 +114,5 @@ AsyncPausableSink >> startSend: anObject [
 	
 	remaining lock: [ :aValue |
 		aValue isZero
-			ifTrue: [
-				promise lock: [ :anOptionalPromise |
-					promise value: AsyncOptionalValue none.
-					anOptionalPromise ifSome: [ :aPromise | aPromise fulfillWithValue: true ] ] ] ]
+			ifTrue: [ self fulfillPendingPromise ] ]
 ]
