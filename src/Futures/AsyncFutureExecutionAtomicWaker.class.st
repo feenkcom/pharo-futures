@@ -32,3 +32,8 @@ AsyncFutureExecutionAtomicWaker >> wakeUp [
 			waker := nil.
 			aWaker wakeUp ] ]
 ]
+
+{ #category : #accessing }
+AsyncFutureExecutionAtomicWaker >> waker [
+	^ waker
+]
