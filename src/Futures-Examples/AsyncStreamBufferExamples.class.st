@@ -21,12 +21,14 @@ AsyncStreamBufferExamples >> bufferOnLargeStream [
 	
 	self assert: aBuffer size equals: 20.
 	
-	self assert: theAnnouncements size equals: 2.
+	self assert: theAnnouncements size equals: 21.
 	self assert: (theAnnouncements at: 1) class equals: AsyncStreamBufferStartedLoading.
-	self assert: (theAnnouncements at: 2) class equals: AsyncStreamBufferChanged.
-	self assert: (theAnnouncements at: 2) index equals: 1.
-	self assert: (theAnnouncements at: 2) amountOfLoadedItems equals: 20.
-	
+
+	1 to: 20 do: [ :i |
+		self assert: (theAnnouncements at: i + 1) class equals: AsyncStreamBufferChanged.
+		self assert: (theAnnouncements at: i + 1) index equals: i.
+		self assert: (theAnnouncements at: i + 1) amountOfLoadedItems equals: 1 ].
+
 	^ aBuffer
 ]
 
@@ -35,10 +37,9 @@ AsyncStreamBufferExamples >> defaultStreamBuffer [
 	<gtExample>
 	| aBuffer |
 	
-	aBuffer := AsyncSinkStreamBuffer new.
+	aBuffer := AsyncStreamBuffer new.
 
 	self assert: aBuffer preloadAmount equals: 20.
-	self assert: aBuffer preloadDuration equals: 300 milliSeconds.
 	self assert: aBuffer loadSinglesUntil equals: 0.
 	
 	^ aBuffer
