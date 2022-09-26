@@ -6,7 +6,8 @@ Class {
 	#instVars : [
 		'stream',
 		'seenItems',
-		'comparisonBlock'
+		'comparisonBlock',
+		'setClass'
 	],
 	#category : #'Futures-Base - Streams'
 }
@@ -24,6 +25,11 @@ AsyncWithoutDuplicatesStream class >> forStream: anAsyncStream basedOn: aBlock [
 { #category : #accessing }
 AsyncWithoutDuplicatesStream >> comparisonBlock: aBlock [
 	comparisonBlock := aBlock
+]
+
+{ #category : #private }
+AsyncWithoutDuplicatesStream >> convertSeenItems [
+	seenItems ifNotNil: [ seenItems := setClass withAll: seenItems ]
 ]
 
 { #category : #'api - stream' }
@@ -57,12 +63,23 @@ AsyncWithoutDuplicatesStream >> pollNext: anAsynchronousContext [
 AsyncWithoutDuplicatesStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
-	stream := stream asyncSimilarCopy.
-	seenItems := Set new
+	self stream: stream asyncSimilarCopy
 ]
 
 { #category : #initialization }
 AsyncWithoutDuplicatesStream >> stream: anAsyncStream [
 	stream := anAsyncStream.
-	seenItems := Set new
+	seenItems := (setClass ifNil: [ Set ]) new
+]
+
+{ #category : #accessing }
+AsyncWithoutDuplicatesStream >> useEqualityComparison [
+	setClass := Set.
+	seenItems ifNotNil: [ seenItems := setClass withAll: seenItems ]
+]
+
+{ #category : #accessing }
+AsyncWithoutDuplicatesStream >> useIdentityComparison [
+	setClass := IdentitySet.
+	self convertSeenItems
 ]
