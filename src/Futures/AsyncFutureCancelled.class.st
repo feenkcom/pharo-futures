@@ -35,6 +35,12 @@ AsyncFutureCancelled >> initialize [
 	isSignalled := false
 ]
 
+{ #category : #handling }
+AsyncFutureCancelled >> pass [
+	isSignalled
+		ifTrue: [ super pass ]
+]
+
 { #category : #signalling }
 AsyncFutureCancelled >> signal [
 	isSignalled := true.

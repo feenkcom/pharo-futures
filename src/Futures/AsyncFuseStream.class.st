@@ -13,7 +13,8 @@ Class {
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
 		'stream',
-		'done'
+		'done',
+		'waker'
 	],
 	#category : #'Futures-Base - Streams'
 }
@@ -42,10 +43,12 @@ AsyncFuseStream >> pollNext: anAsynchronousContext [
 	self isDone
 		ifTrue: [
 			^ AsyncPoll ready: AsyncOptionalValue none ].
-		
+
+	waker register: anAsynchronousContext waker.
+
 	aReadyPoll := (stream pollNext: anAsynchronousContext)
 		ifPending: [ :aPendingPoll | ^ aPendingPoll ].
-		
+
 	aReadyPoll value isNone
 		ifTrue: [ done := true ].
 		
@@ -73,11 +76,13 @@ AsyncFuseStream >> sizeHint [
 AsyncFuseStream >> stop [
 	"Stop the stream even if there are more items available"
 
-	done := true
+	done := true.
+	waker wakeUp
 ]
 
 { #category : #initialization }
 AsyncFuseStream >> stream: anAsyncStream [
 	stream := anAsyncStream.
-	done := false
+	done := false.
+	waker := AsyncFutureExecutionAtomicWaker new.
 ]

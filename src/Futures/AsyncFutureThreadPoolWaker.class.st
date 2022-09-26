@@ -11,6 +11,11 @@ Class {
 }
 
 { #category : #'private - accessing' }
+AsyncFutureThreadPoolWaker >> task [
+	^ task
+]
+
+{ #category : #'private - accessing' }
 AsyncFutureThreadPoolWaker >> task: anObject [
 
 	task := anObject

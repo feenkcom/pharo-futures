@@ -30,6 +30,11 @@ AsyncFutureThreadPoolQueue >> isEmpty [
 	^ queue isEmpty
 ]
 
+{ #category : #accessing }
+AsyncFutureThreadPoolQueue >> itemArray [
+	^ queue itemArray
+]
+
 { #category : #testing }
 AsyncFutureThreadPoolQueue >> notEmpty [
 	^ queue isEmpty not

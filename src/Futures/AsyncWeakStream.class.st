@@ -51,7 +51,7 @@ AsyncWeakStream >> postSimilarCopy [
 	stream := nil asWeakReference
 ]
 
-{ #category : #accessing }
+{ #category : #initialization }
 AsyncWeakStream >> stream: aStream [
 	stream := aStream asWeakReference.
 	aStream finalizationRegistry
