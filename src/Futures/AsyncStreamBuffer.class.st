@@ -9,6 +9,7 @@ Class {
 	#name : #AsyncStreamBuffer,
 	#superclass : #Object,
 	#instVars : [
+		'id',
 		'announcer',
 		'monitor',
 		'preloadAmount',
@@ -22,12 +23,58 @@ Class {
 		'pendingScanPromises',
 		'chunkLoadingPromise'
 	],
+	#classVars : [
+		'LastUniqueId'
+	],
 	#category : #'Futures-Buffer'
 }
 
 { #category : #'instance creation' }
+AsyncStreamBuffer class >> bufferWithId: anId [
+	^ self allInstances
+		detect: [ :eachSpace | eachSpace id = anId ]
+		ifFound: #yourself
+		ifNone: [ nil ]
+]
+
+{ #category : #'instance creation' }
 AsyncStreamBuffer class >> forStream: anAsyncStream [
 	^ self new stream: anAsyncStream
+]
+
+{ #category : #initialization }
+AsyncStreamBuffer class >> generateUniqueId [
+	^ LastUniqueId lock: [ :anId |
+		| aNextId |
+		aNextId := anId + 1.
+		LastUniqueId value: aNextId.
+		aNextId ]
+]
+
+{ #category : #'error handling' }
+AsyncStreamBuffer class >> handleError: anException [
+	"Logging the error on the transcript only shows the exception, not where it came from.
+	Emit the exception as well so that it can be found with a beacon logger (which includes the stack)."
+	anException emit.
+	Smalltalk logStdOutDuring: [ :aLogger | 
+	aLogger
+		nextPutAll: '*** EXCEPTION ***';
+		cr;
+		nextPutAll: anException printString;
+		cr;
+		nextPutAll: (String streamContents: [ :aStream | 
+			anException signalerContext errorReportOn: aStream ]);
+		cr ]
+]
+
+{ #category : #initialization }
+AsyncStreamBuffer class >> initialize [
+	LastUniqueId := AsyncMutex for: 0
+]
+
+{ #category : #initialization }
+AsyncStreamBuffer class >> lastUniqueId [
+	^ LastUniqueId lock: [ :anId | anId copy ]
 ]
 
 { #category : #'private - accessing' }
@@ -141,6 +188,11 @@ AsyncStreamBuffer >> gtBufferedItemsFor: aView [
 		actionUpdateButton
 ]
 
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> id [
+	^ id
+]
+
 { #category : #'api - enumeration' }
 AsyncStreamBuffer >> indexOf: anObject [
 	1 to: self size do: [ :i | (self at: i) = anObject ifTrue: [ ^ i ] ].
@@ -150,6 +202,8 @@ AsyncStreamBuffer >> indexOf: anObject [
 { #category : #initialization }
 AsyncStreamBuffer >> initialize [
 	super initialize.
+
+	id := self class generateUniqueId.
 
 	monitor := Monitor new.
 	stream := nil.
@@ -262,20 +316,8 @@ AsyncStreamBuffer >> privateEnsureLoading [
 	
 		"Watch out! We must first assign the promise and only then handle then:otherwise:"
 		(streamLoadingPromise := (stream forward: pausableSink) await: executionConfiguration)
-			then: [ self notifyStreamDone ]
-			otherwise: [ :anException | 
-				"Logging the error on the transcript only shows the exception, not where it came from.
-				Emit the exception as well so that it can be found with a beacon logger (which includes the stack)."
-				anException emit.
-				Smalltalk logStdOutDuring: [ :aLogger | 
-				aLogger
-					nextPutAll: '*** EXCEPTION ***';
-					cr;
-					nextPutAll: anException printString;
-					cr;
-					nextPutAll: (String streamContents: [ :aStream | 
-						anException signalerContext errorReportOn: aStream ]);
-					cr ] ] ]
+			then: (WeakMessageSend receiver: self selector: #notifyStreamDone)
+			otherwise: (MessageSend receiver: self class selector: #handleError:) ]
 ]
 
 { #category : #'private - event handling' }
