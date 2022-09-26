@@ -100,7 +100,7 @@ AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuff
 		executionConfiguration: executionConfiguration;
 		stream: aStream.
 
-	newBuffer privateLoadNewItems then: [
+	newBuffer continue then: [
 		newBuffer
 			preloadAmount: preloadAmount;
 			loadSinglesUntil: loadSinglesUntil ]
