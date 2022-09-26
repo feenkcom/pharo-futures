@@ -11,7 +11,6 @@ Class {
 		'previousItems',
 		'newBuffer',
 		'preloadAmount',
-		'preloadDuration',
 		'executionConfiguration',
 		'loadSinglesUntil'
 	],
@@ -72,18 +71,6 @@ AsyncStreamTransitionBuffer >> preloadAmount: aNumber [
 	preloadAmount := aNumber
 ]
 
-{ #category : #accessing }
-AsyncStreamTransitionBuffer >> preloadDuration [
-
-	^ preloadDuration
-]
-
-{ #category : #accessing }
-AsyncStreamTransitionBuffer >> preloadDuration: aNumber [
-
-	preloadDuration := aNumber
-]
-
 { #category : #'api - loading' }
 AsyncStreamTransitionBuffer >> preloadUntilFoundSuchThat: aBlock [
 	^ newBuffer preloadUntilFoundSuchThat: aBlock
@@ -105,21 +92,18 @@ AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuff
 	previousItems := anAsyncStreamBuffer bufferSnapshot.
 	preloadAmount := anAsyncStreamBuffer preloadAmount.
 	loadSinglesUntil := anAsyncStreamBuffer loadSinglesUntil.
-	preloadDuration := anAsyncStreamBuffer preloadDuration.
 	executionConfiguration := anAsyncStreamBuffer executionConfiguration.
 
-	newBuffer := AsyncSinkStreamBuffer new
+	newBuffer := AsyncStreamBuffer new
 		preloadAmount: (previousItems size max: preloadAmount);
 		loadSinglesUntil: loadSinglesUntil;
-		preloadDuration: 1 minute;
 		executionConfiguration: executionConfiguration;
 		stream: aStream.
 
-	newBuffer privateLoadNewItems then: [
+	newBuffer continue then: [
 		newBuffer
 			preloadAmount: preloadAmount;
-			loadSinglesUntil: loadSinglesUntil;
-			preloadDuration: preloadDuration ]
+			loadSinglesUntil: loadSinglesUntil ]
 ]
 
 { #category : #'announcer - subscription' }

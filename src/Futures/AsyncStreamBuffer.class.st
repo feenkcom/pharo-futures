@@ -11,15 +11,16 @@ Class {
 	#instVars : [
 		'announcer',
 		'monitor',
-		'stream',
-		'buffer',
-		'loadingPromise',
-		'pendingScanPromises',
 		'preloadAmount',
-		'preloadDuration',
-		'executionConfiguration',
 		'loadSinglesUntil',
-		'amountOfLoadedItems'
+		'executionConfiguration',
+		'stream',
+		'bufferSink',
+		'outputSinks',
+		'pausableSink',
+		'streamLoadingPromise',
+		'pendingScanPromises',
+		'chunkLoadingPromise'
 	],
 	#category : #'Futures-Buffer'
 }
@@ -27,6 +28,11 @@ Class {
 { #category : #'instance creation' }
 AsyncStreamBuffer class >> forStream: anAsyncStream [
 	^ self new stream: anAsyncStream
+]
+
+{ #category : #'private - accessing' }
+AsyncStreamBuffer >> amountOfLoadedItems [
+	^ bufferSink collection size
 ]
 
 { #category : #'api - announcer' }
@@ -37,34 +43,44 @@ AsyncStreamBuffer >> announce: anAnnouncement [
 
 { #category : #'api - accessing' }
 AsyncStreamBuffer >> at: anIndex [
-	^ monitor critical: [ 
-		| requestedItem |
+	| requestedItem |
 
-		requestedItem := buffer at: anIndex.
+	requestedItem := bufferSink collection at: anIndex.
 
-		(stream isDone not and: [ anIndex = buffer size ])
-			ifTrue: [ self privateLoadNewItems ].
+	(stream isDone not and: [ anIndex = self amountOfLoadedItems ])
+		ifTrue: [ self continue ].
 
-		requestedItem ]
+	^ requestedItem
 ]
 
-{ #category : #'api - loading' }
+{ #category : #'private - accessing' }
 AsyncStreamBuffer >> bufferLoadingPromise [
 	"Return a promise that will be fulfilled when the buffer finishes preloading items"
 	<return: #TAsyncPromise>
 
-	^ monitor critical: [ 
-		loadingPromise
-			ifNil: [ true asAsyncPromise ]
-			ifNotNil: [ loadingPromise then: [ true ] ] ]
+	^ chunkLoadingPromise
 ]
 
-{ #category : #'api - accessing' }
+{ #category : #'private - accessing' }
 AsyncStreamBuffer >> bufferSnapshot [
 	"Returns a snapshot copy of the current loaded items in the buffer"
 	<return: #Collection>
 
-	^ monitor critical: [ buffer copy ]
+	^ bufferSink collection copy
+]
+
+{ #category : #'api - loading' }
+AsyncStreamBuffer >> continue [
+	<return: #TAsyncPromise>
+	| anInitialAmountOfItems aLoadingPromise |
+	self privateEnsureLoading.
+	
+	anInitialAmountOfItems := self amountOfLoadedItems.
+	aLoadingPromise := self privateContinueLoading.
+	
+	self notifyStartedLoading: aLoadingPromise initialAmountOfItems: anInitialAmountOfItems.
+
+	^ aLoadingPromise
 ]
 
 { #category : #initialization }
@@ -82,9 +98,10 @@ AsyncStreamBuffer >> defaultPreloadAmount [
 	^ 20
 ]
 
-{ #category : #initialization }
-AsyncStreamBuffer >> defaultPreloadDuration [
-	^ 300 milliSeconds
+{ #category : #'api - enumeration' }
+AsyncStreamBuffer >> detect: aBlock ifFound: foundBlock ifNone: exceptionBlock [
+	self do: [ :each | (aBlock value: each) ifTrue: [ ^ foundBlock cull: each ] ].
+	^ exceptionBlock value
 ]
 
 { #category : #'api - enumeration' }
@@ -112,20 +129,42 @@ AsyncStreamBuffer >> executionConfiguration: anObject [
 	executionConfiguration := anObject
 ]
 
+{ #category : #'gt - extensions' }
+AsyncStreamBuffer >> gtBufferedItemsFor: aView [
+	<gtView>
+	
+	^ aView list
+		title: 'Buffered';
+		priority: 5;
+		items: [ bufferSink collection asArray ];
+		updateWhen: Announcement in: (announcer ifNil: [ announcer := Announcer new ]);
+		actionUpdateButton
+]
+
+{ #category : #'api - enumeration' }
+AsyncStreamBuffer >> indexOf: anObject [
+	1 to: self size do: [ :i | (self at: i) = anObject ifTrue: [ ^ i ] ].
+	^0
+]
+
 { #category : #initialization }
 AsyncStreamBuffer >> initialize [
 	super initialize.
-	
+
 	monitor := Monitor new.
-	buffer := OrderedCollection new.
 	stream := nil.
-	loadingPromise := nil.
+
+	bufferSink := AsyncCollectionSink forCollection: AsyncSharedOrderedCollection new.
+	pausableSink := nil.
+	outputSinks := nil.
+
+	streamLoadingPromise := nil.
+	chunkLoadingPromise := true asAsyncPromise.
 	pendingScanPromises := OrderedCollection new.
+
 	preloadAmount := self defaultPreloadAmount.
-	preloadDuration := self defaultPreloadDuration.
 	executionConfiguration := self defaultExecutionConfiguration.
-	loadSinglesUntil := self defaultLoadSinglesUntil.
-	amountOfLoadedItems := 0.
+	loadSinglesUntil := self defaultLoadSinglesUntil
 ]
 
 { #category : #testing }
@@ -135,19 +174,31 @@ AsyncStreamBuffer >> isDone [
 	^ monitor critical: [ stream isDone ]
 ]
 
-{ #category : #accessing }
+{ #category : #'api - accessing' }
 AsyncStreamBuffer >> loadSinglesUntil [
 	^ loadSinglesUntil
 ]
 
-{ #category : #accessing }
+{ #category : #'api - accessing' }
 AsyncStreamBuffer >> loadSinglesUntil: aNumber [
 	loadSinglesUntil := aNumber
 ]
 
-{ #category : #accessing }
-AsyncStreamBuffer >> loadedItems [
-	^ amountOfLoadedItems
+{ #category : #'private - notifying' }
+AsyncStreamBuffer >> notifyItemsLoaded: anAmountOfItems at: anIndex [
+	self announce: (AsyncStreamBufferChanged new newItems: (Array new: anAmountOfItems); index: anIndex)
+]
+
+{ #category : #'private - notifying' }
+AsyncStreamBuffer >> notifyStartedLoading: aPromise initialAmountOfItems: anInitialAmountOfItems [
+	self announce: (AsyncStreamBufferStartedLoading new
+		bufferLoadingPromise: aPromise;
+		initialAmountOfItems: anInitialAmountOfItems)
+]
+
+{ #category : #'private - notifying' }
+AsyncStreamBuffer >> notifyStreamDone [
+	self announce: AsyncStreamBufferDone new
 ]
 
 { #category : #'api - accessing' }
@@ -164,19 +215,7 @@ AsyncStreamBuffer >> preloadAmount: aNumber [
 ]
 
 { #category : #'api - accessing' }
-AsyncStreamBuffer >> preloadDuration [
-	"Returns the amount of time the buffer should wait for new
-	items before stopping pre-loading. It is useful when it takes a lot of
-	time to fetch one item, which would result in a long delay before
-	#preloadAmount of items are ready"
-	<return: #Duration>
-
-	^ preloadDuration
-]
-
-{ #category : #'api - accessing' }
 AsyncStreamBuffer >> preloadDuration: anObject [
-	preloadDuration := anObject
 ]
 
 { #category : #'api - loading' }
@@ -185,120 +224,132 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 
 	monitor critical: [
 		| aPendingScanPromise |
-		"first let's try to find among existing buffered items"
-		buffer withIndexDo: [ :eachItem :eachIndex | 
-			(aBlock cull: eachItem cull: eachIndex)
-				ifTrue: [ ^ (AsyncStreamBufferItem new item: eachItem; index: eachIndex) asAsyncPromise ] ].
+		
+		bufferSink collection critical: [
+			| eachIndex |
+			eachIndex := 0.
+			"first let's try to find among existing buffered items"
+			bufferSink collection do: [ :eachItem | 
+				eachIndex := eachIndex + 1.
+				(aBlock cull: eachItem cull: eachIndex)
+					ifTrue: [ ^ (AsyncStreamBufferItem new item: eachItem; index: eachIndex) asAsyncPromise ] ] ].
 
 		"the value was not found, let's register a pending scan"
 		aPendingScanPromise := AsyncPendingPromise new.
 		pendingScanPromises add: (aPendingScanPromise -> aBlock).
 		"and request the loading of new items"
-		self privateLoadNewItems.
+		streamLoadingPromise ifNotNil: [ self continue ].
 
 		^ aPendingScanPromise ]
 ]
 
-{ #category : #private }
-AsyncStreamBuffer >> privateLoadNewItems [
+{ #category : #'private - loading' }
+AsyncStreamBuffer >> privateContinueLoading [
 	<return: #TAsyncPromise>
 	| toLoad |
-	^ monitor critical: [ 
-		  loadingPromise ifNotNil: [ ^ loadingPromise ].
 
-		  "Watch out! We must first assign the promise and only then handle then:otherwise:"
-		  toLoad := amountOfLoadedItems < loadSinglesUntil
-			            ifTrue: [ 1 ]
-			            ifFalse: [ preloadAmount ].
-		  ((self setLoadingPromise: (((stream for: preloadDuration) take: toLoad) toArray await: executionConfiguration))
-			  then: [ :newItems | 
-				  amountOfLoadedItems := amountOfLoadedItems + newItems size.
-				  newItems
-					  ifNotEmpty: [ self privateOnItemsLoaded: newItems ]
-					  ifEmpty: [ self setLoadingPromise: nil ] ]
-			  otherwise: [ :anException | 
-				  monitor critical: [ "Logging the error on the transcript only shows the exception, not where it came from.
-				Emit the exception as well so that it can be found with a beacon logger (which includes the stack)."
-					  anException emit.
-					  Smalltalk logStdOutDuring: [ :aLogger | 
-						  aLogger
-							  nextPutAll: '*** EXCEPTION ***';
-							  cr;
-							  nextPutAll: anException printString;
-							  cr;
-							  nextPutAll: (String streamContents: [ :aStream | 
-										   anException signalerContext errorReportOn: aStream ]);
-							  cr ] ].
+	toLoad := self amountOfLoadedItems < loadSinglesUntil
+		ifTrue: [ 1 ]
+		ifFalse: [ preloadAmount ].
 
-				  self setLoadingPromise: nil ])
-						then: [ "all good!" ]
-						otherwise: [ :anException | anException debug ] ]
+	^ chunkLoadingPromise := pausableSink resume: toLoad
 ]
 
-{ #category : #private }
-AsyncStreamBuffer >> privateOnItemsLoaded: theNewItems [
+{ #category : #'private - loading' }
+AsyncStreamBuffer >> privateEnsureLoading [
+	monitor critical: [ 
+	 	streamLoadingPromise ifNotNil: [ ^ self ].
+	
+		"Watch out! We must first assign the promise and only then handle then:otherwise:"
+		(streamLoadingPromise := (stream forward: pausableSink) await: executionConfiguration)
+			then: [ self notifyStreamDone ]
+			otherwise: [ :anException | 
+				"Logging the error on the transcript only shows the exception, not where it came from.
+				Emit the exception as well so that it can be found with a beacon logger (which includes the stack)."
+				anException emit.
+				Smalltalk logStdOutDuring: [ :aLogger | 
+				aLogger
+					nextPutAll: '*** EXCEPTION ***';
+					cr;
+					nextPutAll: anException printString;
+					cr;
+					nextPutAll: (String streamContents: [ :aStream | 
+						anException signalerContext errorReportOn: aStream ]);
+					cr ] ] ]
+]
+
+{ #category : #'private - event handling' }
+AsyncStreamBuffer >> privateOnItemLoaded: anItem at: anIndex [
+	"Is sent after an item was loaded at a given position."
+	
+	self notifyItemsLoaded: 1 at: anIndex.
+
 	monitor critical: [
-		| aPreviousBufferSize |
-		
-		aPreviousBufferSize := buffer size.
-
-		buffer addAll: theNewItems.
-		
-		self setLoadingPromise: nil.
-
 		pendingScanPromises := pendingScanPromises reject: [ :eachPendingScanAssociation |
-			| eachScanPromise eachScanBlock eachItemFound eachItemIndex |
+			| eachScanPromise eachScanBlock eachItemFound |
 
 			eachScanPromise := eachPendingScanAssociation key.
 			eachScanBlock := eachPendingScanAssociation value.
 			
 			eachItemFound := false.
-			eachItemIndex := aPreviousBufferSize .
 
-			[ eachItemFound not and: [ eachItemIndex < buffer size  ] ] whileTrue: [
-				eachItemIndex := eachItemIndex + 1.
-				(eachScanBlock cull: (buffer at: eachItemIndex) cull: eachItemIndex)
-					ifTrue: [
-						eachItemFound := true.
-						eachScanPromise fulfillWithValue: (AsyncStreamBufferItem new item: (buffer at: eachItemIndex); index: eachItemIndex) ] ].
+			(eachScanBlock cull: anItem cull: anIndex)
+				ifTrue: [
+					eachItemFound := true.
+					eachScanPromise fulfillWithValue: (AsyncStreamBufferItem new item: anItem; index: anIndex) ].
 
 			eachItemFound ].
-		pendingScanPromises ifNotEmpty: [ self privateLoadNewItems ].
-		self announce: (AsyncStreamBufferChanged new newItems: theNewItems; index: aPreviousBufferSize + 1) ]
+		pendingScanPromises ifNotEmpty: [ self continue ] ]
 ]
 
-{ #category : #private }
-AsyncStreamBuffer >> setLoadingPromise: aPromise [
-
-	monitor critical: [ 
-		loadingPromise := aPromise.
-		aPromise ifNotNil: [ self announce: (AsyncStreamBufferStartedLoading new bufferLoadingPromise: aPromise) ].
-		stream isDone ifTrue: [ self announce: AsyncStreamBufferDone new ] ].
-
-	^ aPromise
+{ #category : #'api - accessing' }
+AsyncStreamBuffer >> sinks [
+	^ outputSinks
 ]
 
-{ #category : #'api - enumeration' }
+{ #category : #'api - accessing' }
 AsyncStreamBuffer >> size [
 	"Return the current buffer length"
 	| aBufferSize |
 	
-	aBufferSize := monitor critical: [ buffer size ].
+	aBufferSize := self amountOfLoadedItems.
 
 	(stream isDone not and: [ aBufferSize isZero ])
-		ifTrue: [ self privateLoadNewItems ].
+		ifTrue: [ self continue ].
 
 	^ aBufferSize
+]
+
+{ #category : #'api - loading' }
+AsyncStreamBuffer >> stop [
+	stream stop
 ]
 
 { #category : #initialization }
 AsyncStreamBuffer >> stream: aStream [
 
 	self
+		stream: aStream
+		sinks: #()
+]
+
+{ #category : #initialization }
+AsyncStreamBuffer >> stream: aStream sinks: aCollectionOfSinks [
+
+	self
 		assert: [ stream isNil ]
 		description: [ 'Stream must not be already initialized' ].
 
-	stream := AsyncFuseStream forStream: aStream
+	stream := AsyncFuseStream forStream: aStream.
+
+	outputSinks := aCollectionOfSinks.
+	
+	pausableSink := AsyncPausableSink forSink: (AsyncSpreadSink forSinks:
+		{ 
+			bufferSink.
+			AsyncStreamBufferSentSink new streamBuffer: self.
+		},
+		outputSinks)
 ]
 
 { #category : #'api - announcer' }
@@ -311,16 +362,16 @@ AsyncStreamBuffer >> unsubscribe: anObject [
 
 { #category : #'api - loading' }
 AsyncStreamBuffer >> wait [
+	"! Debugging and testing only !"
 	"Synchronously wait for the current loading to finish"
 	| aSemaphore |
 	
 	aSemaphore := Semaphore new.
 	monitor critical: [
-		loadingPromise ifNotNil: [ :aPromise |
-			aPromise
-				then: [ aSemaphore signal ]
-				otherwise: [ aSemaphore signal ] ] ].
-			
+		chunkLoadingPromise 
+			then: [ aSemaphore signal ]
+			otherwise: [ aSemaphore signal ] ].
+
 	aSemaphore wait
 ]
 

@@ -1,91 +1,118 @@
 Class {
-	#name : #AsyncSpreadSink,
+	#name : #AsyncPausableSink,
 	#superclass : #Object,
 	#traits : 'TAsyncSink',
 	#classTraits : 'TAsyncSink classTrait',
 	#instVars : [
-		'sinks'
+		'sink',
+		'remaining',
+		'waker',
+		'promise'
 	],
 	#category : #'Futures-Base - Sinks'
 }
 
 { #category : #'instance creation' }
-AsyncSpreadSink class >> forSinks: aCollectionOfSinks [
-	^ self new sinks: aCollectionOfSinks
+AsyncPausableSink class >> forSink: aSink [
+	^ self new sink: aSink
 ]
 
-{ #category : #initialization }
-AsyncSpreadSink >> initialize [
-	super initialize.
-	
-	sinks := #()
+{ #category : #'private - sink' }
+AsyncPausableSink >> fulfillPendingPromise [
+	promise lock: [ :anOptionalPromise |
+		promise value: AsyncOptionalValue none.
+		anOptionalPromise ifSome: [ :aPromise | aPromise fulfillWithValue: true ] ]
+]
+
+{ #category : #'api - actions' }
+AsyncPausableSink >> pause [
+	remaining value: 0.
+	waker wakeUp
 ]
 
 { #category : #'api - sink' }
-AsyncSpreadSink >> pollClose: anAsynchronousContext [
+AsyncPausableSink >> pollClose: anAsynchronousContext [
 	"Flush any remaining output and close this sink, if necessary.
 	Returns AsyncPoll::Ready(true) when no buffered items remain and the sink has been successfully closed.
 	Returns Poll::Pending if there is more work left to do, in which case the current task is scheduled (via cx.waker().wake_by_ref()) to wake up when poll_close should be called again.
 	If this function encounters an error, the sink should be considered to have failed permanently, and no more Sink methods should be called."
 	<return: #AsyncPoll>
-	| isClosed |
+	
+	remaining value: -1.
+	self fulfillPendingPromise.
 
-	isClosed := sinks allSatisfy: [ :eachSink | (eachSink pollClose: anAsynchronousContext) isReady ].
-
-	^ isClosed
-		ifTrue: [ AsyncPoll ready: true ]
-		ifFalse: [ AsyncPoll pending ]
+	^ sink pollClose: anAsynchronousContext
 ]
 
 { #category : #'api - sink' }
-AsyncSpreadSink >> pollFlush: anAsynchronousContext [
+AsyncPausableSink >> pollFlush: anAsynchronousContext [
 	"Flush any remaining output from this sink.
 	Returns Poll::Ready(true) when no buffered items remain. If this value is returned then it is guaranteed that all previous values sent via #startSend: have been flushed.
 	Returns Poll::Pending if there is more work left to do, in which case the current task is scheduled (via waker) to wake up when #pollFlush: should be called again.
 	In most cases, if the sink encounters an error, the sink will permanently be unable to receive items."
 	<return: #AsyncPoll>
 
-	| isFlushed |
-
-	isFlushed := sinks allSatisfy: [ :eachSink | (eachSink pollFlush: anAsynchronousContext) isReady ].
-
-	^ isFlushed
-		ifTrue: [ AsyncPoll ready: true ]
-		ifFalse: [ AsyncPoll pending ]
+	^ sink pollFlush: anAsynchronousContext
 ]
 
 { #category : #'api - sink' }
-AsyncSpreadSink >> pollReady: anAsynchronousContext [
+AsyncPausableSink >> pollReady: anAsynchronousContext [
 	"Attempts to prepare the Sink to receive a value.
 	This method must be called and return Poll::Ready(true) prior to each call to start_send.
 	This method returns Poll::Ready once the underlying sink is ready to receive data. If this method returns Poll::Pending, the current task is registered to be notified (via waker) when #pollReady: should be called again.
 	In most cases, if the sink encounters an error, the sink will permanently be unable to receive items."
 	<return: #AsyncPoll>
-	
-	| isReady |
 
-	isReady := sinks allSatisfy: [ :eachSink | (eachSink pollReady: anAsynchronousContext) isReady ].
+	^ remaining
+		lock: [ :aRemaining | 
+			aRemaining isZero
+				ifTrue: [
+					waker register: anAsynchronousContext waker.
+					AsyncPoll pending ]
+				ifFalse: [ sink pollReady: anAsynchronousContext ] ]
+]
 
-	^ isReady
-		ifTrue: [ AsyncPoll ready: true ]
-		ifFalse: [ AsyncPoll pending ]
+{ #category : #'api - actions' }
+AsyncPausableSink >> resume: anAmount [
+	<return: #TAsyncPromise>
+	| returnedPromise |
+
+	returnedPromise := remaining lock: [ :aValue |
+		remaining value: (anAmount max: aValue).
+		promise lock: [ :anOptionalPromise |
+			anOptionalPromise
+				ifSome: [ :aPromise | aPromise ]
+				ifNone: [
+					| newPromise |
+					newPromise := AsyncPendingPromise new.
+					promise value: (AsyncOptionalValue some: newPromise).
+					newPromise ] ] ].
+
+	waker wakeUp.
+
+	^ returnedPromise
+]
+
+{ #category : #initialization }
+AsyncPausableSink >> sink: aSink [
+	sink := aSink.
+	remaining := AsyncMutex for: 0.
+	waker := AsyncFutureExecutionAtomicWaker new.
+	promise := AsyncMutex for: AsyncOptionalValue none
 ]
 
 { #category : #'api - sink' }
-AsyncSpreadSink >> sinks: aCollectionOfSinks [
-	self
-		assert: [ aCollectionOfSinks allSatisfy: [ :eachSink | eachSink notNil ] ]
-		description: [ 'Sinks must not be nil' ].
-
-	sinks := aCollectionOfSinks
-]
-
-{ #category : #'api - sink' }
-AsyncSpreadSink >> startSend: anObject [
+AsyncPausableSink >> startSend: anObject [
 	"Begin the process of sending a value to the sink. Each call to this function must be preceded by a successful call to pollReady which returned Poll::Ready(true).
 	As the name suggests, this method only begins the process of sending the item. If the sink employs buffering, the item isn't fully processed until the buffer is fully flushed. Since sinks are designed to work with asynchronous I/O, the process of actually writing out the data to an underlying object takes place asynchronously. You must use #pollFlush: or #pollClose: in order to guarantee completion of a send.
 	Implementations of #pollReady: and #startSend: will usually involve flushing behind the scenes in order to make room for new messages. It is only necessary to call #pollFlush: if you need to guarantee that all of the items placed into the Sink have been sent.
 	In most cases, if the sink encounters an error, the sink will permanently be unable to receive items."
+
+	remaining lock: [ :aValue | aValue > 0 ifTrue: [ remaining value: (aValue - 1) ] ].
+
+	sink startSend: anObject.
 	
-	sinks do: [ :eachSink | eachSink startSend: anObject ]
+	remaining lock: [ :aValue |
+		aValue isZero
+			ifTrue: [ self fulfillPendingPromise ] ]
 ]

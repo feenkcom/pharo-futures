@@ -54,6 +54,18 @@ AsyncMutex >> lock: mutuallyExcludedBlock ifNilPut: ifNilBlock [
 	^ blockValue
 ]
 
+{ #category : #printing }
+AsyncMutex >> printOn: aStream [
+	aStream
+		nextPutAll: self class name;
+		space;
+		nextPut: $(.
+		
+	self lock: [ :aValue | aStream print: aValue ].
+	
+	aStream nextPut: $)
+]
+
 { #category : #'api - monitor' }
 AsyncMutex >> value: aValue [
 	self lock: [ value := aValue ]
