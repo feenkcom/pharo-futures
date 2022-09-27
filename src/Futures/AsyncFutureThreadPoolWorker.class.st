@@ -29,7 +29,7 @@ AsyncFutureThreadPoolWorker >> amountOfFutures [
 	pending futures within pending queue"
 	<return: #Number>
 
-	^ localQueue size + pendingQueue size
+	^ localQueue size
 ]
 
 { #category : #'api - worker' }
