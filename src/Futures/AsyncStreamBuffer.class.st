@@ -21,7 +21,8 @@ Class {
 		'pausableSink',
 		'streamLoadingPromise',
 		'pendingScanPromises',
-		'chunkLoadingPromise'
+		'chunkLoadingPromise',
+		'terminatableStream'
 	],
 	#classVars : [
 		'LastUniqueId'
@@ -238,6 +239,14 @@ AsyncStreamBuffer >> loadSinglesUntil: aNumber [
 	loadSinglesUntil := aNumber
 ]
 
+{ #category : #'private - accessing' }
+AsyncStreamBuffer >> loadedItems [
+	"Returns a shared collection of currently loaded items (not a copy)"
+	<return: #Collection>
+
+	^ bufferSink collection
+]
+
 { #category : #'private - notifying' }
 AsyncStreamBuffer >> notifyItemsLoaded: anAmountOfItems at: anIndex [
 	self announce: (AsyncStreamBufferChanged new newItems: (Array new: anAmountOfItems); index: anIndex)
@@ -364,7 +373,7 @@ AsyncStreamBuffer >> size [
 
 { #category : #'api - loading' }
 AsyncStreamBuffer >> stop [
-	stream stop
+	terminatableStream terminate
 ]
 
 { #category : #initialization }
@@ -382,7 +391,8 @@ AsyncStreamBuffer >> stream: aStream sinks: aCollectionOfSinks [
 		assert: [ stream isNil ]
 		description: [ 'Stream must not be already initialized' ].
 
-	stream := AsyncFuseStream forStream: aStream.
+	terminatableStream := aStream terminatable.
+	stream := AsyncFuseStream forStream: terminatableStream.
 
 	outputSinks := aCollectionOfSinks.
 	

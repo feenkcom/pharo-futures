@@ -281,6 +281,14 @@ TAsyncStream >> toArray [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> weak [
+	"Wraps the stream into a stream that references it weakly. A stream is closed upon garbage collection."
+	<return: #TAsyncStream>
+
+	^ AsyncWeakStream forStream: self
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> withIndexCollect: aMapBlock [
 	"An alias to TAsyncStream>>#withIndexMap:"
 	<return: #TAsyncStream>
