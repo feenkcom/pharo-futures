@@ -62,6 +62,12 @@ AsyncAbstractOrderedCollection >> do: aBlock [
 	] repeat
 ]
 
+{ #category : #enumerating }
+AsyncAbstractOrderedCollection >> indexOf: anObject [
+	1 to: self size do: [ :i | (self at: i) = anObject ifTrue: [ ^ i ] ].
+	^0
+]
+
 { #category : #initialization }
 AsyncAbstractOrderedCollection >> initialize [
 	super initialize.
