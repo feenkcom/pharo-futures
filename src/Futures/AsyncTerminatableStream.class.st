@@ -45,10 +45,10 @@ AsyncTerminatableStream >> pollNext: anAsynchronousContext [
 	isTerminated
 		ifTrue: [ ^ AsyncPoll ready: AsyncOptionalValue none ].
 
+	waker register: anAsynchronousContext waker.
+
 	(stream pollNext: anAsynchronousContext)
 		ifReady: [ :aReadyPoll | ^ aReadyPoll ].
-	
-	waker register: anAsynchronousContext waker.
 
 	isTerminated
 		ifTrue: [ ^ AsyncPoll ready: AsyncOptionalValue none ].

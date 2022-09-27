@@ -27,39 +27,39 @@ AsyncStreamForwardFuture class >> forStream: anAsynStream sink: anAsyncSink [
 { #category : #'api - future' }
 AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 	<return: #AsyncPoll>
-	| aWeakSink aSink |
+	| aWeakSink |
 	
 	aWeakSink := sink
 		ifSome: #yourself
 		ifNone: [ self error: 'Polled Forward after completion' ].
 
-	aSink := (aWeakSink at: 1)
-		"Sink was garbage collected"
-		ifNil: [
-			bufferedItem := AsyncOptionalValue none.
-			sink := AsyncOptionalValue none.
-			^ AsyncPoll ready: true ].
-
-	[ 
+	[
+		aWeakSink isAlive
+			"Sink was garbage collected"
+			ifFalse: [
+				bufferedItem := AsyncOptionalValue none.
+				sink := AsyncOptionalValue none.
+				^ AsyncPoll ready: true ].
+	 
 		"If we've got an item buffered already, we need to write it to the sink before we can do anything else"
 		bufferedItem ifSome: [ :anItem |
-			(aSink pollReady: anAsynchronousContext)
+			(aWeakSink pollReady: anAsynchronousContext)
 				ifPending: [ :aPendingPoll | ^ aPendingPoll ].
 			bufferedItem := AsyncOptionalValue none.
-			aSink startSend: anItem ].
+			aWeakSink startSend: anItem ].
 		
 		(stream pollNext: anAsynchronousContext)
 			ifReady: [ :aReadyPoll |
 				aReadyPoll value
 					ifSome: [ :anItem | bufferedItem := AsyncOptionalValue some: anItem ]
 					ifNone: [
-						(aSink pollClose: anAsynchronousContext)
+						(aWeakSink pollClose: anAsynchronousContext)
 							ifReady: [ :aReadyClosePoll |
 								sink := AsyncOptionalValue none.
 								^ AsyncPoll ready: true ]
 							ifPending: [ :aPendingPoll | ^ aPendingPoll ] ] ]
 			ifPending: [ :aPendingPoll |
-				aSink pollFlush: anAsynchronousContext.
+				aWeakSink pollFlush: anAsynchronousContext.
 				^ aPendingPoll ]
 	] repeat
 ]
@@ -67,6 +67,6 @@ AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 { #category : #initialization }
 AsyncStreamForwardFuture >> stream: anAsynStream sink: anAsyncSink [
 	stream := AsyncFuseStream forStream: anAsynStream.
-	sink := AsyncOptionalValue some: anAsyncSink asWeakReference.
+	sink := AsyncOptionalValue some: (AsyncWeakSink forSink: anAsyncSink).
 	bufferedItem := AsyncOptionalValue none
 ]

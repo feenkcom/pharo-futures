@@ -8,3 +8,8 @@ Class {
 AsyncFutureExecutionLowPriority >> asPharoProcessPriority [
 	^ 25
 ]
+
+{ #category : #printing }
+AsyncFutureExecutionLowPriority >> gtDisplayOn: aStream [
+	aStream nextPutAll: 'Low'
+]

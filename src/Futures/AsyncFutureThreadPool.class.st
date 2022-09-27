@@ -41,7 +41,7 @@ AsyncFutureThreadPool >> pickWorkerFor: aAsyncFutureThreadPoolTask [
 		eachWorker acceptsFutures and: [
 			eachWorker group = aAsyncFutureThreadPoolTask group
 				and: [ eachWorker priority = aAsyncFutureThreadPoolTask priority ] ] ].
-		
+
 	runningWorkers := runningWorkers sorted: [ :a :b | a amountOfFutures < b amountOfFutures ].
 
 	runningWorkers
@@ -65,7 +65,7 @@ AsyncFutureThreadPool >> pickWorkerFor: aAsyncFutureThreadPoolTask [
 					aNewWorker startup.
 					workers add: aNewWorker.
 					^ aNewWorker ]
-				ifFalse: [	
+				ifFalse: [
 					^ runningWorkers
 						detect: [ :eachWorker | eachWorker isBusy not ]
 						ifFound: [ :aWorker | aWorker ]
