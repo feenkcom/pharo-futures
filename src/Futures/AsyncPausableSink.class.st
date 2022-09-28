@@ -17,6 +17,13 @@ AsyncPausableSink class >> forSink: aSink [
 	^ self new sink: aSink
 ]
 
+{ #category : #'api - sink' }
+AsyncPausableSink >> cleanSink [
+	"Resets the sink to its original state"
+
+	sink cleanSink
+]
+
 { #category : #'private - sink' }
 AsyncPausableSink >> fulfillPendingPromise [
 	promise lock: [ :anOptionalPromise |

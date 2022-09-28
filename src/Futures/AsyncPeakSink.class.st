@@ -16,6 +16,13 @@ Class {
 	#category : #'Futures-Base - Sinks'
 }
 
+{ #category : #'api - sink' }
+AsyncPeakSink >> cleanSink [
+	"Resets the sink to its original state"
+
+	item := AsyncOptionalValue none
+]
+
 { #category : #initialization }
 AsyncPeakSink >> initialize [
 	super initialize.

@@ -14,6 +14,13 @@ AsyncSpreadSink class >> forSinks: aCollectionOfSinks [
 	^ self new sinks: aCollectionOfSinks
 ]
 
+{ #category : #'api - sink' }
+AsyncSpreadSink >> cleanSink [
+	"Resets the sink to its original state"
+
+	sinks do: #cleanSink
+]
+
 { #category : #initialization }
 AsyncSpreadSink >> initialize [
 	super initialize.

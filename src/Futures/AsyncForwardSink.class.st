@@ -9,6 +9,13 @@ Class {
 	#category : #'Futures-Base - Sinks'
 }
 
+{ #category : #'api - sink' }
+AsyncForwardSink >> cleanSink [
+	"Resets the sink to its original state"
+
+	sink cleanSink
+]
+
 { #category : #initialization }
 AsyncForwardSink >> initialize [
 	super initialize.
