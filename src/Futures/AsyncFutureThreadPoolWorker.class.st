@@ -169,7 +169,9 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 		ifNotNil: [
 			aFutureResult
 				ifReady: [ :aResultValue | pendingQueue pop: aPendingTask ]
-				ifPending: [ "it is already in the queue" ] ]
+				ifPending: [ "it is already in the queue" ] ].
+
+	self telemetryDo: [ :aTelemetry | aTelemetry done: anAsyncPendingFuturePromise worker: self ]
 ]
 
 { #category : #'private - process' }
@@ -186,7 +188,7 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 	aContext := AsyncFutureExecutionContext new
 		waker: aWaker.
 	
-	[ [ [
+	[ [ [ self privatePollFuture: aAsyncPendingFuturePromise during: [
 		| aFutureResult |
 		aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
 
@@ -198,7 +200,7 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 			ifPending: [ "it is already in the queue" ].
 
 		aSemaphore signal
-	]
+	] ]
 	on: Error do: [ :anError |
 		wasRejected := true.
 		self
@@ -218,6 +220,17 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 	on: Exception do: [ :anException |
 		aSemaphore signal.
 		anException pass ]
+]
+
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privatePollFuture: aAsyncPendingFuturePromise during: aBlock [
+	^ self
+		telemetryDo: [ :aTelemetry |
+			aTelemetry
+				polled: aAsyncPendingFuturePromise
+				worker: self
+				during: aBlock ]
+		ifNone: aBlock
 ]
 
 { #category : #'private - process' }
@@ -367,6 +380,18 @@ AsyncFutureThreadPoolWorker >> startup [
 	aStartupPromise := AsyncPendingFuturePromise new future: #startup asAsyncFuture.
 	self schedule: aStartupPromise.
 	^ aStartupPromise
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> telemetryDo: aBlock [
+	^ self telemetryDo: aBlock ifNone: [ nil ]
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> telemetryDo: aBlock ifNone: aNoneBlock [
+	^ threadPool
+		ifNotNil: [ :aThreadPool | aThreadPool telemetryDo: aBlock ifNone: aNoneBlock ]
+		ifNil: aNoneBlock
 ]
 
 { #category : #'api - worker' }
