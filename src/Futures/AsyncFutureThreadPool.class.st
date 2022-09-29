@@ -5,7 +5,8 @@ Class {
 	#classTraits : 'TAsyncFutureExecutor classTrait',
 	#instVars : [
 		'workers',
-		'maxWorkers'
+		'maxWorkers',
+		'telemetry'
 	],
 	#classInstVars : [
 		'current'
@@ -74,16 +75,40 @@ AsyncFutureThreadPool >> pickWorkerFor: aAsyncFutureThreadPoolTask [
 
 { #category : #'api - execution' }
 AsyncFutureThreadPool >> schedule: anAsyncPendingFuturePromise [
+	| aWorker |
 	anAsyncPendingFuturePromise isCancelled
 		ifTrue: [
 			anAsyncPendingFuturePromise rejectWithCancellation.
 			^ self ].
 
-	(self pickWorkerFor: anAsyncPendingFuturePromise)
-		schedule: anAsyncPendingFuturePromise
+	aWorker := (self pickWorkerFor: anAsyncPendingFuturePromise).
+	(aWorker schedule: anAsyncPendingFuturePromise)
+		ifFalse: [ ^ self ].
+
+	self telemetryDo: [ :aTelemetry | aTelemetry scheduled: anAsyncPendingFuturePromise worker: aWorker ]
 ]
 
 { #category : #'api - execution' }
 AsyncFutureThreadPool >> shutdown [
 	workers do: [ :eachWorker | eachWorker shutdown ]
+]
+
+{ #category : #'api - telemetry' }
+AsyncFutureThreadPool >> telemetry: aTelemetry [
+	telemetry := aTelemetry asWeakReference
+]
+
+{ #category : #'api - telemetry' }
+AsyncFutureThreadPool >> telemetryDo: aBlock [
+	^ self telemetryDo: aBlock ifNone: [ nil ]
+]
+
+{ #category : #'api - telemetry' }
+AsyncFutureThreadPool >> telemetryDo: aBlock ifNone: aNoneBlock [
+	^ telemetry
+		ifNotNil: [ :aWeakTelemetry |
+			(aWeakTelemetry at: 1)
+				ifNotNil: aBlock
+				ifNil: aNoneBlock ]
+		ifNil: aNoneBlock
 ]
