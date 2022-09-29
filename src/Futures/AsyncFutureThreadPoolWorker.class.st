@@ -170,8 +170,8 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 			aFutureResult
 				ifReady: [ :aResultValue | pendingQueue pop: aPendingTask ]
 				ifPending: [ "it is already in the queue" ] ].
-			
-	threadPool telemetryDo: [ :aTelemetry | aTelemetry done: anAsyncPendingFuturePromise worker: self ]
+
+	self telemetryDo: [ :aTelemetry | aTelemetry done: anAsyncPendingFuturePromise worker: self ]
 ]
 
 { #category : #'private - process' }
@@ -224,7 +224,7 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 
 { #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privatePollFuture: aAsyncPendingFuturePromise during: aBlock [
-	^ threadPool
+	^ self
 		telemetryDo: [ :aTelemetry |
 			aTelemetry
 				polled: aAsyncPendingFuturePromise
@@ -380,6 +380,18 @@ AsyncFutureThreadPoolWorker >> startup [
 	aStartupPromise := AsyncPendingFuturePromise new future: #startup asAsyncFuture.
 	self schedule: aStartupPromise.
 	^ aStartupPromise
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> telemetryDo: aBlock [
+	^ self telemetryDo: aBlock ifNone: [ nil ]
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> telemetryDo: aBlock ifNone: aNoneBlock [
+	^ threadPool
+		ifNotNil: [ :aThreadPool | aThreadPool telemetryDo: aBlock ifNone: aNoneBlock ]
+		ifNil: aNoneBlock
 ]
 
 { #category : #'api - worker' }
