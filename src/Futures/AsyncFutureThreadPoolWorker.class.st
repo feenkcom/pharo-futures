@@ -269,17 +269,13 @@ AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePr
 AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePromise withUnhandledException: anUnhandledException signalling: aSemaphore ifRejected: wasAlreadyRejected [
 	"Error handling is a user code that we should handle"
 
-	NonInteractiveTranscript stdout
-		nextPutAll: 'reject with unhandled exception';
-		cr.
-
 	wasAlreadyRejected
 		"If promise was already rejected it means we already signalled a semaphore, do nothing here and just pass an error"
 		ifTrue: [ anUnhandledException pass ]
 		ifFalse: [
 			"If the promise is not rejected yet it means we didn't handle an error and this is our first try.
 			We give promise a chance to handle the error, if it does not work we pass."
-			[ aAsyncPendingFuturePromise rejectWithError: anUnhandledException ]
+			[ aAsyncPendingFuturePromise rejectWithError: anUnhandledException. aSemaphore signal ]
 				on: Error
 				do: [ :anError |
 					aSemaphore signal.
