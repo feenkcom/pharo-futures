@@ -200,6 +200,14 @@ TAsyncStream >> next [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> on: anException do: anExceptionHandler [
+	^ AsyncErrorHandlingStream
+		stream: self
+		on: anException
+		do: anExceptionHandler
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
