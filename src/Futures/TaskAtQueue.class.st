@@ -69,6 +69,12 @@ TaskAtQueue class >> schedule: aValuable at: aTime entryIdentifier: anObject [
 	^ self default schedule: aValuable at: aTime entryIdentifier: anObject
 ]
 
+{ #category : #converting }
+TaskAtQueue >> asArray [
+	queue ifNil: [ ^ #() ].
+	^ queue itemArray
+]
+
 { #category : #accessing }
 TaskAtQueue >> clock [
 	"Answer the clock used to schedule the receiver"
