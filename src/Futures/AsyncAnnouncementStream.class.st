@@ -4,7 +4,7 @@ Class {
 	#traits : 'TAsyncStream',
 	#classTraits : 'TAsyncStream classTrait',
 	#instVars : [
-		'announcer',
+		'announcers',
 		'announcement',
 		'announcements',
 		'waker'
@@ -14,7 +14,14 @@ Class {
 
 { #category : #'instance creation' }
 AsyncAnnouncementStream class >> forAnnouncer: anAnnouncer on: anAnnouncement [
-	^ self new registerTo: anAnnouncer on: anAnnouncement
+	^ self new registerToAll: { anAnnouncer } on: anAnnouncement
+]
+
+{ #category : #'instance creation' }
+AsyncAnnouncementStream class >> forAnnouncers: aCollectionOfAnnouncers on: anAnnouncement [
+	^ self new
+		registerToAll: aCollectionOfAnnouncers
+		on: anAnnouncement
 ]
 
 { #category : #printing }
@@ -55,19 +62,20 @@ AsyncAnnouncementStream >> pollNext: anAsynchronousContext [
 AsyncAnnouncementStream >> postSimilarCopy [
 	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
 	
-	self registerTo: announcer on: announcement
+	self registerToAll: announcers on: announcement
 ]
 
 { #category : #initialization }
-AsyncAnnouncementStream >> registerTo: anAnnouncer on: anAnnouncement [
+AsyncAnnouncementStream >> registerToAll: aCollectionOfAnnouncers on: anAnnouncement [
 	announcements := AsyncMutex for: LinkedList new.
 	waker := AsyncFutureExecutionAtomicWaker new.
 
-	announcer := anAnnouncer.
+	announcers := aCollectionOfAnnouncers.
 	announcement := anAnnouncement.
 	
-	anAnnouncer weak
-		when: anAnnouncement
-		send: #onAnnouncement:
-		to: self
+	aCollectionOfAnnouncers do:  [ :eachAnnouncer |
+		eachAnnouncer weak
+			when: anAnnouncement
+			send: #onAnnouncement:
+			to: self ]
 ]
