@@ -251,10 +251,6 @@ AsyncFutureThreadPoolWorker >> privateRejectCancelledPendingFuture: anAsyncPendi
 AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePromise withException: anException signalling: aSemaphore [
 	"Error handling is a user code that we should handle"
 
-	NonInteractiveTranscript stdout
-		nextPutAll: 'reject with error';
-		cr.
-
 	[ aAsyncPendingFuturePromise rejectWithError: anException ]
 		on: Error
 		do: [ :anError |

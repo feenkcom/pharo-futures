@@ -40,33 +40,45 @@ AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 				bufferedItem := AsyncOptionalValue none.
 				sink := AsyncOptionalValue none.
 				^ AsyncPoll ready: true ].
-	 
+
 		"If we've got an item buffered already, we need to write it to the sink before we can do anything else"
 		bufferedItem ifSome: [ :anItem |
 			(aWeakSink pollReady: anAsynchronousContext)
 				ifPending: [ :aPendingPoll | ^ aPendingPoll ].
 			bufferedItem := AsyncOptionalValue none.
 			aWeakSink startSend: anItem ].
-		
-		(stream pollNext: anAsynchronousContext)
-			ifReady: [ :aReadyPoll |
-				aReadyPoll value
-					ifSome: [ :anItem | bufferedItem := AsyncOptionalValue some: anItem ]
-					ifNone: [
-						(aWeakSink pollClose: anAsynchronousContext)
-							ifReady: [ :aReadyClosePoll |
-								sink := AsyncOptionalValue none.
-								^ AsyncPoll ready: true ]
-							ifPending: [ :aPendingPoll | ^ aPendingPoll ] ] ]
-			ifPending: [ :aPendingPoll |
-				aWeakSink pollFlush: anAsynchronousContext.
-				^ aPendingPoll ]
+
+		stream
+			ifSome: [ :aStream | 
+				(aStream pollNext: anAsynchronousContext)
+					ifReady: [ :aReadyPoll |
+						aReadyPoll value
+							ifSome: [ :anItem | bufferedItem := AsyncOptionalValue some: anItem ]
+							ifNone: [
+								(aWeakSink pollClose: anAsynchronousContext)
+									ifReady: [ :aReadyClosePoll |
+										sink := AsyncOptionalValue none.
+										stream := AsyncOptionalValue none.
+										bufferedItem := AsyncOptionalValue none.
+										^ AsyncPoll ready: true ]
+									ifPending: [ :aPendingPoll | ^ aPendingPoll ] ] ]
+					ifPending: [ :aPendingPoll |
+						aWeakSink pollFlush: anAsynchronousContext.
+						^ aPendingPoll ] ]
+			ifNone: [ ^ AsyncPoll ready: true ].
 	] repeat
+]
+
+{ #category : #'api - future copy' }
+AsyncStreamForwardFuture >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	self error: 'Stream forward future does not support #asyncSimilarCopy'
 ]
 
 { #category : #initialization }
 AsyncStreamForwardFuture >> stream: anAsynStream sink: anAsyncSink [
-	stream := AsyncFuseStream forStream: anAsynStream.
+	stream := AsyncOptionalValue some: anAsynStream.
 	sink := AsyncOptionalValue some: (AsyncWeakSink forSink: anAsyncSink).
 	bufferedItem := AsyncOptionalValue none
 ]
