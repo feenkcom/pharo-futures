@@ -78,6 +78,14 @@ TAsyncStream >> filter: aFilterBlock [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> flatCollect: aMapBlock [
+	"An shortcut to #collect: plus #flatten"
+	<return: #TAsyncStream>
+
+	^ (self collect: aMapBlock) flatten
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> flatten [
 	^ AsyncFlattenStream stream: self
 ]
