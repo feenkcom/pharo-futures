@@ -27,5 +27,6 @@ AsyncSinkCloseFuture >> poll: anAsynchronousContext [
 
 { #category : #initialize }
 AsyncSinkCloseFuture >> sink: anAsyncSink [
-	sink := anAsyncSink
+	sink := anAsyncSink.
+	sink parentSink: self
 ]

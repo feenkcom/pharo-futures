@@ -103,6 +103,7 @@ AsyncPausableSink >> resume: anAmount [
 { #category : #initialization }
 AsyncPausableSink >> sink: aSink [
 	sink := aSink.
+	sink parentSink: self.
 	remaining := AsyncMutex for: 0.
 	waker := AsyncFutureExecutionAtomicWaker new.
 	promise := AsyncMutex for: AsyncOptionalValue none

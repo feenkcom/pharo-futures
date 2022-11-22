@@ -74,6 +74,7 @@ AsyncWeakSink >> pollReady: anAsynchronousContext [
 
 { #category : #initialization }
 AsyncWeakSink >> sink: aSink [
+	aSink parentSink: self.
 	sink := aSink asWeakReference.
 	aSink finalizationRegistry
 		add: aSink
@@ -81,11 +82,6 @@ AsyncWeakSink >> sink: aSink [
 			receiver: waker;
 			selector: #wakeUp;
 			arguments: #())
-]
-
-{ #category : #'api - sink' }
-AsyncWeakSink >> source: anObject [
-	(sink at: 1) ifNotNil: [ :aSink | aSink source: anObject ]
 ]
 
 { #category : #'api - sink' }

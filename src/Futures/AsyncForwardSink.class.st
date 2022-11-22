@@ -67,6 +67,7 @@ AsyncForwardSink >> pollReady: anAsynchronousContext [
 
 { #category : #'api - sink' }
 AsyncForwardSink >> sink: aSink [
+	aSink parentSink: self.
 	sink value: (AsyncOptionalValue some: aSink)
 ]
 

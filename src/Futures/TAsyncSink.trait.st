@@ -17,7 +17,7 @@ As with Future and Stream, the Sink trait is built from a few core required meth
 Trait {
 	#name : #TAsyncSink,
 	#instVars : [
-		'source'
+		'parentSink'
 	],
 	#category : #'Futures-Base - Sinks'
 }
@@ -47,6 +47,13 @@ TAsyncSink >> fanout: anotherSink [
 { #category : #'api - sink' }
 TAsyncSink >> isAsyncSink [
 	^ true
+]
+
+{ #category : #'api - sink' }
+TAsyncSink >> parentSink: anAsyncSink [
+	"Asing parent sink. Please note, that at any given time, sink can only have one parent"
+
+	parentSink := anAsyncSink
 ]
 
 { #category : #'api - sink' }
@@ -96,7 +103,13 @@ TAsyncSink >> sendAll: aStream [
 
 { #category : #'api - sink' }
 TAsyncSink >> source: anObject [
-	source := anObject
+	self
+		deprecated: 'Please use parentSink: instead.'
+		transformWith:
+			'`@receiver source: `@statements1'
+				-> '`@receiver parentSink: `@statements1'.
+
+	self parentSink: anObject
 ]
 
 { #category : #'api - sink' }
