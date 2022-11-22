@@ -84,6 +84,11 @@ AsyncWeakSink >> sink: aSink [
 ]
 
 { #category : #'api - sink' }
+AsyncWeakSink >> source: anObject [
+	(sink at: 1) ifNotNil: [ :aSink | aSink source: anObject ]
+]
+
+{ #category : #'api - sink' }
 AsyncWeakSink >> startSend: anObject [
 	"Begin the process of sending a value to the sink. Each call to this function must be preceded by a successful call to pollReady which returned Poll::Ready(true).
 	As the name suggests, this method only begins the process of sending the item. If the sink employs buffering, the item isn't fully processed until the buffer is fully flushed. Since sinks are designed to work with asynchronous I/O, the process of actually writing out the data to an underlying object takes place asynchronously. You must use #pollFlush: or #pollClose: in order to guarantee completion of a send.

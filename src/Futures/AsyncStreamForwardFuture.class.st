@@ -32,7 +32,9 @@ AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 			ifNone: [ self error: 'Polled Forward after completion' ].
 
 	[ aWeakSink isAlive
-		ifFalse: [ sink := AsyncOptionalValue none.
+		ifFalse: [ 
+			aWeakSink source: nil.
+			sink := AsyncOptionalValue none.
 			^ AsyncPoll ready: true ].
 	stream
 		ifSome: [ :aStream | 
@@ -42,7 +44,8 @@ AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 				ifReady: [ :aReadyPoll | 
 					aReadyPoll value
 						ifSome: [ :anItem | aWeakSink startSend: anItem ]
-						ifNone: [ (aWeakSink pollClose: anAsynchronousContext)
+						ifNone: [ aWeakSink source: nil.
+							(aWeakSink pollClose: anAsynchronousContext)
 								ifReady: [ :aReadyClosePoll | 
 									sink := AsyncOptionalValue none.
 									stream := AsyncOptionalValue none.

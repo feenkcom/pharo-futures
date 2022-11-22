@@ -8,6 +8,26 @@ Class {
 }
 
 { #category : #accessing }
+AsyncMemoryExamples >> closedStreamExample [
+	<gtExample>
+	| sink future ending |
+	ending := Interval allInstances
+			inject: 12345
+			into: [ :sum :each | 
+				(each notEmpty and: [ each last isInteger ])
+					ifTrue: [ sum + each last abs ]
+					ifFalse: [ sum ] ].
+	sink := AsyncCounterSink new.
+	future := (1 to: ending) asAsyncStream forward: sink.
+	future wait.
+	self assert: sink count equals: ending.
+	Smalltalk garbageCollect.
+
+	self
+		assert: (Interval allInstances noneSatisfy: [ :each | each last = ending ])
+]
+
+{ #category : #accessing }
 AsyncMemoryExamples >> dirtyBlockExample [
 	"Checks to ensure that streams are gc'd even when using 'dirty' blocks"
 
