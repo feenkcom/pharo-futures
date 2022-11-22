@@ -53,7 +53,6 @@ AsyncStreamEphemeronForwardFuture >> poll: anAsynchronousContext [
 										(aWeakSink pollClose: anAsynchronousContext)
 											ifReady: [ :aReadyClosePoll |
 												sink := AsyncOptionalValue none.
-												anEphemeron mourn.
 												bufferedItem := AsyncOptionalValue none.
 												^ AsyncPoll ready: true ]
 											ifPending: [ :aPendingPoll | ^ aPendingPoll ] ] ]

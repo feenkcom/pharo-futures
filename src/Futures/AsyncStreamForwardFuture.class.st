@@ -32,8 +32,7 @@ AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 			ifNone: [ self error: 'Polled Forward after completion' ].
 
 	[ aWeakSink isAlive
-		ifFalse: [ 
-			aWeakSink source: nil.
+		ifFalse: [ aWeakSink parentSink: nil.
 			sink := AsyncOptionalValue none.
 			^ AsyncPoll ready: true ].
 	stream
@@ -44,7 +43,7 @@ AsyncStreamForwardFuture >> poll: anAsynchronousContext [
 				ifReady: [ :aReadyPoll | 
 					aReadyPoll value
 						ifSome: [ :anItem | aWeakSink startSend: anItem ]
-						ifNone: [ aWeakSink source: nil.
+						ifNone: [ aWeakSink parentSink: nil.
 							(aWeakSink pollClose: anAsynchronousContext)
 								ifReady: [ :aReadyClosePoll | 
 									sink := AsyncOptionalValue none.
@@ -66,7 +65,10 @@ AsyncStreamForwardFuture >> postSimilarCopy [
 
 { #category : #initialization }
 AsyncStreamForwardFuture >> stream: anAsynStream sink: anAsyncSink [
-	anAsyncSink source: anAsynStream.
+	| aWeakSink |
+
+	aWeakSink := (AsyncWeakSink forSink: anAsyncSink).
+	aWeakSink parentSink: anAsynStream.
 	stream := AsyncOptionalValue some: anAsynStream weak.
-	sink := AsyncOptionalValue some: (AsyncWeakSink forSink: anAsyncSink)
+	sink := AsyncOptionalValue some: aWeakSink
 ]

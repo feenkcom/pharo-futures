@@ -19,6 +19,7 @@ AsyncMemoryExamples >> closedStreamExample [
 					ifFalse: [ sum ] ].
 	sink := AsyncCounterSink new.
 	future := (1 to: ending) asAsyncStream forward: sink.
+	
 	future wait.
 
 	self assert: sink count equals: ending.
