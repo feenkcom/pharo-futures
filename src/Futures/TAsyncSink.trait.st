@@ -16,6 +16,9 @@ As with Future and Stream, the Sink trait is built from a few core required meth
 "
 Trait {
 	#name : #TAsyncSink,
+	#instVars : [
+		'source'
+	],
 	#category : #'Futures-Base - Sinks'
 }
 
@@ -89,6 +92,11 @@ TAsyncSink >> sendAll: aStream [
 	<return: #TAsyncFuture>
 
 	^ AsyncSinkSendAllFuture forSink: self stream: aStream asAsyncStream
+]
+
+{ #category : #'api - sink' }
+TAsyncSink >> source: anObject [
+	source := anObject
 ]
 
 { #category : #'api - sink' }

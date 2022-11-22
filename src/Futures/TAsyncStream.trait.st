@@ -115,8 +115,8 @@ TAsyncStream >> forward: anAsyncSink [
 	The future references the Sink weakly and will stop polling the stream.
 	It will complete once the stream is exhausted, the sink has received and flushed all items, and the sink is closed."
 	<return: #TAsyncFuture>
-
-	^ AsyncStreamForwardFuture forStream: self sink: anAsyncSink
+anAsyncSink source: self.
+	^ AsyncStreamForwardFuture forStream: self weak sink: anAsyncSink
 ]
 
 { #category : #'api - stream' }
