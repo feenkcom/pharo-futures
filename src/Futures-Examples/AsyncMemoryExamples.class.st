@@ -11,15 +11,10 @@ Class {
 AsyncMemoryExamples >> closedStreamExample [
 	<gtExample>
 	| sink future ending |
-	ending := Interval allInstances
-			inject: 12345
-			into: [ :sum :each | 
-				(each notEmpty and: [ each last isInteger ])
-					ifTrue: [ sum + each last abs ]
-					ifFalse: [ sum ] ].
+	ending := self findUniqueIntervalEnd.
 	sink := AsyncCounterSink new.
 	future := (1 to: ending) asAsyncStream forward: sink.
-	
+
 	future wait.
 
 	self assert: sink count equals: ending.
@@ -33,15 +28,10 @@ AsyncMemoryExamples >> closedStreamExample [
 { #category : #accessing }
 AsyncMemoryExamples >> dirtyBlockExample [
 	"Checks to ensure that streams are gc'd even when using 'dirty' blocks"
+
 	<gtExample>
 	| sink future ending |
-
-	ending := Interval allInstances
-			inject: 12345
-			into: [ :sum :each | 
-				(each notEmpty and: [ each last isInteger ])
-					ifTrue: [ sum + each last abs ]
-					ifFalse: [ sum ] ].
+	ending := self findUniqueIntervalEnd.
 	sink := AsyncCounterSink new.
 	future := [ :array | 
 		((1 to: ending) asAsyncStream collect: [ :each | each * array last ])
@@ -56,17 +46,24 @@ AsyncMemoryExamples >> dirtyBlockExample [
 ]
 
 { #category : #accessing }
-AsyncMemoryExamples >> leakExample [
-	"Checks to ensure that streams are gc'd when unreferenced by sinks"
-
-	<gtExample>
-	| sink future ending |
+AsyncMemoryExamples >> findUniqueIntervalEnd [
+	| ending |
 	ending := Interval allInstances
 			inject: 12345
 			into: [ :sum :each | 
 				(each notEmpty and: [ each last isInteger ])
 					ifTrue: [ sum + each last abs ]
 					ifFalse: [ sum ] ].
+	^ ending
+]
+
+{ #category : #accessing }
+AsyncMemoryExamples >> leakExample [
+	"Checks to ensure that streams are gc'd when unreferenced by sinks"
+
+	<gtExample>
+	| sink future ending |
+	ending := self findUniqueIntervalEnd.
 	sink := AsyncCounterSink new.
 	future := (1 to: ending) asAsyncStream forward: sink.
 

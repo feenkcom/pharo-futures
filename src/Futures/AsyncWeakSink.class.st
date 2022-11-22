@@ -27,6 +27,11 @@ AsyncWeakSink >> isAlive [
 	^ (sink at: 1) notNil
 ]
 
+{ #category : #testing }
+AsyncWeakSink >> parentSink: anObject [
+	^ (sink at: 1) ifNotNil: [ :obj | obj parentSink: anObject ]
+]
+
 { #category : #'api - sink' }
 AsyncWeakSink >> pollClose: anAsynchronousContext [
 	"Flush any remaining output and close this sink, if necessary.

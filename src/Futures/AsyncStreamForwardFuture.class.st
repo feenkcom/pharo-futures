@@ -68,7 +68,7 @@ AsyncStreamForwardFuture >> stream: anAsynStream sink: anAsyncSink [
 	| aWeakSink |
 
 	aWeakSink := (AsyncWeakSink forSink: anAsyncSink).
-	aWeakSink parentSink: anAsynStream.
+	anAsyncSink parentSink: anAsynStream.
 	stream := AsyncOptionalValue some: anAsynStream weak.
 	sink := AsyncOptionalValue some: aWeakSink
 ]
