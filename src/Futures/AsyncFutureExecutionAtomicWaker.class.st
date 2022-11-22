@@ -26,6 +26,11 @@ AsyncFutureExecutionAtomicWaker >> register: aWaker [
 ]
 
 { #category : #'api - execution' }
+AsyncFutureExecutionAtomicWaker >> unregister [
+	monitor critical: [ waker := nil ]
+]
+
+{ #category : #'api - execution' }
 AsyncFutureExecutionAtomicWaker >> wakeUp [
 	monitor critical: [
 		waker ifNotNil: [ :aWaker |
