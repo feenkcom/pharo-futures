@@ -62,6 +62,15 @@ TAsyncFuture >> await: anExecutionSpecification [
 ]
 
 { #category : #'api - future' }
+TAsyncFuture >> awaitWithPassExceptionHandler [
+	"Execute the future asynchronously by allowing error to pass and raise a debugger if not caught."
+	<return: #TAsyncPromise>
+	
+	^ self await: (AsyncFutureExecutionConfiguration default
+		errorHandler: AsyncPassExceptionHandler new)
+]
+
+{ #category : #'api - future' }
 TAsyncFuture >> delayed: aDuration [
 	^ AsyncDelayedFuture forFuture: self delay: aDuration
 ]
