@@ -4,12 +4,15 @@ Extension { #name : #TAsyncFuture }
 TAsyncFuture >> debugWait [
 	"Debug only! Polls the future until its completion without using worker threads.
 	It might be useful for profiling streams and futures with Tally."
-	| aWaitTime |
+	| aWaitTime aContext |
 	
 	aWaitTime := 1 milliSecond.
 	
+	aContext := AsyncFutureExecutionContext new
+		waker: AsyncFutureDummyWaker new.
+	
 	[
-		(self poll: nil)
+		(self poll: aContext)
 			ifReady: [ :aReadyPoll | ^ aReadyPoll value ]
 			ifPending: [
 				aWaitTime wait.

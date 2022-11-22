@@ -70,6 +70,14 @@ TAsyncStream >> do: aBlock [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> ephemerous [
+	"Wraps the stream into a stream that references it ephemerously. A stream is closed upon mourning."
+	<return: #TAsyncStream>
+
+	^ AsyncEphemerousStream forStream: self
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> filter: aFilterBlock [
 	"Filters the values produced by this stream according to the provided asynchronous predicate."
 	<return: #TAsyncStream>
@@ -114,10 +122,9 @@ TAsyncStream >> forward: anAsyncSink [
 	This future will drive the stream to keep producing items until it is exhausted, sending each item to the sink.
 	The future references the Sink weakly and will stop polling the stream.
 	It will complete once the stream is exhausted, the sink has received and flushed all items, and the sink is closed."
-
 	<return: #TAsyncFuture>
-	anAsyncSink source: self.
-	^ AsyncStreamForwardFuture forStream: self weak sink: anAsyncSink
+
+	^ AsyncStreamForwardFuture forStream: self sink: anAsyncSink
 ]
 
 { #category : #'api - stream' }

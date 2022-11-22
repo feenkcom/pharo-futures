@@ -8,24 +8,53 @@ Class {
 }
 
 { #category : #accessing }
+AsyncMemoryExamples >> closedStreamExample [
+	<gtExample>
+	| sink future ending |
+	ending := self findUniqueIntervalEnd.
+	sink := AsyncCounterSink new.
+	future := (1 to: ending) asAsyncStream forward: sink.
+
+	future wait.
+
+	self assert: sink count equals: ending.
+
+	2 timesRepeat: [ Smalltalk garbageCollect ].
+
+	self
+		assert: (Interval allInstances noneSatisfy: [ :each | each last = ending ])
+]
+
+{ #category : #accessing }
 AsyncMemoryExamples >> dirtyBlockExample [
 	"Checks to ensure that streams are gc'd even when using 'dirty' blocks"
 
 	<gtExample>
-| sink future ending |
-ending := Interval allInstances
-		inject: 12345
-		into: [ :sum :each | 
-			(each notEmpty and: [ each last isInteger ])
-				ifTrue: [ sum + each last abs ]
-				ifFalse: [ sum ] ].
-sink := AsyncCounterSink new.
-future := [:array | ((1 to: ending) asAsyncStream
-		collect: [ :each | each * array last ]) forward: sink] value: {sink. 2}.
-sink := nil.
-Smalltalk garbageCollect.
+	| sink future ending |
+	ending := self findUniqueIntervalEnd.
+	sink := AsyncCounterSink new.
+	future := [ :array | 
+		((1 to: ending) asAsyncStream collect: [ :each | each * array last ])
+			forward: sink ]
+			value: {sink.
+					2}.
+	sink := nil.
+	2 timesRepeat: [ Smalltalk garbageCollect ].
 
-self assert: (Interval allInstances noneSatisfy: [ :each | each last = ending ])
+	self
+		assert: (Interval allInstances noneSatisfy: [ :each | each last = ending ])
+]
+
+{ #category : #accessing }
+AsyncMemoryExamples >> findUniqueIntervalEnd [
+	| ending |
+	ending := Interval allInstances
+			inject: 12345
+			into: [ :sum :each | 
+				(each notEmpty and: [ each last isInteger ])
+					ifTrue: [ sum + each last abs ]
+					ifFalse: [ sum ] ].
+	^ ending
 ]
 
 { #category : #accessing }
@@ -34,16 +63,12 @@ AsyncMemoryExamples >> leakExample [
 
 	<gtExample>
 	| sink future ending |
-	ending := Interval allInstances
-			inject: 12345
-			into: [ :sum :each | 
-				(each notEmpty and: [ each last isInteger ])
-					ifTrue: [ sum + each last abs ]
-					ifFalse: [ sum ] ].
+	ending := self findUniqueIntervalEnd.
 	sink := AsyncCounterSink new.
 	future := (1 to: ending) asAsyncStream forward: sink.
+
 	sink := nil.
-	Smalltalk garbageCollect.
+	2 timesRepeat: [ Smalltalk garbageCollect ].
 
 	self
 		assert: (Interval allInstances noneSatisfy: [ :each | each last = ending ])
@@ -56,7 +81,7 @@ AsyncMemoryExamples >> weakExample [
 	sink := AsyncCounterSink new.
 	future := (1 to: 1000) asAsyncStream forward: sink.
 
-	Smalltalk garbageCollect.
+	2 timesCollect: [ Smalltalk garbageCollect ].
 
 	future wait.
 	self assert: sink count equals: 1000
@@ -84,7 +109,7 @@ AsyncMemoryExamples >> weakGroupByExample [
 								at: false putSink: sink4;
 								yourself);
 					yourself).
-	Smalltalk garbageCollect.
+	2 timesRepeat: [ Smalltalk garbageCollect ].
 
 	future wait.
 	{sink1.

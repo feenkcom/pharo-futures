@@ -84,7 +84,8 @@ AsyncSpreadSink >> sinks: aCollectionOfSinks [
 		assert: [ aCollectionOfSinks allSatisfy: [ :eachSink | eachSink notNil ] ]
 		description: [ 'Sinks must not be nil' ].
 
-	sinks := aCollectionOfSinks
+	sinks := aCollectionOfSinks.
+	sinks do: [ :eachSink | eachSink parentSink: self ]
 ]
 
 { #category : #'api - sink' }

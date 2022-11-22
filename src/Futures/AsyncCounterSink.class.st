@@ -30,6 +30,11 @@ AsyncCounterSink >> count [
 ]
 
 { #category : #initialization }
+AsyncCounterSink >> counter: anInitialvalue [
+	count := anInitialvalue
+]
+
+{ #category : #initialization }
 AsyncCounterSink >> initialize [
 	super initialize.
 	

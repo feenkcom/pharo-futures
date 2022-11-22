@@ -97,7 +97,9 @@ AsyncFanoutSink >> sinkA: aSinkA sinkB: aSinkB [
 		description: [ 'Sink `B` must be a sink, but was ', aSinkB class name ].
 
 	sinkA := aSinkA.
-	sinkB := aSinkB
+	sinkA parentSink: self.
+	sinkB := aSinkB.
+	sinkB parentSink: self
 ]
 
 { #category : #'api - sink' }

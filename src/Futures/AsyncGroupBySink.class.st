@@ -32,7 +32,7 @@ AsyncGroupBySink >> at: aGroupKey put: anAsyncSink [
 
 { #category : #initialization }
 AsyncGroupBySink >> at: aGroupKey putSink: anAsyncSink [
-	anAsyncSink source: self.
+	anAsyncSink parentSink: self.
 	groups
 		at: aGroupKey
 		put: anAsyncSink
