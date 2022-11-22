@@ -20,8 +20,7 @@ Class {
 
 { #category : #'instance creation' }
 AsyncStreamForwardFuture class >> forStream: anAsynStream sink: anAsyncSink [
-	anAsyncSink source: anAsynStream.
-	^ self new stream: anAsynStream weak sink: anAsyncSink
+	^ self new stream: anAsynStream sink: anAsyncSink
 ]
 
 { #category : #'api - future' }
@@ -67,6 +66,7 @@ AsyncStreamForwardFuture >> postSimilarCopy [
 
 { #category : #initialization }
 AsyncStreamForwardFuture >> stream: anAsynStream sink: anAsyncSink [
-	stream := AsyncOptionalValue some: anAsynStream.
+	anAsyncSink source: anAsynStream.
+	stream := AsyncOptionalValue some: anAsynStream weak.
 	sink := AsyncOptionalValue some: (AsyncWeakSink forSink: anAsyncSink)
 ]
