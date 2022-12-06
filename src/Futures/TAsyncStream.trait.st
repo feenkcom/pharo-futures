@@ -62,6 +62,16 @@ TAsyncStream >> collect: aMapBlock [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> debounce: aDuration [
+	"Return an item from the stream after aDuration period of silence"
+	<return: #TAsyncStream>
+
+	^ (AsyncDebounceStream forStream: self)
+		timeout: aDuration;
+		yourself
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> do: aBlock [
 	"Alias to TAsyncSteam>>#forEach:"
 	<return: #TAsyncFuture>
