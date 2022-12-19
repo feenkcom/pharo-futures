@@ -1,9 +1,9 @@
 "
-#Peak sink
+#Peek sink
 Stores the last received item by the sink. Is useful to keep track of the current item.
 
 ##Example
-{{gtExample:AsyncSinkExamples>>#peakSink}}
+{{gtExample:AsyncSinkExamples>>#peekSink}}
 "
 Class {
 	#name : #AsyncPeekSink,
