@@ -139,13 +139,13 @@ AsyncSinkExamples >> injectIntoSink [
 ]
 
 { #category : #examples }
-AsyncSinkExamples >> peakSink [
+AsyncSinkExamples >> peekSink [
 	<gtExample>
 	| stream sink |
 	
 	stream := (1 to: 5) asAsyncStream.
 
-	sink := AsyncPeakSink new.
+	sink := AsyncPeekSink new.
 	(sink sendAll: stream) wait.
 
 	self assert: sink value equals: 5.
