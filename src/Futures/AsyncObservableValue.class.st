@@ -83,6 +83,19 @@ AsyncObservableValue >> observe: anAsyncSink [
 	^ anObserver
 ]
 
+{ #category : #'api - obervable' }
+AsyncObservableValue >> observeNext [
+	"Create a new observer of this value which is a stream that becomes ready when the value of the observable changes.
+	Please note, that compared to #observe, the returned observable is not initialized with the existing value"
+	<return: #TAsyncStream>
+	| anObserver |
+
+	anObserver := AsyncObservableValue observer.
+	sinks add: anObserver.
+
+	^ anObserver
+]
+
 { #category : #'api - sink' }
 AsyncObservableValue >> pollClose: anAsynchronousContext [
 	"Flush any remaining output and close this sink, if necessary.
