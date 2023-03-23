@@ -67,6 +67,11 @@ AsyncMutex >> printOn: aStream [
 ]
 
 { #category : #'api - monitor' }
+AsyncMutex >> value [
+	^ self lock: [ :aValue | aValue ]
+]
+
+{ #category : #'api - monitor' }
 AsyncMutex >> value: aValue [
 	self lock: [ value := aValue ]
 ]
