@@ -35,6 +35,13 @@ AsyncObservableValue class >> observe: anAsyncStream [
 ]
 
 { #category : #'instance creation' }
+AsyncObservableValue class >> observe: anAsyncStream executionConfiguration: anAsyncFutureExecutionConfiguration [
+	^ self observer
+		setupStream: anAsyncStream executionConfiguration: anAsyncFutureExecutionConfiguration;
+		yourself
+]
+
+{ #category : #'instance creation' }
 AsyncObservableValue class >> observer [
 	^ self basicNew
 		initialize;
@@ -43,6 +50,11 @@ AsyncObservableValue class >> observer [
 
 { #category : #converting }
 AsyncObservableValue >> asAsyncObservable [
+	^ self
+]
+
+{ #category : #converting }
+AsyncObservableValue >> asAsyncObservable: anAsyncFutureExecutionConfiguration [
 	^ self
 ]
 
