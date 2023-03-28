@@ -16,6 +16,13 @@ TAsyncStream >> asAsyncObservable [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> asAsyncObservable: anAsyncFutureExecutionConfiguration [
+	^ AsyncObservableValue 
+		observe: self 
+		executionConfiguration: anAsyncFutureExecutionConfiguration
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> asAsyncStream [
 	^ self
 ]

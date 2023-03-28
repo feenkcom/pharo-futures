@@ -14,6 +14,13 @@ Class {
 }
 
 { #category : #'instance creation' }
+AsyncObservableValue class >> executionConfiguration: anAsyncFutureExecutionConfiguration [
+	^ self observer
+		setupStreamSelf: anAsyncFutureExecutionConfiguration;
+		yourself
+]
+
+{ #category : #'instance creation' }
 AsyncObservableValue class >> new [
 	^ self observer
 		setupStreamSelf;
@@ -28,6 +35,13 @@ AsyncObservableValue class >> observe: anAsyncStream [
 ]
 
 { #category : #'instance creation' }
+AsyncObservableValue class >> observe: anAsyncStream executionConfiguration: anAsyncFutureExecutionConfiguration [
+	^ self observer
+		setupStream: anAsyncStream executionConfiguration: anAsyncFutureExecutionConfiguration;
+		yourself
+]
+
+{ #category : #'instance creation' }
 AsyncObservableValue class >> observer [
 	^ self basicNew
 		initialize;
@@ -36,6 +50,11 @@ AsyncObservableValue class >> observer [
 
 { #category : #converting }
 AsyncObservableValue >> asAsyncObservable [
+	^ self
+]
+
+{ #category : #converting }
+AsyncObservableValue >> asAsyncObservable: anAsyncFutureExecutionConfiguration [
 	^ self
 ]
 
@@ -186,8 +205,25 @@ AsyncObservableValue >> setupStream: aStream [
 ]
 
 { #category : #initialization }
+AsyncObservableValue >> setupStream: aStream executionConfiguration: anAsyncFutureExecutionConfiguration [
+	stream := aStream.
+	(promise := ((AsyncWeakStream forStream: aStream) forward: self) 
+		await: anAsyncFutureExecutionConfiguration)
+			"Do not use block closures here, otherwise it will start to leak"
+			then: #yourself
+			otherwise: #debug
+]
+
+{ #category : #initialization }
 AsyncObservableValue >> setupStreamSelf [
 	self setupStream: self
+]
+
+{ #category : #initialization }
+AsyncObservableValue >> setupStreamSelf: anAsyncFutureExecutionConfiguration [
+	self 
+		setupStream: self 
+		executionConfiguration: anAsyncFutureExecutionConfiguration
 ]
 
 { #category : #'api - sink' }
