@@ -95,8 +95,35 @@ AsyncAbstractOrderedCollection >> privateAt: anIndex [
 ]
 
 { #category : #'private - adding / removing' }
+AsyncAbstractOrderedCollection >> privateRemove: anObject [
+	"Try to remove a given object from the collection"
+	<return: #AsyncOptionalValue>
+
+	^ AsyncOptionalValue some: (collection
+		remove: anObject
+		ifAbsent: [ ^ AsyncOptionalValue none ])
+]
+
+{ #category : #'private - adding / removing' }
 AsyncAbstractOrderedCollection >> privateRemoveAll [
 	collection removeAll
+]
+
+{ #category : #'adding / removing' }
+AsyncAbstractOrderedCollection >> remove: anObject [
+	self
+		remove: anObject
+		ifAbsent: [ ]
+]
+
+{ #category : #'adding / removing' }
+AsyncAbstractOrderedCollection >> remove: anObject ifAbsent: aBlock [
+	| wasRemoved |
+	
+	wasRemoved := monitor critical: [ self privateRemove: anObject ].
+	^ wasRemoved
+		ifSome: [ :aValue | aValue ]
+		ifNone: aBlock
 ]
 
 { #category : #'adding / removing' }
