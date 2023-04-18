@@ -23,20 +23,14 @@ AsyncStreamTransitionBufferExamples >> bufferOnLargeStream [
 { #category : #accessing }
 AsyncStreamTransitionBufferExamples >> getAtLast [
 	<gtExample>
-	<noTest>
 	| aTransitionBuffer theLastIndex |
 	aTransitionBuffer := self bufferOnLargeStream.
 
 	self assert: aTransitionBuffer size equals: 20.
 
 	theLastIndex := aTransitionBuffer size.
-	
+
 	self assert: (aTransitionBuffer at: theLastIndex) equals: theLastIndex.
-	
-	"asking for the last items triggers a preloading"
-	aTransitionBuffer wait.
-	
-	self assert: aTransitionBuffer size equals: 40.
 
 	^ aTransitionBuffer
 ]
@@ -44,17 +38,31 @@ AsyncStreamTransitionBufferExamples >> getAtLast [
 { #category : #accessing }
 AsyncStreamTransitionBufferExamples >> preloadUntilFound [
 	<gtExample>
-	| aTransitionBuffer theItem |
+	| aTransitionBuffer theItem aScanPromise |
 	aTransitionBuffer := self bufferOnLargeStream.
 
 	self assert: aTransitionBuffer size equals: 20.
 
-	theItem := (aTransitionBuffer preloadUntilFoundSuchThat: [ :each | each = 510 ])
-			wait.
-
+	aScanPromise := aTransitionBuffer preloadUntilFoundSuchThat: [ :each | each = 510 ].
+	aTransitionBuffer wait.
+	
+	self assert: aTransitionBuffer size equals: 20.
+	self assert: aTransitionBuffer newBuffer size >= 510.
+	self assert: aScanPromise isPending.
+	
+	aTransitionBuffer fulfillPendingScanPromisses.
+	
+	self assert: aTransitionBuffer size equals: 20.
+	self assert: aTransitionBuffer newBuffer size >= 510.
+	self assert: aScanPromise isFulfilled.
+	
+	theItem := aScanPromise wait.
+	
+	self assert: theItem isNotNil.
 	self assert: theItem index equals: 510.
 	self assert: theItem item equals: 510.
-	self assert: aTransitionBuffer size >= 510.
+	self assert: aTransitionBuffer size equals: 20.
+	self assert: aTransitionBuffer newBuffer size >= 510.
 
 	^ aTransitionBuffer
 ]
