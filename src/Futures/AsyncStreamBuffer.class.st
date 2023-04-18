@@ -177,18 +177,6 @@ AsyncStreamBuffer >> executionConfiguration: anObject [
 	executionConfiguration := anObject
 ]
 
-{ #category : #'gt - extensions' }
-AsyncStreamBuffer >> gtBufferedItemsFor: aView [
-	<gtView>
-	
-	^ aView list
-		title: 'Buffered';
-		priority: 5;
-		items: [ bufferSink collection asArray ];
-		updateWhen: Announcement in: (announcer ifNil: [ announcer := Announcer new ]);
-		actionUpdateButton
-]
-
 { #category : #'api - accessing' }
 AsyncStreamBuffer >> id [
 	^ id

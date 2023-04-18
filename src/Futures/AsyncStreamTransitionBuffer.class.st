@@ -26,7 +26,7 @@ AsyncStreamTransitionBuffer class >> forStream: aStream previousBuffer: anAsyncS
 
 { #category : #accessing }
 AsyncStreamTransitionBuffer >> at: anIndex [
-	^ previousItems at: anIndex
+	^ (newBuffer at: anIndex) ifNil: [ previousItems at: anIndex ]
 ]
 
 { #category : #'api - loading' }
@@ -79,7 +79,7 @@ AsyncStreamTransitionBuffer >> preloadUntilFoundSuchThat: aBlock [
 { #category : #accessing }
 AsyncStreamTransitionBuffer >> size [
 	"Return the current buffer length"
-	^ previousItems size
+	^ previousItems size max: newBuffer size
 ]
 
 { #category : #'api - loading' }
@@ -109,4 +109,12 @@ AsyncStreamTransitionBuffer >> stream: aStream previousBuffer: anAsyncStreamBuff
 { #category : #'announcer - subscription' }
 AsyncStreamTransitionBuffer >> unsubscribe: anObject [
 	"Just for polymorphism with the {{gtClass:AsyncStreamBuffer}}"
+]
+
+{ #category : #'api - loading' }
+AsyncStreamTransitionBuffer >> wait [
+	"! Debugging and testing only !"
+	"Synchronously wait for the current loading to finish"
+
+	newBuffer wait
 ]

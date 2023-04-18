@@ -1,0 +1,60 @@
+Class {
+	#name : #AsyncStreamTransitionBufferExamples,
+	#superclass : #Object,
+	#category : #'Futures-Examples-Buffer'
+}
+
+{ #category : #accessing }
+AsyncStreamTransitionBufferExamples >> bufferOnLargeStream [
+	<gtExample>
+	| aTransitionBuffer aPreviousBuffer |
+	aPreviousBuffer := AsyncStreamBufferExamples new bufferOnLargeStream.
+
+	aTransitionBuffer := AsyncStreamTransitionBuffer
+			forStream: (1 to: 10000) asAsyncStream
+			previousBuffer: aPreviousBuffer.
+
+	self assert: aPreviousBuffer size equals: 20.
+	self assert: aTransitionBuffer size equals: 20.
+			
+	^ aTransitionBuffer
+]
+
+{ #category : #accessing }
+AsyncStreamTransitionBufferExamples >> getAtLast [
+	<gtExample>
+	<noTest>
+	| aTransitionBuffer theLastIndex |
+	aTransitionBuffer := self bufferOnLargeStream.
+
+	self assert: aTransitionBuffer size equals: 20.
+
+	theLastIndex := aTransitionBuffer size.
+	
+	self assert: (aTransitionBuffer at: theLastIndex) equals: theLastIndex.
+	
+	"asking for the last items triggers a preloading"
+	aTransitionBuffer wait.
+	
+	self assert: aTransitionBuffer size equals: 40.
+
+	^ aTransitionBuffer
+]
+
+{ #category : #accessing }
+AsyncStreamTransitionBufferExamples >> preloadUntilFound [
+	<gtExample>
+	| aTransitionBuffer theItem |
+	aTransitionBuffer := self bufferOnLargeStream.
+
+	self assert: aTransitionBuffer size equals: 20.
+
+	theItem := (aTransitionBuffer preloadUntilFoundSuchThat: [ :each | each = 510 ])
+			wait.
+
+	self assert: theItem index equals: 510.
+	self assert: theItem item equals: 510.
+	self assert: aTransitionBuffer size >= 510.
+
+	^ aTransitionBuffer
+]
