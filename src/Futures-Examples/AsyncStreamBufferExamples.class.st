@@ -1,7 +1,7 @@
 Class {
 	#name : #AsyncStreamBufferExamples,
 	#superclass : #Object,
-	#category : #'Futures-Examples'
+	#category : #'Futures-Examples-Buffer'
 }
 
 { #category : #examples }
