@@ -2,8 +2,8 @@
 #Transition buffer
 Is a helper buffer to fill the gap between two buffers created for different streams. {{gtClass:AsyncStreamBuffer}} loads items in chunks and is created with empty buffer. When used in the UI, this means that if a stream is replaced, the widgets would momentarily show an empty list which results in a flickering. To solve that problem, developers should use a transition buffer which tries to preload as many items as there were in the previous buffer. By doing so, we give UI a chance to preserve the scrolling possition and reduce unwanted updates.
 
-{{gtMethod:AsyncStreamTransitionBuffer>>#bufferLoadingPromise}} is fulfilled when an underlying new buffer is ready and is able to provide a new collection of items.
-{{gtMethod:AsyncStreamTransitionBuffer>>#fulfillPendingScanPromisses}} must be called when the underlying new buffer replaces the {{gtClass:AsyncStreamTransitionBuffer}}. 
+{{gtMethod:AsyncStreamTransitionBuffer>>#bufferLoadingPromise}} is fulfislled when an underlying new buffer is ready and is able to provide a new collection of items.
+{{gtMethod:AsyncStreamTransitionBuffer>>#fulfillPendingScanPromises}} must be called when the underlying new buffer replaces the {{gtClass:AsyncStreamTransitionBuffer}}. 
 "
 Class {
 	#name : #AsyncStreamTransitionBuffer,
