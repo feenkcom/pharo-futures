@@ -50,7 +50,7 @@ AsyncStreamTransitionBufferExamples >> preloadUntilFound [
 	self assert: aTransitionBuffer newBuffer size >= 510.
 	self assert: aScanPromise isPending.
 	
-	aTransitionBuffer fulfillPendingScanPromisses.
+	aTransitionBuffer fulfillPendingScanPromises.
 	
 	self assert: aTransitionBuffer size equals: 20.
 	self assert: aTransitionBuffer newBuffer size >= 510.

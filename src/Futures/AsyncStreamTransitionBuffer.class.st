@@ -47,7 +47,7 @@ AsyncStreamTransitionBuffer >> executionConfiguration [
 ]
 
 { #category : #'api - loading' }
-AsyncStreamTransitionBuffer >> fulfillPendingScanPromisses [
+AsyncStreamTransitionBuffer >> fulfillPendingScanPromises [
 	"See #preloadUntilFoundSuchThat: for more information"
 
 	pendingScanPromises keysAndValuesDo: [ :aPendingPromise :anOptionalValue | 
@@ -102,7 +102,7 @@ AsyncStreamTransitionBuffer >> preloadUntilFoundSuchThat: aBlock [
 	| aPendingPromise |
     "The pendingScanPromises must be invoked (fulfilled) only after 
     this buffer is no longer in use. My users are reponsible for 
-    the invocation by calling #fulfillPendingScanPromisses.
+    the invocation by calling #fulfillPendingScanPromises.
     In the mean time, all pending scan promises are stored."
     aPendingPromise := AsyncPendingPromise new.
     pendingScanPromises at: aPendingPromise put: AsyncOptionalValue none.
