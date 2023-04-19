@@ -59,7 +59,7 @@ AsyncSharedDictionary >> keysAndValuesDo: aBlock [
 
 { #category : #accessing }
 AsyncSharedDictionary >> remove: anObject ifAbsent: exceptionBlock [
-	^ monitor critical: [ dictionary remove: anObject ifAbsent: exceptionBlock ]
+	^ monitor critical: [ dictionary removeKey: anObject ifAbsent: exceptionBlock ]
 ]
 
 { #category : #accessing }
