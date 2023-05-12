@@ -19,6 +19,11 @@ Class {
 }
 
 { #category : #'instance creation' }
+AsyncMapStream class >> mapBlock: aBlock stream: anAsyncStream [
+	^ self new stream: anAsyncStream mapBlock: aBlock
+]
+
+{ #category : #'instance creation' }
 AsyncMapStream class >> stream: anAsyncStream mapBlock: aBlock [
 	^ self new stream: anAsyncStream mapBlock: aBlock
 ]
