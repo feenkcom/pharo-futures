@@ -24,11 +24,6 @@ TGtStreamGroup >> asAsyncStream [
 ]
 
 { #category : #accessing }
-TGtStreamGroup >> asBrItemsProvider [
-	^ BrStreamItemsProvider forStream: self stream
-]
-
-{ #category : #accessing }
 TGtStreamGroup >> asyncSimilarCopy [
 	^ self explicitRequirement
 ]
