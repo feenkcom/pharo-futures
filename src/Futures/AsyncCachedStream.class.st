@@ -23,6 +23,21 @@ AsyncCachedStream class >> forStream: anAsyncStream [
 	^ self new stream: anAsyncStream
 ]
 
+{ #category : #accessing }
+AsyncCachedStream >> contents [
+	"Convenience method, for when we really just want the collection and not a future."
+
+	| collection |
+	collection := OrderedCollection new.
+	(self asyncSimilarCopy do: [ :each | collection add: each ]) await.
+	^ collection
+]
+
+{ #category : #accessing }
+AsyncCachedStream >> items [
+	^ self contents
+]
+
 { #category : #'api - stream' }
 AsyncCachedStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
