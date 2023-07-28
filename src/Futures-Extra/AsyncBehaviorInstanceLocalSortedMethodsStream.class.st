@@ -1,11 +1,8 @@
 Class {
 	#name : #AsyncBehaviorInstanceLocalSortedMethodsStream,
-	#superclass : #Object,
-	#traits : 'TAsyncStream',
-	#classTraits : 'TAsyncStream classTrait',
+	#superclass : #AsyncAbstractWrappedStream,
 	#instVars : [
-		'behavior',
-		'stream'
+		'behavior'
 	],
 	#category : #'Futures-Extra'
 }

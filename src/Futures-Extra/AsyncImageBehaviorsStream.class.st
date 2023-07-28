@@ -1,11 +1,6 @@
 Class {
 	#name : #AsyncImageBehaviorsStream,
-	#superclass : #Object,
-	#traits : 'TAsyncStream',
-	#classTraits : 'TAsyncStream classTrait',
-	#instVars : [
-		'stream'
-	],
+	#superclass : #AsyncAbstractWrappedStream,
 	#category : #'Futures-Extra'
 }
 
