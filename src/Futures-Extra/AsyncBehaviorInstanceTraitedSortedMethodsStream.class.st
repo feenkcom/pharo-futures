@@ -1,45 +1,13 @@
 Class {
 	#name : #AsyncBehaviorInstanceTraitedSortedMethodsStream,
-	#superclass : #AsyncAbstractWrappedStream,
-	#instVars : [
-		'behavior'
-	],
+	#superclass : #AsyncBehaviorStream,
 	#category : #'Futures-Extra'
 }
 
-{ #category : #'instance creation' }
-AsyncBehaviorInstanceTraitedSortedMethodsStream class >> forBehavior: aBehavior [
-	^ self new behavior: aBehavior
-]
-
-{ #category : #comparing }
-AsyncBehaviorInstanceTraitedSortedMethodsStream >> = anObject [
-
-	"Answer whether the receiver and anObject represent the same object."
-
-	self == anObject ifTrue: [ ^ true ].
-	self class = anObject class ifFalse: [ ^ false ].
-	^ behavior = anObject behavior
-]
-
-{ #category : #accessing }
-AsyncBehaviorInstanceTraitedSortedMethodsStream >> behavior [
-
-	^ behavior
-]
-
 { #category : #initialization }
-AsyncBehaviorInstanceTraitedSortedMethodsStream >> behavior: aBehavior [
-	behavior := aBehavior.
-	stream := AsyncSequenceStream forCollection: [ behavior selectors sorted: GtMethodsSortFunction new ] asAsyncFuture
-]
-
-{ #category : #comparing }
-AsyncBehaviorInstanceTraitedSortedMethodsStream >> hash [
-
-	"Answer an integer value that is related to the identity of the receiver."
-
-	^ behavior hash
+AsyncBehaviorInstanceTraitedSortedMethodsStream >> initializeStream [
+	stream := AsyncSequenceStream
+			forCollection: [ behavior selectors sorted: GtMethodsSortFunction new ] asAsyncFuture
 ]
 
 { #category : #'api - stream' }
@@ -60,11 +28,4 @@ AsyncBehaviorInstanceTraitedSortedMethodsStream >> pollNext: anAsynchronousConte
 				behavior
 					compiledMethodAt: aSelector
 					ifAbsent: [ ^ AsyncPoll pending ] ] ]
-]
-
-{ #category : #'api - stream copy' }
-AsyncBehaviorInstanceTraitedSortedMethodsStream >> postSimilarCopy [
-	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
-	
-	self behavior: behavior
 ]

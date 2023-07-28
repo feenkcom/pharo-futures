@@ -1,45 +1,13 @@
 Class {
 	#name : #AsyncBehaviorInstanceLocalMethodsStream,
-	#superclass : #AsyncAbstractWrappedStream,
-	#instVars : [
-		'behavior'
-	],
+	#superclass : #AsyncBehaviorStream,
 	#category : #'Futures-Extra'
 }
 
-{ #category : #'instance creation' }
-AsyncBehaviorInstanceLocalMethodsStream class >> forBehavior: aBehavior [
-	^ self new behavior: aBehavior
-]
-
-{ #category : #comparing }
-AsyncBehaviorInstanceLocalMethodsStream >> = anObject [
-
-	"Answer whether the receiver and anObject represent the same object."
-
-	self == anObject ifTrue: [ ^ true ].
-	self class = anObject class ifFalse: [ ^ false ].
-	^ behavior = anObject behavior
-]
-
-{ #category : #accessing }
-AsyncBehaviorInstanceLocalMethodsStream >> behavior [
-
-	^ behavior
-]
-
 { #category : #initialization }
-AsyncBehaviorInstanceLocalMethodsStream >> behavior: aBehavior [
-	behavior := aBehavior.
-	stream := AsyncSequenceStream forCollection: [ behavior localSelectors ] asAsyncFuture
-]
-
-{ #category : #comparing }
-AsyncBehaviorInstanceLocalMethodsStream >> hash [
-
-	"Answer an integer value that is related to the identity of the receiver."
-
-	^ behavior hash
+AsyncBehaviorInstanceLocalMethodsStream >> initializeStream [
+	stream := AsyncSequenceStream
+			forCollection: [ behavior localSelectors ] asAsyncFuture
 ]
 
 { #category : #'api - stream' }
@@ -60,11 +28,4 @@ AsyncBehaviorInstanceLocalMethodsStream >> pollNext: anAsynchronousContext [
 				behavior
 					compiledMethodAt: aSelector
 					ifAbsent: [ ^ AsyncPoll pending ] ] ]
-]
-
-{ #category : #'api - stream copy' }
-AsyncBehaviorInstanceLocalMethodsStream >> postSimilarCopy [
-	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
-	
-	self behavior: behavior
 ]

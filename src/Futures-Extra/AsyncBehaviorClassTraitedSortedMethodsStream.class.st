@@ -5,8 +5,7 @@ Class {
 }
 
 { #category : #accessing }
-AsyncBehaviorClassTraitedSortedMethodsStream >> behavior: aBehavior [
-	behavior := aBehavior.
+AsyncBehaviorClassTraitedSortedMethodsStream >> initializeStream [
 	stream := AsyncSequenceStream
 			forCollection: [ (behavior classSide visibleMethods collect: #selector)
 					sorted: GtMethodsSortFunction new ] asAsyncFuture
