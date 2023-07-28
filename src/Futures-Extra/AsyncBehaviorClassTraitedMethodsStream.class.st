@@ -5,8 +5,7 @@ Class {
 }
 
 { #category : #accessing }
-AsyncBehaviorClassTraitedMethodsStream >> behavior: aBehavior [
-	super behavior: aBehavior.
+AsyncBehaviorClassTraitedMethodsStream >> initializeStream [
 	stream := AsyncSequenceStream
 			forCollection: [ behavior classSide visibleMethods collect: #selector ] asAsyncFuture
 ]

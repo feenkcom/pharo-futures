@@ -1,29 +1,31 @@
 Class {
 	#name : #AsyncBehaviorAllSubclassesStream,
-	#superclass : #AsyncAbstractWrappedStream,
-	#instVars : [
-		'behavior'
-	],
+	#superclass : #AsyncBehaviorStream,
 	#category : #'Futures-Extra'
 }
 
-{ #category : #'instance creation' }
-AsyncBehaviorAllSubclassesStream class >> forBehavior: aBehavior [
-	^ self new behavior: aBehavior
+{ #category : #comparing }
+AsyncBehaviorAllSubclassesStream >> = anObject [ 
+	"Answer whether the receiver and the argument represent the same 
+	object. If = is redefined in any subclass, consider also redefining the 
+	message hash."
+
+	^self == anObject
+]
+
+{ #category : #comparing }
+AsyncBehaviorAllSubclassesStream >> hash [
+	"Answer a SmallInteger whose value is related to the receiver's identity.
+	May be overridden, and should be overridden in any classes that define = "
+
+	^ self identityHash
 ]
 
 { #category : #initialization }
-AsyncBehaviorAllSubclassesStream >> behavior: aBehavior [
-	behavior := aBehavior.
-	stream := { AsyncBehaviorSubclassesStream forBehavior: behavior .
-		(((AsyncBehaviorSubclassesStream forBehavior: behavior)
-		select: [ :eachBehavior | eachBehavior subclasses notEmpty ])
-		collect: [ :eachBehavior | AsyncBehaviorAllSubclassesStream forBehavior: eachBehavior ]) flatten } asAsyncStream flatten
-]
-
-{ #category : #'api - stream copy' }
-AsyncBehaviorAllSubclassesStream >> postSimilarCopy [
-	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
-	
-	self behavior: behavior
+AsyncBehaviorAllSubclassesStream >> initializeStream [
+	stream := {AsyncBehaviorSubclassesStream forBehavior: behavior.
+			(((AsyncBehaviorSubclassesStream forBehavior: behavior)
+				select: [ :eachBehavior | eachBehavior subclasses notEmpty ])
+				collect: [ :eachBehavior | AsyncBehaviorAllSubclassesStream forBehavior: eachBehavior ])
+				flatten} asAsyncStream flatten
 ]
