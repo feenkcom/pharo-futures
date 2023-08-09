@@ -8,6 +8,6 @@ Class {
 AsyncBehaviorAllSortedInheritedMethodsStream >> initializeStreams [
 	instanceStream := AsyncBehaviorInstanceSortedInheritedMethodsStream
 			forBehavior: behavior.
-	classStream := AsyncBehaviorClassTraitedSortedMethodsStream
+	classStream := AsyncBehaviorSortedInheritedClassMethodsStream
 			forBehavior: behavior
 ]
