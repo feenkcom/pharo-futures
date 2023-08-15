@@ -81,12 +81,22 @@ AsyncWeakSink >> pollReady: anAsynchronousContext [
 AsyncWeakSink >> sink: aSink [
 	aSink parentSink: self.
 	sink := aSink asWeakReference.
-	aSink finalizationRegistry
-		add: aSink
-		executor: (ObjectFinalizer new
-			receiver: waker;
-			selector: #wakeUp;
-			arguments: #())
+	
+	self
+		forPharo11OrNewer: [
+			aSink finalizationRegistry
+				add: aSink
+				finalizer: (ObjectFinalizer new
+					receiver: waker;
+					selector: #wakeUp;
+					arguments: #()) ]
+		forPharo10: [
+			aSink finalizationRegistry
+				add: aSink
+				executor: (ObjectFinalizer new
+					receiver: waker;
+					selector: #wakeUp;
+					arguments: #()) ]
 ]
 
 { #category : #'api - sink' }

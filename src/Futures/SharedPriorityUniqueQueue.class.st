@@ -158,9 +158,11 @@ SharedPriorityUniqueQueue >> nextOrNilSuchThat: aBlock [
 	If no object has been sent, answer <nil> and leave me intact.
 	NOTA BENE:  aBlock MUST NOT contain a non-local return (^).
 	Ensure that the operation isn't terminated while within the monitor"
-
+	
 	self
-		assert: [ aBlock hasMethodReturn not ]
+		assert: [ self
+			forPharo11OrNewer: [ aBlock hasNonLocalReturn not ]
+			forPharo10: [ aBlock hasMethodReturn not ] ]
 		description: [ 'Must not have a local return' ].
 
 	^ [ monitor critical: [

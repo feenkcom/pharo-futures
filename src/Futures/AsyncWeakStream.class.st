@@ -54,10 +54,20 @@ AsyncWeakStream >> postSimilarCopy [
 { #category : #initialization }
 AsyncWeakStream >> stream: aStream [
 	stream := aStream asWeakReference.
-	aStream finalizationRegistry
-		add: aStream
-		executor: (ObjectFinalizer new
-			receiver: waker;
-			selector: #wakeUp;
-			arguments: #())
+
+	self
+		forPharo11OrNewer: [
+			aStream finalizationRegistry
+				add: aStream
+				finalizer: (ObjectFinalizer new
+					receiver: waker;
+					selector: #wakeUp;
+					arguments: #()) ]
+		forPharo10: [
+			aStream finalizationRegistry
+				add: aStream
+				executor: (ObjectFinalizer new
+					receiver: waker;
+					selector: #wakeUp;
+					arguments: #()) ]
 ]
