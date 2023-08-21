@@ -55,6 +55,11 @@ AsyncStreamCache >> pollAt: anIndex context: anAsynchronousContext [
 	] repeat
 ]
 
+{ #category : #accessing }
+AsyncStreamCache >> stream [
+	^ stream
+]
+
 { #category : #initialization }
 AsyncStreamCache >> stream: anAsyncStream [
 	stream := anAsyncStream.
