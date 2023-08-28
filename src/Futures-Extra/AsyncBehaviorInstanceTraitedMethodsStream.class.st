@@ -6,5 +6,5 @@ Class {
 
 { #category : #initialization }
 AsyncBehaviorInstanceTraitedMethodsStream >> initializeStream [
-	stream := AsyncSequenceStream forCollection: [ behavior methods ] asAsyncFuture
+	stream := AsyncSequenceStream forCollection: [ behavior instanceSide methods ] asAsyncFuture
 ]
