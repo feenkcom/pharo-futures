@@ -39,7 +39,7 @@ AsyncMemoryExamples >> dirtyBlockExample [
 			value: {sink.
 					2}.
 	sink := nil.
-	2 timesRepeat: [ Smalltalk garbageCollect ].
+	3 timesRepeat: [ Smalltalk garbageCollect ].
 
 	self
 		assert: (Interval allInstances noneSatisfy: [ :each | each last = ending ])
