@@ -12,8 +12,7 @@ Class {
 AsyncBehaviorMethodStream >> behavior: aBehavior [
 	behavior := aBehavior.
 	self initializeStreams.
-	stream := {instanceStream.
-			classStream} asAsyncStream flatten
+	stream := (instanceStream merge: classStream) withoutDuplicates
 ]
 
 { #category : #accessing }
