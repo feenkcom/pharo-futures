@@ -41,6 +41,14 @@ AsyncDelayedFuture >> poll: anAsynchronousContext [
 		ifFalse: [ ^ future poll: anAsynchronousContext ]
 ]
 
+{ #category : #'api - future copy' }
+AsyncDelayedFuture >> postSimilarCopy [
+	"Is called by similarCopy. self is a shallow copy, implementors should set the fields as necessary to complete the similar copy"
+	
+	future := future asyncSimilarCopy.
+	startTime := nil.
+]
+
 { #category : #private }
 AsyncDelayedFuture >> waitDuration [
 	^ DateAndTime now - (startTime ifNil:[ DateAndTime now ])

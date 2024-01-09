@@ -77,7 +77,7 @@ AsyncFutureExecutionConfiguration >> initialize [
 	
 	group := AsyncFutureExecutionUnspecifiedGroup uniqueInstance.
 	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
-	errorHandler := AsyncNoneErrorHandler uniqueInstance
+	errorHandler := AsyncPassExceptionHandler new
 ]
 
 { #category : #accessing }

@@ -15,6 +15,13 @@ AsyncOptionalValue class >> some: anObject [
 ]
 
 { #category : #controlling }
+AsyncOptionalValue >> ifNone: aNoneBlock [
+	^ self
+		ifSome: [ nil ]
+		ifNone: aNoneBlock
+]
+
+{ #category : #controlling }
 AsyncOptionalValue >> ifSome: aSomeBlock [
 	^ self
 		ifSome: aSomeBlock

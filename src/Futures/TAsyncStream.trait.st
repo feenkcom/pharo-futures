@@ -220,6 +220,15 @@ TAsyncStream >> map: aMapBlock key: aKeyBlock cache: anAsyncSharedDictionary [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> mapFuture: aMapBlock [
+	"Maps this stream's object to a Future, returning a new stream.
+	The provided closure is executed over all elements of this stream as they are made available."
+	<return: #TAsyncStream>
+
+	^ AsyncMapFutureStream stream: self mapBlock: aMapBlock
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> merge: aStream [
 	^ (AsyncSequenceStream forCollection: { self . aStream }) flatten
 ]
@@ -303,6 +312,16 @@ TAsyncStream >> terminatable [
 	<return: #TAsyncStream>
 
 	^ AsyncTerminatableStream forStream: self
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> throttle: aDuration [
+	"Return an item once in every specified time interval"
+	<return: #TAsyncStream>
+
+	^ (AsyncThrottleStream forStream: self)
+		timeout: aDuration;
+		yourself
 ]
 
 { #category : #'api - stream' }

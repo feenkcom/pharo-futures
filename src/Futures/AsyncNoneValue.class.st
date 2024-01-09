@@ -53,3 +53,8 @@ AsyncNoneValue >> isSome [
 AsyncNoneValue >> map: aBlock [
 	^ self
 ]
+
+{ #category : #generated }
+AsyncNoneValue >> value [
+	^ nil
+]
