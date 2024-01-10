@@ -15,6 +15,11 @@ AsyncPoll class >> ready: anObject [
 ]
 
 { #category : #'operators-mapping' }
+AsyncPoll >> asStreamPoll [
+	^ self subclassResponsibility
+]
+
+{ #category : #'operators-mapping' }
 AsyncPoll >> ifPending: aPendingBlock [
 	^ self isReady
 		ifTrue: [ self ]
