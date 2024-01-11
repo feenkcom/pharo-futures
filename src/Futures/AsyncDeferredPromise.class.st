@@ -99,6 +99,13 @@ AsyncDeferredPromise >> newChainedPromises [
 ]
 
 { #category : #'private - state' }
+AsyncDeferredPromise >> notifyPotentiallyIndefinitelyPending [
+	mutex critical: [
+		state := AsyncIndefinitelyPendingPromiseState new.
+		chainedPromises do: [ :eachPromise | eachPromise notifyPotentiallyIndefinitelyPending ] ]
+]
+
+{ #category : #'private - state' }
 AsyncDeferredPromise >> rejectWithError: anError [
 	self subclassResponsibility
 ]
@@ -210,4 +217,24 @@ AsyncDeferredPromise >> wait [
 	aSemaphore wait.
 	anAwaitError ifNotNil: [ ^ anAwaitError ].
 	^ anAwaitResult
+]
+
+{ #category : #'api - promise' }
+AsyncDeferredPromise >> whenIndefinitelyPending: aBlock [
+	mutex critical: [
+		state isPending
+			ifTrue: [
+				| aCallbackPromise |
+
+				aCallbackPromise := AsyncWhenIndefinitelyPendingPromise new
+					callback: aBlock.
+
+				chainedPromises add: aCallbackPromise.
+				
+				state isPendingIndefinitely
+					ifTrue: [ aCallbackPromise notifyPotentiallyIndefinitelyPending ].
+				
+				^ aCallbackPromise ] ].
+	
+	^ self
 ]

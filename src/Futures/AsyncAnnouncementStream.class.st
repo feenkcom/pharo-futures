@@ -53,7 +53,7 @@ AsyncAnnouncementStream >> pollNext: anAsynchronousContext [
 		theAnnouncements
 			ifEmpty: [
 				waker register: anAsynchronousContext waker.
-				AsyncPoll pending ]
+				AsyncPoll indefinitelyPending ]
 			ifNotEmpty: [
 				AsyncPoll ready: (AsyncOptionalValue some: theAnnouncements removeFirst) ] ]
 ]

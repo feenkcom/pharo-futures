@@ -19,7 +19,7 @@ TAsyncFuture >> asAsyncFuture [
 
 { #category : #'api - future' }
 TAsyncFuture >> asAsyncPromise [
-	^ AsyncFuturePromise new future: self
+	^ self await
 ]
 
 { #category : #'api - future' }
@@ -51,7 +51,7 @@ TAsyncFuture >> await: anExecutionSpecification [
 	<return: #TAsyncPromise>
 	| aPromise |
 
-	aPromise := AsyncPendingFuturePromise new
+	aPromise := AsyncFuturePromise new
 		priority: anExecutionSpecification priority;
 		group: anExecutionSpecification group;
 		errorHandler: anExecutionSpecification errorHandler;

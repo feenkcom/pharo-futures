@@ -197,7 +197,9 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 
 		aFutureResult
 			ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
-			ifPending: [ "it is already in the queue" ].
+			ifPending: [ :aPendingPoll | "it is already in the queue"
+				aPendingPoll isPendingIndefinitely
+					ifTrue: [ aAsyncPendingFuturePromise notifyPotentiallyIndefinitelyPending ] ].
 
 		aSemaphore signal
 	] ]
@@ -290,7 +292,7 @@ AsyncFutureThreadPoolWorker >> privateUnschedule: anAsyncPendingFuturePromise [
 AsyncFutureThreadPoolWorker >> privateWakeUpWorkerLoop [
 	"Wake up the worker loop by enqueuing a future that does nothing"
 	
-	monitor critical: [ localQueue pushBack: (AsyncPendingFuturePromise new future: #wakeup asAsyncFuture) ]
+	monitor critical: [ localQueue pushBack: (AsyncFuturePromise new future: #wakeup asAsyncFuture) ]
 ]
 
 { #category : #'api - worker' }
@@ -322,7 +324,7 @@ AsyncFutureThreadPoolWorker >> shutdown [
 	<return: #TAsyncPromise>
 	| aShutdownPromise |
 	
-	aShutdownPromise := AsyncPendingFuturePromise new future: #shutdown asAsyncFuture.
+	aShutdownPromise := AsyncFuturePromise new future: #shutdown asAsyncFuture.
 	
 	monitor critical: [	
 		self isRunning
@@ -369,7 +371,7 @@ AsyncFutureThreadPoolWorker >> startup [
 
 		aPharoProcess resume ].
 
-	aStartupPromise := AsyncPendingFuturePromise new future: #startup asAsyncFuture.
+	aStartupPromise := AsyncFuturePromise new future: #startup asAsyncFuture.
 	self schedule: aStartupPromise.
 	^ aStartupPromise
 ]

@@ -35,7 +35,7 @@ AsyncThrottleStream >> pollNext: anAsynchronousContext [
 	 - Poll::Ready(Some(val)) means that the stream has successfully produced a value, val, and may produce further values on subsequent poll_next calls.
 	 - Poll::Ready(None) means that the stream has terminated, and poll_next should not be invoked again."
 	<return: #AsyncPoll>
-	| timeElapsed aCurrentPoll aPoll anEmittedValue |
+	| timeElapsed aCurrentPoll anEmittedValue |
 	
 	"Quick return if the stream is done and last item was emitted"
 	(stream isDone and: [ last isNone ])
@@ -50,20 +50,18 @@ AsyncThrottleStream >> pollNext: anAsynchronousContext [
 
 			^ AsyncPoll ready: anEmittedValue ].
 		
-	"poll all until pending"
-	aPoll := AsyncPoll pending.
 	[
 		aCurrentPoll := stream pollNext: anAsynchronousContext.
 	] doWhileTrue: [
 		aCurrentPoll
 			ifReady: [ :aReadyPoll |
-				aPoll := aReadyPoll.
 				"we continue as long as timeout is reached and unless stream finished"
-				aPoll value isSome and: [ (DateAndTime now - previousPollTime) < timeout ] ]
+				aCurrentPoll value isSome and: [ (DateAndTime now - previousPollTime) < timeout ] ]
 			"if pending we stop"
-			ifPending: [ false ] ].
+			ifPending: [ :aPendingPoll |
+				false ] ].
 	
-	aPoll ifReady: [ :aReadyPoll |
+	aCurrentPoll ifReady: [ :aReadyPoll |
 		aReadyPoll value isSome
 			ifTrue: [ last := aReadyPoll value ] ].
 
@@ -73,7 +71,7 @@ AsyncThrottleStream >> pollNext: anAsynchronousContext [
 	
 	"stream is not ready"
 	last isNone
-		ifTrue: [ ^ AsyncPoll pending ].
+		ifTrue: [ ^ aCurrentPoll ].
 
 	timeElapsed := DateAndTime now - previousPollTime.
 	timeElapsed < timeout

@@ -19,7 +19,7 @@ AsyncFulfilledPromise >> asyncThen: onFulfilledBlock [
 		isSynchronous: false)
 			value: value ] asAsyncFuture.
 
-	^ AsyncFuturePromise new future: aFutureValue
+	^ aFutureValue await
 ]
 
 { #category : #'api - promise' }

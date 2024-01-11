@@ -8,3 +8,8 @@ Class {
 AsyncPendingPromiseState >> isPending [
 	^ true
 ]
+
+{ #category : #testing }
+AsyncPendingPromiseState >> isPendingIndefinitely [
+	^ false
+]

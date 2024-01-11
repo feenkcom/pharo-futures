@@ -47,13 +47,12 @@ AsyncTerminatableStream >> pollNext: anAsynchronousContext [
 
 	waker register: anAsynchronousContext waker.
 
-	(stream pollNext: anAsynchronousContext)
-		ifReady: [ :aReadyPoll | ^ aReadyPoll ].
-
-	isTerminated
-		ifTrue: [ ^ AsyncPoll ready: AsyncOptionalValue none ].
-	
-	^ AsyncPoll pending
+	^ (stream pollNext: anAsynchronousContext)
+		ifReady: [ :aReadyPoll | aReadyPoll ]
+		ifPending: [ :aPendingPoll |
+			isTerminated
+				ifTrue: [ AsyncPoll ready: AsyncOptionalValue none ]
+				ifFalse: [ aPendingPoll ] ]
 ]
 
 { #category : #'api - stream copy' }
