@@ -29,6 +29,12 @@ TAsyncPromise >> isAsyncPromise [
 ]
 
 { #category : #'accessing - utils' }
+TAsyncPromise >> notifyPotentiallyIndefinitelyPending [
+	"Is sent by the futures worker when promise switches to the indefinitely pending state.
+	Only promises that are derived from futures can be inidefinitely pending"
+]
+
+{ #category : #'accessing - utils' }
 TAsyncPromise >> relatedFutures [
 	^ #()
 ]
@@ -83,4 +89,9 @@ TAsyncPromise >> wait [
 	aSemaphore wait.
 	anAwaitError ifNotNil: [ ^ anAwaitError ].
 	^ anAwaitResult
+]
+
+{ #category : #'api - promise' }
+TAsyncPromise >> whenIndefinitelyPending: aBlock [
+	^ self
 ]

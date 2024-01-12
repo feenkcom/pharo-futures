@@ -27,6 +27,11 @@ AsyncPollPending >> isPending [
 	^ true
 ]
 
+{ #category : #accessing }
+AsyncPollPending >> isPendingIndefinitely [
+	^ false
+]
+
 { #category : #testing }
 AsyncPollPending >> isReady [
 	^ false

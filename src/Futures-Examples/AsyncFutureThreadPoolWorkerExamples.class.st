@@ -20,7 +20,7 @@ AsyncFutureThreadPoolWorkerExamples >> hardCancelScheduledInRunningWorker [
 	aWorker := self startupNewWorker.
 	
 	aSemaphore := Semaphore new.
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ aSemaphore signal. 10 seconds wait. 42 ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: [ aSemaphore signal. 10 seconds wait. 42 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	
 	aSemaphore wait.
@@ -62,7 +62,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleErroneousInRunningWorker [
 
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ 1 / 0 ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: [ 1 / 0 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	self assert: aPendingFuturePromise wait class equals: ZeroDivide.
 
@@ -83,7 +83,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleHaltInRunningWorker [
 
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ true asString . Halt now . 2 + 2 ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: [ true asString . Halt now . 2 + 2 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	self assert: aPendingFuturePromise wait class equals: Halt.
 
@@ -102,7 +102,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleHardCancelledInRunningWorker [
 
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: 42 asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
 	aPendingFuturePromise cancel: AsyncFutureExecutionHardCancellation uniqueInstance.
 
 	self assert: (aWorker schedule: aPendingFuturePromise) not.
@@ -123,7 +123,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInNewWorker [
 
 	aWorker := self newWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: 42 asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise) not.
 
 	self assert: aWorker isRunning not.
@@ -141,7 +141,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInRunningWorker [
 
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: 42 asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	self assert: aPendingFuturePromise wait equals: 42.
 
@@ -160,7 +160,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInShutdownWorker [
 
 	aWorker := self shutdownNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: 42 asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise) not.
 
 	self assert: aWorker isRunning not.
@@ -176,7 +176,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInShuttingDownWorker [
 	<gtExample>
 	| aWorker aPendingFuturePromise aShutdownPromise |
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: 42 asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
 
 	aWorker := self startupNewWorker.
 	aShutdownPromise := aWorker shutdown.
@@ -200,7 +200,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationInRunningWorker [
 
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ AsyncFutureExampleNotification new signal ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: [ AsyncFutureExampleNotification new signal ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	self assert: aPendingFuturePromise wait equals: nil.
 
@@ -220,7 +220,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationWithReturnValueInRunn
 
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ (AsyncFutureExampleNotificationWithReturnValue new value: 42) signal * 2 ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: [ (AsyncFutureExampleNotificationWithReturnValue new value: 42) signal * 2 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	self assert: aPendingFuturePromise wait equals: 84.
 
@@ -240,7 +240,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleSoftCancelledInRunningWorker [
 
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: 42 asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
 	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
 
 	self assert: (aWorker schedule: aPendingFuturePromise) not.
@@ -261,7 +261,7 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleUnhandledExceptionInRunningWorker
 
 	aWorker := self startupNewWorker.
 	
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ AsyncFutureExampleUnhandledException signal ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: [ AsyncFutureExampleUnhandledException signal ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	
 	"an exception is passed after we signal the promise semaphore"
@@ -320,7 +320,7 @@ AsyncFutureThreadPoolWorkerExamples >> softCancelScheduledInRunningWorker [
 	aWorker := self startupNewWorker.
 
 	aSemaphore := Semaphore new.
-	aPendingFuturePromise := AsyncPendingFuturePromise new future: [ aSemaphore signal. 42 ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new future: [ aSemaphore signal. 42 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 
 	aSemaphore wait.

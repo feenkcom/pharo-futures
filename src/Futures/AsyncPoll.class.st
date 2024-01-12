@@ -5,6 +5,11 @@ Class {
 }
 
 { #category : #accessing }
+AsyncPoll class >> indefinitelyPending [
+	^ AsyncPollIndefinitelyPending uniqueInstance
+]
+
+{ #category : #accessing }
 AsyncPoll class >> pending [
 	^ AsyncPollPending uniqueInstance
 ]

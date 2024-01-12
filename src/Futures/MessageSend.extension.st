@@ -7,7 +7,7 @@ MessageSend >> asAsyncFuture [
 
 { #category : #'*Futures' }
 MessageSend >> asAsyncPromise [
-	^ AsyncFuturePromise new future: self asAsyncFuture
+	^ self asAsyncFuture await
 ]
 
 { #category : #'*Futures' }

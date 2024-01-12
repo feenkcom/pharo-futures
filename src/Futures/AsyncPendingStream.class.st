@@ -19,5 +19,5 @@ AsyncPendingStream >> pollNext: anAsynchronousContext [
 	 - Poll::Ready(None) means that the stream has terminated, and poll_next should not be invoked again."
 	<return: #AsyncPoll>
 
-	^ AsyncPoll pending
+	^ AsyncPoll indefinitelyPending
 ]

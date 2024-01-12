@@ -7,7 +7,7 @@ BlockClosure >> asAsyncFuture [
 
 { #category : #'*Futures' }
 BlockClosure >> asAsyncPromise [
-	^ AsyncFuturePromise new future: self asAsyncFuture
+	^ self asAsyncFuture await
 ]
 
 { #category : #'*Futures' }

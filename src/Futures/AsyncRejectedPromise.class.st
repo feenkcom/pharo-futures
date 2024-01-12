@@ -37,7 +37,7 @@ AsyncRejectedPromise >> then: aFulfillmentBlock [
 { #category : #'api - promise' }
 AsyncRejectedPromise >> then: onFulfilledBlock otherwise: onRejectedBlock [
 	<return: #TAsyncPromise>
-	
+
 	^ (AsyncPromiseComputation new
 		computation: onRejectedBlock;
 		isSynchronous: true)
