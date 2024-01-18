@@ -11,7 +11,8 @@ Class {
 		'priority',
 		'group',
 		'currentTaskProcess',
-		'workerProcess'
+		'workerProcess',
+		'futuresCounter'
 	],
 	#category : #'Futures-Executor - Thread Pool'
 }
@@ -30,6 +31,11 @@ AsyncFutureThreadPoolWorker >> amountOfFutures [
 	<return: #Number>
 
 	^ localQueue size
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> amountOfRecentFutures [
+	^ futuresCounter amountOfPings
 ]
 
 { #category : #'api - worker' }
@@ -62,7 +68,9 @@ AsyncFutureThreadPoolWorker >> initialize [
 	shouldStop := nil.
 	workerProcess := nil.
 	currentTask := AsyncOptionalValue none.
-	currentTaskProcess := nil
+	currentTaskProcess := nil.
+	
+	futuresCounter := AsyncFutureThreadPoolCounter new secondsPerBucket: 2
 ]
 
 { #category : #'api - accessing' }
@@ -312,6 +320,7 @@ AsyncFutureThreadPoolWorker >> schedule: anAsyncPendingFuturePromise [
 			ifFalse: [ ^ false ].
 
 		localQueue pushBack: anAsyncPendingFuturePromise.
+		futuresCounter ping.
 		
 		true ]
 ]
@@ -424,6 +433,11 @@ AsyncFutureThreadPoolWorker >> terminate: anAsyncPendingFuturePromise [
 { #category : #initialization }
 AsyncFutureThreadPoolWorker >> threadPool: anAsyncFutureThreadPool [
 	threadPool := anAsyncFutureThreadPool
+]
+
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> timelineOfRecentFutures [
+	^ futuresCounter pingsTimeline
 ]
 
 { #category : #'api - worker' }
