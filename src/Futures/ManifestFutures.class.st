@@ -14,6 +14,7 @@ ManifestFutures class >> mustOnlyDependOn [
 		'Beacon-Core'.
 		'Collections-Abstract'.
 		'Collections-Atomic'.
+		'Collections-Native'.
 		'Collections-Sequenceable'.
 		'Collections-Stack'.
 		'Collections-Streams'.
