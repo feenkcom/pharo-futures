@@ -42,7 +42,12 @@ AsyncSharedDictionary >> initialize [
 	super initialize.
 	
 	monitor := Monitor new.
-	dictionary := Dictionary new
+	dictionary := self newDictionary
+]
+
+{ #category : #accessing }
+AsyncSharedDictionary >> keys [
+	^ monitor critical: [ dictionary keys ]
 ]
 
 { #category : #enumerating }
@@ -57,14 +62,26 @@ AsyncSharedDictionary >> keysAndValuesDo: aBlock [
 	monitor critical: [ dictionary keysAndValuesDo: aBlock ]
 ]
 
+{ #category : #initialization }
+AsyncSharedDictionary >> newDictionary [
+	^ Dictionary new
+]
+
 { #category : #accessing }
 AsyncSharedDictionary >> remove: anObject ifAbsent: exceptionBlock [
-	^ monitor critical: [ dictionary removeKey: anObject ifAbsent: exceptionBlock ]
+	^ self
+		removeKey: anObject
+		ifAbsent: exceptionBlock
 ]
 
 { #category : #accessing }
 AsyncSharedDictionary >> removeAll [
 	^ monitor critical: [ dictionary removeAll ]
+]
+
+{ #category : #accessing }
+AsyncSharedDictionary >> removeKey: anObject ifAbsent: exceptionBlock [
+	^ monitor critical: [ dictionary removeKey: anObject ifAbsent: exceptionBlock ]
 ]
 
 { #category : #enumerating }
