@@ -13,6 +13,11 @@ Class {
 }
 
 { #category : #accessing }
+AsyncSharedDictionary >> associations [
+	^ monitor critical: [ dictionary associations ]
+]
+
+{ #category : #accessing }
 AsyncSharedDictionary >> at: aKey [
 	^ monitor critical: [ dictionary at: aKey ]
 ]
@@ -25,6 +30,11 @@ AsyncSharedDictionary >> at: aKey ifAbsent: aBlock [
 { #category : #accessing }
 AsyncSharedDictionary >> at: aKey ifAbsentPut: aBlock [
 	^ monitor critical: [ dictionary at: aKey ifAbsentPut: aBlock ]
+]
+
+{ #category : #accessing }
+AsyncSharedDictionary >> at: aKey ifPresent: aBlock [
+	^ monitor critical: [ dictionary at: aKey ifPresent: aBlock ]
 ]
 
 { #category : #accessing }
