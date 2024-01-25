@@ -289,7 +289,7 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 		aPendingScanPromise := AsyncPendingPromise new.
 		pendingScanPromises add: (aPendingScanPromise -> aBlock).
 		"and request the loading of new items"
-		streamLoadingPromise ifNotNil: [ self continue ].
+		self continue.
 
 		^ aPendingScanPromise ]
 ]
