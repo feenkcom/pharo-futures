@@ -29,7 +29,7 @@ AsyncCachedStream >> contents [
 
 	| collection |
 	collection := OrderedCollection new.
-	(self asyncSimilarCopy do: [ :each | collection add: each ]) await.
+	(self asyncSimilarCopy do: [ :each | collection add: each ]) wait.
 	^ collection
 ]
 
