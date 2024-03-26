@@ -200,18 +200,26 @@ TaskAtQueue >> queueReaderLoop [
 ]
 
 { #category : #operations }
-TaskAtQueue >> schedule: aBlTaskAtTask [
+TaskAtQueue >> removeTask: aTaskAtTask [
+	"Remove the supplied task from the queue.
+	Return quietly if the task wasn't in the queue."
+
+	queue nextOrNilSuchThat: [ :each | each == aTaskAtTask ]
+]
+
+{ #category : #operations }
+TaskAtQueue >> schedule: aTaskAtTask [
 	"Add the supplied task to the queue and trigger the semaphore (which will either run the task immediately, or update the timeout, if required).
 	Return the scheduled task or a similar previously scheduled task."
 	| aResult |
 
-	aBlTaskAtTask queue: self.
-	aResult := queue nextPut: aBlTaskAtTask.
-	aResult == aBlTaskAtTask ifFalse: [ 
-		aBlTaskAtTask handleNotScheduledBecauseOfPreviousTask: aResult.
+	aTaskAtTask queue: self.
+	aResult := queue nextPut: aTaskAtTask.
+	aResult == aTaskAtTask ifFalse: [ 
+		aTaskAtTask handleNotScheduledBecauseOfPreviousTask: aResult.
 		^ aResult ].
 	scheduleSemaphore signal.
-	^ aBlTaskAtTask.
+	^ aTaskAtTask.
 ]
 
 { #category : #'api - queue' }
