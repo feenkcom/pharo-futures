@@ -100,6 +100,17 @@ AsyncFutureThreadPoolWorker >> isShuttingDown [
 	^ monitor critical: [ shouldStop notNil and: [ workerProcess notNil ] ]
 ]
 
+{ #category : #'api - accessing' }
+AsyncFutureThreadPoolWorker >> isWaitingOnSemaphore [
+	"Return true if the worker is waiting on a semaphore, false otherwise."
+	<return: #Boolean>
+
+	^ monitor critical: [
+		currentTaskProcess
+			ifNil: [ false ]
+			ifNotNil: [ :aProcess | aProcess suspendingList notNil ] ]
+]
+
 { #category : #'api - lifecycle' }
 AsyncFutureThreadPoolWorker >> maintanance [
 ]

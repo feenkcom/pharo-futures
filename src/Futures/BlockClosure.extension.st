@@ -1,6 +1,11 @@
 Extension { #name : #BlockClosure }
 
 { #category : #'*Futures' }
+BlockClosure >> asAsyncForkedFuture [
+	^ AsyncForkPollFuture pollBlock: self
+]
+
+{ #category : #'*Futures' }
 BlockClosure >> asAsyncFuture [
 	^ AsyncPollFuture pollBlock: self
 ]
