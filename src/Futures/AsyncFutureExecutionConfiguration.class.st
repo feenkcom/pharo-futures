@@ -35,13 +35,6 @@ AsyncFutureExecutionConfiguration class >> normalExceptionHandlingByDefault [
 ]
 
 { #category : #accessing }
-AsyncFutureExecutionConfiguration class >> notifyExceptionsByDefault [
-	"Notifies exceptions and continues the normal flow of rejecting promises.
-	Can slow down execution in case of a large amount if notifications."
-	defaultErrorHandler := AsyncInformExceptionHandler new
-]
-
-{ #category : #accessing }
 AsyncFutureExecutionConfiguration class >> passExceptionsByDefault [
 	"Should only be used for debugging as it influences the normal handling of promises.
 	Passes exceptions and raises a debugger rather than rejecting promises."
