@@ -46,6 +46,11 @@ AsyncStreamTransitionBuffer >> executionConfiguration [
 	^ executionConfiguration
 ]
 
+{ #category : #accessing }
+AsyncStreamTransitionBuffer >> executionConfiguration: anObject [
+	"execution configuration is inherited from the previous buffer"
+]
+
 { #category : #'api - loading' }
 AsyncStreamTransitionBuffer >> fulfillPendingScanPromises [
 	"See #preloadUntilFoundSuchThat: for more information"
