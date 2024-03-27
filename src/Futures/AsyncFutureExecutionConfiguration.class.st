@@ -6,12 +6,46 @@ Class {
 		'group',
 		'errorHandler'
 	],
+	#classInstVars : [
+		'defaultErrorHandler'
+	],
 	#category : #'Futures-Executor'
 }
 
 { #category : #accessing }
 AsyncFutureExecutionConfiguration class >> default [
 	^ self new
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration class >> defaultErrorHandler [
+	^ defaultErrorHandler ifNil: [ AsyncNoneErrorHandler uniqueInstance ]
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration class >> initialize [
+	self normalExceptionHandlingByDefault
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration class >> normalExceptionHandlingByDefault [
+	"Goes through a normal mechanism of rejecting promises."
+
+	defaultErrorHandler := AsyncNoneErrorHandler uniqueInstance
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration class >> notifyExceptionsByDefault [
+	"Notifies exceptions and continues the normal flow of rejecting promises.
+	Can slow down execution in case of a large amount if notifications."
+	defaultErrorHandler := AsyncInformExceptionHandler new
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration class >> passExceptionsByDefault [
+	"Should only be used for debugging as it influences the normal handling of promises.
+	Passes exceptions and raises a debugger rather than rejecting promises."
+	defaultErrorHandler := AsyncPassExceptionHandler new
 ]
 
 { #category : #comparing }
@@ -77,7 +111,7 @@ AsyncFutureExecutionConfiguration >> initialize [
 	
 	group := AsyncFutureExecutionUnspecifiedGroup uniqueInstance.
 	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
-	errorHandler := AsyncNoneErrorHandler uniqueInstance
+	errorHandler := self class defaultErrorHandler
 ]
 
 { #category : #accessing }
