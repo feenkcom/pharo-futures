@@ -12,6 +12,13 @@ AsyncProcessProperties class >> initialize [
 	Properties := AsyncSharedWeakIdentityKeyDictionary new
 ]
 
+{ #category : #testing }
+AsyncProcessProperties class >> isWorkerProcess: aPharoProcess [
+	^ (self
+   	reifiedProcess: aPharoProcess
+   	ifAbsent: [ nil ]) notNil
+]
+
 { #category : #accessing }
 AsyncProcessProperties class >> process: aProcess property: aPropertyKey ifAbsent: anAbsentBlock [
 	^ (Properties
