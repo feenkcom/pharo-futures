@@ -474,7 +474,11 @@ AsyncFutureThreadPoolWorker >> wakeUp: anAsyncFutureExecutionTask [
 { #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> workerLoop [
 	"Execute futures until asked to stop"
-
+	
+	"We do not want users to be able to interrupt worker process as it can block the system"
+	#GlutinIgnoreDuringInterruptStatus asClassIfPresent: [ :aClass |
+		aClass value: true].
+	
 	[ monitor critical: [ shouldStop notNil and: [ localQueue isEmpty and: [ pendingQueue isEmpty ] ] ] ] whileFalse: [
 			self maintanance.
 			self privateExecuteFuture: localQueue popAndWait ]
