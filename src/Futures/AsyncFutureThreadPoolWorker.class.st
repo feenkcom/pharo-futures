@@ -12,10 +12,26 @@ Class {
 		'group',
 		'currentTaskProcess',
 		'workerProcess',
-		'futuresCounter'
+		'futuresCounter',
+		'logger'
+	],
+	#classVars : [
+		'DefaultLogger'
 	],
 	#category : #'Futures-Executor - Thread Pool'
 }
+
+{ #category : #accessing }
+AsyncFutureThreadPoolWorker class >> defaultLogger [
+	<return: #TAsyncFutureLogger>
+	^ DefaultLogger ifNil: [ 
+		DefaultLogger := AsyncFutureDetailedTranscriptLogger new ]
+]
+
+{ #category : #accessing }
+AsyncFutureThreadPoolWorker class >> defaultLogger: aLogger [
+	DefaultLogger := aLogger
+]
 
 { #category : #'api - accessing' }
 AsyncFutureThreadPoolWorker >> acceptsFutures [
@@ -111,6 +127,17 @@ AsyncFutureThreadPoolWorker >> isWaitingOnSemaphore [
 			ifNotNil: [ :aProcess | aProcess suspendingList notNil ] ]
 ]
 
+{ #category : #accessing }
+AsyncFutureThreadPoolWorker >> logger [
+	<return: #TAsyncFutureLogger>
+	^ logger ifNil: [ self class defaultLogger ]
+]
+
+{ #category : #accessing }
+AsyncFutureThreadPoolWorker >> logger: aLogger [
+	logger := aLogger
+]
+
 { #category : #'api - lifecycle' }
 AsyncFutureThreadPoolWorker >> maintanance [
 ]
@@ -167,9 +194,7 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 		| isPending |
 		isPending := aSemaphore waitTimeoutSeconds: 60.
 		isPending ifTrue: [
-			NonInteractiveTranscript stdout
-				nextPutAll: aPendingTask printString;
-				cr ].
+			self logger pendingTask: aPendingTask ].
 		"if the process is terminated, then there is no reason to wait for it even if the semaphore was not signalled "
 		isPending := isPending
 			and: [ currentTaskProcess isTerminated not ].
