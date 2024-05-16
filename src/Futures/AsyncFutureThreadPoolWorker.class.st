@@ -21,16 +21,26 @@ Class {
 	#category : #'Futures-Executor - Thread Pool'
 }
 
-{ #category : #accessing }
+{ #category : #'api - logger' }
+AsyncFutureThreadPoolWorker class >> addDefaultLogger: aLogger [
+	self defaultLogger: (self defaultLogger composeWith: aLogger)
+]
+
+{ #category : #'api - logger' }
 AsyncFutureThreadPoolWorker class >> defaultLogger [
 	<return: #TAsyncFutureLogger>
 	^ DefaultLogger ifNil: [ 
 		DefaultLogger := AsyncFutureDetailedTranscriptLogger new ]
 ]
 
-{ #category : #accessing }
+{ #category : #'api - logger' }
 AsyncFutureThreadPoolWorker class >> defaultLogger: aLogger [
 	DefaultLogger := aLogger
+]
+
+{ #category : #'api - logger' }
+AsyncFutureThreadPoolWorker class >> ensureDefaultLogger: aLogger [
+	self defaultLogger: (self defaultLogger ensureLogger: aLogger)
 ]
 
 { #category : #'api - accessing' }
