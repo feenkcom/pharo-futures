@@ -50,14 +50,14 @@ AsyncForkPollFuture >> poll: anAsynchronousContext [
 
 	executedBlock := pollBlock.
 	pollBlock := nil.
-	computationProcess value: ([
+	computationProcess value: (AsyncOptionalValue some: [
 		computationValue value: (AsyncOptionalValue some: executedBlock value).
 		computationProcess value: (AsyncOptionalValue none).
 		waker wakeUp
 	] newProcess).
 
 	waker register: anAsynchronousContext waker.
-	computationProcess value resume.
+	computationProcess value value resume.
 	^ AsyncPoll pending
 ]
 
