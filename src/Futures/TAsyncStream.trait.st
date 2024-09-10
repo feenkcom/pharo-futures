@@ -183,6 +183,16 @@ TAsyncStream >> isNotEmpty [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> lines [
+	"Asuming the receiver is a stream of characters return a stream of lines splitting
+	me by CR, LF or CRLF. It is possible to control whether a line break as a last character
+	emits an empty line using #emitEmptyLastLine"
+	<return: #TAsyncStream>
+
+	^ AsyncLineReadStream stream: self
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> map: aMapBlock [
 	"Maps this stream's object to a different object, returning a new stream.
 	The provided closure is executed over all elements of this stream as they are made available."
@@ -295,6 +305,17 @@ TAsyncStream >> sizeHint [
 	<return: #AsyncStreamSizeHint>
 
 	^ AsyncStreamSizeHint unknown
+]
+
+{ #category : #'api - stream' }
+TAsyncStream >> splitOn: aBlock [
+	"Split a stream of items into a stream of collections of items based on a separator block closure.
+	A separator is defined as a single item for which aBlock returns true"
+	<return: #TAsyncStream>
+
+	^ AsyncSplitStream
+		split: self
+		by: aBlock
 ]
 
 { #category : #'api - stream' }
