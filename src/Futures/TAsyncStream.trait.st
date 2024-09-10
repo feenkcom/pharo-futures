@@ -308,6 +308,17 @@ TAsyncStream >> sizeHint [
 ]
 
 { #category : #'api - stream' }
+TAsyncStream >> splitOn: aBlock [
+	"Split a stream of items into a stream of collections of items based on a separator block closure.
+	A separator is defined as a single item for which aBlock returns true"
+	<return: #TAsyncStream>
+
+	^ AsyncSplitStream
+		split: self
+		by: aBlock
+]
+
+{ #category : #'api - stream' }
 TAsyncStream >> take: anAmount [
 	"Creates a new stream of at most anAmount items of the underlying stream."
 	<return: #TAsyncStream>

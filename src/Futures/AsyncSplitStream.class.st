@@ -1,3 +1,10 @@
+"
+#Split stream
+
+Splits a stream of items into a stream of collections of items based on a separator block closure.
+##Example
+{{gtExample:AsyncSplitStreamExamples>>#splitWithSeparatorInTheMiddle}}
+"
 Class {
 	#name : #AsyncSplitStream,
 	#superclass : #Object,
@@ -12,15 +19,10 @@ Class {
 }
 
 { #category : #'instance creation' }
-AsyncSplitStream class >> separate: aStream by: aBlock [
+AsyncSplitStream class >> split: aStream by: aBlock [
 	^ self new
 		stream: aStream
 		separatorCondition: aBlock
-]
-
-{ #category : #'instance creation' }
-AsyncSplitStream class >> stream: aStream [
-	^ self new stream: aStream
 ]
 
 { #category : #initialization }
