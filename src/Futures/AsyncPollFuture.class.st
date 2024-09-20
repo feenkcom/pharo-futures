@@ -15,6 +15,16 @@ AsyncPollFuture class >> pollBlock: aBlock [
 	^ self new pollBlock: aBlock
 ]
 
+{ #category : #printing }
+AsyncPollFuture >> gtDisplayOn: aStream [
+	super gtDisplayOn: aStream.
+	aStream nextPut: $(.
+	executedBlock
+		ifNotNil: [ aStream nextPutAll: 'Executed' ]
+		ifNil: [ aStream nextPutAll: 'Pending' ].
+	aStream nextPut: $)
+]
+
 { #category : #'api - future' }
 AsyncPollFuture >> poll: anAsynchronousContext [
 	self

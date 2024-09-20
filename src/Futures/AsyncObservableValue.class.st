@@ -58,6 +58,17 @@ AsyncObservableValue >> asAsyncObservable: anAsyncFutureExecutionConfiguration [
 	^ self
 ]
 
+{ #category : #printing }
+AsyncObservableValue >> gtDisplayOn: aStream [
+	super gtDisplayOn: aStream.
+	item ifNil: [ ^ self ].
+	aStream nextPut: $(.
+	self
+		ifSome: [ :aValue | aValue gtDisplayOn: aStream ]
+		ifNone: [ aStream nextPut: 'None' ].
+	aStream nextPut: $)
+]
+
 { #category : #'api - obervable' }
 AsyncObservableValue >> ifSome: aBlock [
 	^ item value ifSome: aBlock
