@@ -78,6 +78,17 @@ AsyncFutureThreadPoolWorker >> group: aAsyncFutureExecutionGroup [
 	group := aAsyncFutureExecutionGroup
 ]
 
+{ #category : #printing }
+AsyncFutureThreadPoolWorker >> gtDisplayOn: aStream [
+	super gtDisplayOn: aStream.
+	aStream
+		nextPut: $(;
+		nextPutAll: (group ifNotNil: #label ifNil: [ 'undefined group' ]);
+		nextPutAll: ', '.
+	priority gtDisplayOn: aStream.
+	aStream nextPut: $)
+]
+
 { #category : #initialization }
 AsyncFutureThreadPoolWorker >> initialize [
 	super initialize.
