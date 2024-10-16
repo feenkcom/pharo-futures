@@ -94,6 +94,34 @@ AsyncFutureExamples >> mapFuture [
 ]
 
 { #category : #examples }
+AsyncFutureExamples >> parallelWaits [
+	<gtExample>
+	| totalDuration result |
+	totalDuration := [ 
+		result := (AsyncJoinAllFuture futures: {
+			[ 0.1 second wait ] asAsyncForkedFuture.
+			[ 0.2 second wait ] asAsyncForkedFuture.
+			[ 0.3 second wait ] asAsyncForkedFuture.
+		}) await wait ] timeToRun.
+	self assert:  totalDuration < 0.4 seconds.
+	^ result
+]
+
+{ #category : #examples }
+AsyncFutureExamples >> sequentialWaits [
+	<gtExample>
+	| totalDuration result |
+	totalDuration := [ 
+		result := (AsyncJoinAllFuture futures: {
+			[ 0.1 second wait ] asAsyncFuture.
+			[ 0.2 second wait ] asAsyncFuture.
+			[ 0.3 second wait ] asAsyncFuture.
+		}) await wait ] timeToRun.
+	self assert:  totalDuration >= 0.6 seconds.
+	^ result
+]
+
+{ #category : #examples }
 AsyncFutureExamples >> simpleFuture [
 	<gtExample>
 
