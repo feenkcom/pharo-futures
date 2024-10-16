@@ -73,6 +73,12 @@ AsyncWithoutDuplicatesStream >> stream: anAsyncStream [
 ]
 
 { #category : #accessing }
+AsyncWithoutDuplicatesStream >> useContentComparison [
+	setClass := GtStringContentSet.
+	seenItems ifNotNil: [ seenItems := setClass withAll: seenItems ]
+]
+
+{ #category : #accessing }
 AsyncWithoutDuplicatesStream >> useEqualityComparison [
 	setClass := Set.
 	seenItems ifNotNil: [ seenItems := setClass withAll: seenItems ]
