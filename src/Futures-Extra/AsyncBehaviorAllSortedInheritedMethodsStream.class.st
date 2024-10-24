@@ -18,7 +18,7 @@ AsyncBehaviorAllSortedInheritedMethodsStream class >> behaviorExample [
 AsyncBehaviorAllSortedInheritedMethodsStream >> behavior: aBehavior [
 	behavior := aBehavior.
 	self initializeStreams.
-	stream := (instanceStream merge: classStream) withoutDuplicates
+	stream := (instanceStream merge: classStream)
 ]
 
 { #category : #accessing }
