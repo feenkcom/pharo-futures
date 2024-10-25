@@ -7,7 +7,10 @@ Class {
 { #category : #accessing }
 AsyncBehaviorSortedInheritedClassMethodsStream >> initializeStream [
 	stream := AsyncSequenceStream
-			forCollection: [ behavior class allMethods sorted: GtInheritedMethodsSortFunction new ] asAsyncFuture
+			forCollection: [ 
+				((behavior class allSelectorsBelow: Class) 
+					collect: [ :s | behavior class lookupSelector: s ])
+					sorted: GtInheritedMethodsSortFunction new ] asAsyncFuture
 ]
 
 { #category : #'api - stream' }
