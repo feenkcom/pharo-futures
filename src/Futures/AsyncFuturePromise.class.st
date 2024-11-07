@@ -125,6 +125,9 @@ AsyncFuturePromise >> printOn: aStream [
 		nextPutAll: ' state: ';
 		print: state.
 	aStream
+		nextPutAll: ' group: ';
+		nextPutAll: (group ifNotNil: #label).
+	aStream
 		nextPutAll: ' future: ';
 		print: future
 ]
