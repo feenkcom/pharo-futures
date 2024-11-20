@@ -27,6 +27,17 @@ AsyncWeakStream >> initialize [
 	waker := AsyncFutureExecutionAtomicWaker new
 ]
 
+{ #category : #finalization }
+AsyncWeakStream >> onFinalization [
+	"I am called when my stream is finalized.
+	It may happen, that my stream is still in my weak reference.
+	For that reason I first remove it and then wake up my waker.
+	See Object>>#finalize for more details."
+
+	stream ifNotNil: [ :aWeak | aWeak at: 1 put: nil ].
+	waker wakeUp
+]
+
 { #category : #'api - stream' }
 AsyncWeakStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
@@ -60,14 +71,14 @@ AsyncWeakStream >> stream: aStream [
 			aStream finalizationRegistry
 				add: aStream
 				finalizer: (ObjectFinalizer new
-					receiver: waker;
-					selector: #wakeUp;
+					receiver: self;
+					selector: #onFinalization;
 					arguments: #()) ]
 		forPharo10: [
 			aStream finalizationRegistry
 				add: aStream
 				executor: (ObjectFinalizer new
-					receiver: waker;
-					selector: #wakeUp;
+					receiver: self;
+					selector: #onFinalization;
 					arguments: #()) ]
 ]
