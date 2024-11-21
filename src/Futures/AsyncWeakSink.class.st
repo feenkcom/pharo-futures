@@ -27,6 +27,17 @@ AsyncWeakSink >> isAlive [
 	^ (sink at: 1) notNil
 ]
 
+{ #category : #finalization }
+AsyncWeakSink >> onFinalization [
+	"I am called when my sink is finalized.
+	It may happen, that my sink is still in my weak reference.
+	For that reason I first remove it and then wake up my waker.
+	See Object>>#finalize for more details."
+
+	sink ifNotNil: [ :aWeak | aWeak at: 1 put: nil ].
+	waker wakeUp
+]
+
 { #category : #testing }
 AsyncWeakSink >> parentSink: anObject [
 	^ (sink at: 1) ifNotNil: [ :obj | obj parentSink: anObject ]
@@ -81,21 +92,21 @@ AsyncWeakSink >> pollReady: anAsynchronousContext [
 AsyncWeakSink >> sink: aSink [
 	aSink parentSink: self.
 	sink := aSink asWeakReference.
-	
+	self finalize.
 	self
 		forPharo11OrNewer: [
 			aSink finalizationRegistry
 				add: aSink
 				finalizer: (ObjectFinalizer new
-					receiver: waker;
-					selector: #wakeUp;
+					receiver: self;
+					selector: #onFinalization;
 					arguments: #()) ]
 		forPharo10: [
 			aSink finalizationRegistry
 				add: aSink
 				executor: (ObjectFinalizer new
-					receiver: waker;
-					selector: #wakeUp;
+					receiver: self;
+					selector: #onFinalization;
 					arguments: #()) ]
 ]
 
