@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'priority',
 		'group',
-		'errorHandler'
+		'errorHandler',
+		'maxAmountOfWorkers'
 	],
 	#classInstVars : [
 		'defaultErrorHandler'
@@ -101,15 +102,26 @@ AsyncFutureExecutionConfiguration >> highPriority [
 { #category : #initialization }
 AsyncFutureExecutionConfiguration >> initialize [
 	super initialize.
-	
+
 	group := AsyncFutureExecutionUnspecifiedGroup uniqueInstance.
 	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
-	errorHandler := self class defaultErrorHandler
+	errorHandler := self class defaultErrorHandler.
+	maxAmountOfWorkers := 1
 ]
 
 { #category : #accessing }
 AsyncFutureExecutionConfiguration >> lowPriority [
 	self priority: AsyncFutureExecutionLowPriority uniqueInstance
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration >> maxAmountOfWorkers [
+	^ maxAmountOfWorkers
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration >> maxAmountOfWorkers: aNumber [
+	maxAmountOfWorkers := aNumber
 ]
 
 { #category : #printing }
