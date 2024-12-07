@@ -7,7 +7,8 @@ Class {
 		'priority',
 		'errorHandler',
 		'worker',
-		'executionState'
+		'executionState',
+		'maxAmountOfWorkers'
 	],
 	#category : #'Futures-Base - Promises'
 }
@@ -110,11 +111,22 @@ AsyncFuturePromise >> initialize [
 	priority := AsyncFutureExecutionDefaultPriority uniqueInstance.
 	executionState := AsyncFutureExecutionPendingState uniqueInstance.
 	errorHandler := AsyncNoneErrorHandler uniqueInstance.
+	maxAmountOfWorkers := 1
 ]
 
 { #category : #'api - promise' }
 AsyncFuturePromise >> isCancelled [
 	^ self critical: [ executionState isCancelled ]
+]
+
+{ #category : #accessing }
+AsyncFuturePromise >> maxAmountOfWorkers [
+	^ maxAmountOfWorkers
+]
+
+{ #category : #accessing }
+AsyncFuturePromise >> maxAmountOfWorkers: anObject [
+	maxAmountOfWorkers := anObject
 ]
 
 { #category : #printing }
