@@ -53,7 +53,7 @@ AsyncFutureThreadPool >> pickWorkerFor: aAsyncFutureThreadPoolTask [
 
 			anAllowedMaxWorkers := aAsyncFutureThreadPoolTask group isUnspecified
 				ifTrue: [ maxWorkers ]
-				ifFalse: [ 1 ].
+				ifFalse: [ aAsyncFutureThreadPoolTask maxAmountOfWorkers ].
 
 			runningWorkers size < anAllowedMaxWorkers
 				ifTrue: [
