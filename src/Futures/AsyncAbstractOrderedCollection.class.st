@@ -62,6 +62,11 @@ AsyncAbstractOrderedCollection >> do: aBlock [
 	] repeat
 ]
 
+{ #category : #accessing }
+AsyncAbstractOrderedCollection >> groupedBy: aBlock [
+	^ monitor critical: [ collection groupedBy: aBlock ]
+]
+
 { #category : #enumerating }
 AsyncAbstractOrderedCollection >> indexOf: anObject [
 	1 to: self size do: [ :i | (self at: i) = anObject ifTrue: [ ^ i ] ].

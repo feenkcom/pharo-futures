@@ -7,7 +7,7 @@ Class {
 		'endTime',
 		'promise'
 	],
-	#category : #'Futures-Executor - Thread Pool'
+	#category : #'Futures-Executor - Telemetry'
 }
 
 { #category : #accessing }

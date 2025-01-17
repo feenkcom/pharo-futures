@@ -57,7 +57,20 @@ TAsyncFuture >> await: anExecutionSpecification [
 		errorHandler: anExecutionSpecification errorHandler;
 		maxAmountOfWorkers: anExecutionSpecification maxAmountOfWorkers;
 		future: self.
+	
+	GtBeaconTypedLogSignal new
+		markAsStartSignal;
+		eventTypeName: AsyncFutureScheduledLogEvent name;
+		signalPayload: aPromise;
+		emit.
+		
 	AsyncFutureThreadPool current schedule: aPromise.
+	
+	GtBeaconTypedLogSignal new
+		markAsEndSignal;
+		eventTypeName: AsyncFutureScheduledLogEvent name;
+		signalPayload: aPromise;
+		emit.
 
 	^ aPromise
 ]
