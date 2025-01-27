@@ -216,8 +216,13 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 						signalling: aSemaphore ]
 		] newProcess
 			priority: self priority asPharoProcessPriority - 1;
-			name: 'Future: ', self name;
-			resume ].
+			name: 'Future: ', self name.
+		
+		AsyncProcessProperties
+			process: currentTaskProcess
+			property: #parentProcess
+			put: Processor activeProcess.
+		currentTaskProcess resume ].
 
 	[
 		| isPending |
@@ -273,7 +278,7 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 			ifPending: [ :aPendingPoll | "it is already in the queue"
 				aPendingPoll isPendingIndefinitely
 					ifTrue: [ aAsyncPendingFuturePromise notifyPotentiallyIndefinitelyPending ] ].
-
+		
 		aSemaphore signal
 	] ]
 	on: Error do: [ :anError |
