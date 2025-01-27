@@ -29,6 +29,15 @@ AsyncProcessProperties class >> process: aProcess property: aPropertyKey ifAbsen
 ]
 
 { #category : #accessing }
+AsyncProcessProperties class >> process: aProcess property: aPropertyKey ifPresent: aPresentBlock [
+	^ (Properties
+		at: aProcess
+		ifAbsent: [ ^ nil ])
+			at: aPropertyKey
+			ifPresent: aPresentBlock
+]
+
+{ #category : #accessing }
 AsyncProcessProperties class >> process: aProcess property: aPropertyKey put: aPropertyValue [
 	^ (Properties
 		at: aProcess

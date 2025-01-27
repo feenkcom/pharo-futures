@@ -12,7 +12,7 @@ Class {
 		'previousSeconds',
 		'pings'
 	],
-	#category : #'Futures-Executor - Thread Pool'
+	#category : #'Futures-Executor - Telemetry'
 }
 
 { #category : #'instance creation' }

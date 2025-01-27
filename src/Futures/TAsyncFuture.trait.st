@@ -57,6 +57,7 @@ TAsyncFuture >> await: anExecutionSpecification [
 		errorHandler: anExecutionSpecification errorHandler;
 		maxAmountOfWorkers: anExecutionSpecification maxAmountOfWorkers;
 		future: self.
+		
 	AsyncFutureThreadPool current schedule: aPromise.
 
 	^ aPromise

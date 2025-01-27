@@ -83,7 +83,7 @@ AsyncFutureThreadPoolWorker >> gtDisplayOn: aStream [
 	super gtDisplayOn: aStream.
 	aStream
 		nextPut: $(;
-		nextPutAll: (group ifNotNil: #label ifNil: [ 'undefined group' ]);
+		nextPutAll: (self name);
 		nextPutAll: ', '.
 	priority gtDisplayOn: aStream.
 	aStream nextPut: $)
@@ -163,6 +163,11 @@ AsyncFutureThreadPoolWorker >> logger: aLogger [
 AsyncFutureThreadPoolWorker >> maintanance [
 ]
 
+{ #category : #printing }
+AsyncFutureThreadPoolWorker >> name [
+	^ (group ifNotNil: #label ifNil: [ 'undefined group' ])
+]
+
 { #category : #'api - accessing' }
 AsyncFutureThreadPoolWorker >> pendingQueueSize [
 	
@@ -209,7 +214,15 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 						privateExecutePendingFuture: anAsyncPendingFuturePromise
 						storingResultIn: aFutureResultHolder
 						signalling: aSemaphore ]
-		] forkAt: self priority asPharoProcessPriority - 1 ].
+		] newProcess
+			priority: self priority asPharoProcessPriority - 1;
+			name: 'Future: ', self name.
+		
+		AsyncProcessProperties
+			process: currentTaskProcess
+			property: #parentProcess
+			put: Processor activeProcess.
+		currentTaskProcess resume ].
 
 	[
 		| isPending |
@@ -265,7 +278,7 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 			ifPending: [ :aPendingPoll | "it is already in the queue"
 				aPendingPoll isPendingIndefinitely
 					ifTrue: [ aAsyncPendingFuturePromise notifyPotentiallyIndefinitelyPending ] ].
-
+		
 		aSemaphore signal
 	] ]
 	on: Error do: [ :anError |
