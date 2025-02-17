@@ -11,7 +11,7 @@ Class {
 
 { #category : #'instance creation' }
 AsyncSortedDictionary class >> new [
-	^ self new: 10
+	^ self new: 5
 ]
 
 { #category : #'instance creation' }
@@ -94,6 +94,58 @@ AsyncSortedDictionary >> at: aKey add: aValue [
 	^ aValue.
 ]
 
+{ #category : #'as yet unclassified' }
+AsyncSortedDictionary >> at: firstKey at: secondKey ifAbsent: aZeroArgBlock [
+		"Return the object stored in the second dictionary at secondKey. The second dictionary is accessed via the key firstKey. Execute aZeroArgBlock in case one of the key is wrong."
+
+	| subDictionary |
+	subDictionary := self at: firstKey ifAbsent: [ ^ aZeroArgBlock value ].
+	^ subDictionary at: secondKey ifAbsent: aZeroArgBlock
+]
+
+{ #category : #'as yet unclassified' }
+AsyncSortedDictionary >> at: firstKey at: secondKey ifPresent: aBlock ifAbsent: aZeroArgBlock [
+		"Return the object stored in the second dictionary at secondKey. The second dictionary is accessed via the key firstKey. Execute aZeroArgBlock in case one of the key is wrong."
+
+	| subDictionary |
+	subDictionary := self at: firstKey ifAbsent: [ ^ aZeroArgBlock value ].
+	^ subDictionary
+		at: secondKey
+		ifPresent: aBlock
+		ifAbsent: aZeroArgBlock
+]
+
+{ #category : #'as yet unclassified' }
+AsyncSortedDictionary >> at: firstKey at: secondKey put: aValue [
+	"Set a value at secondKey in the dictionary returned by firstKey."
+
+	| subDictionary |
+	subDictionary := self at: firstKey ifAbsentPut: [ self copyEmpty ].
+	^ subDictionary at: secondKey put: aValue
+]
+
+{ #category : #'as yet unclassified' }
+AsyncSortedDictionary >> at: key ifAbsent: aBlock [
+	"Answer the value associated with the key or, if key isn't found,
+	answer the result of evaluating aBlock."
+
+	^ dictionary at: key ifAbsent: aBlock
+]
+
+{ #category : #'as yet unclassified' }
+AsyncSortedDictionary >> at: key ifAbsentPut: aBlock [
+	"Return the value at the given key.
+	If the key is not included in the receiver store and return the result
+	of evaluating aBlock as the new value."
+
+	^ self at: key ifAbsent: [self at: key put: aBlock value]
+]
+
+{ #category : #'as yet unclassified' }
+AsyncSortedDictionary >> at: key ifPresent: aPresentBlock ifAbsent: anAbsentBlock [
+	^ aPresentBlock value: (dictionary at: key ifAbsent: [ ^ anAbsentBlock value ])
+]
+
 { #category : #accessing }
 AsyncSortedDictionary >> at: aKey put: aValue [
 	| previousValueKeyIndex |
@@ -123,6 +175,14 @@ AsyncSortedDictionary >> at: aKey put: aValue [
 				previousIndex: previousValueKeyIndex ]
 		ifFalse: [ orderedKeys add: aKey ].
 	^ aValue.
+]
+
+{ #category : #'as yet unclassified' }
+AsyncSortedDictionary >> copyEmpty [
+	^ self class new
+		setDictionary: dictionary copyEmpty
+		orderedKeys: orderedKeys copyEmpty
+		sortByKeys: sortsByKeys
 ]
 
 { #category : #accessing }
@@ -196,7 +256,7 @@ AsyncSortedDictionary >> indexOfKey: aKey ifAbsent: aBlock [
 { #category : #private }
 AsyncSortedDictionary >> initialize: aCapacity [
 	dictionary := self dictionaryClass new: aCapacity.
-	orderedKeys := SortedCollection new: aCapacity.
+	orderedKeys := SortedCollection new: dictionary capacity.
 	sortsByKeys := true.
 ]
 
@@ -232,6 +292,13 @@ AsyncSortedDictionary >> moveKey: aKey from: aPreviousIndex to: aNewIndex [
 				nextValue := anArray at: index + 1 ifAbsent: [ nil ] ] ].
 	
 	anArray at: newValueKeyIndex put: aKey
+]
+
+{ #category : #'as yet unclassified' }
+AsyncSortedDictionary >> setDictionary: aDictionary orderedKeys: aSortedCollection sortByKeys: aBoolean [
+	dictionary := aDictionary.
+	orderedKeys := aSortedCollection.
+	sortsByKeys := aBoolean
 ]
 
 { #category : #accessing }
