@@ -5,7 +5,7 @@ Class {
 		'endTime',
 		'processTelemetry'
 	],
-	#category : #'Futures-Executor - Thread Pool'
+	#category : #'Futures-Telemetry-Telemetry'
 }
 
 { #category : #'as yet unclassified' }

@@ -7,7 +7,7 @@ Class {
 		'endTime',
 		'worker'
 	],
-	#category : #'Futures-Executor - Telemetry'
+	#category : #'Futures-Telemetry-Telemetry'
 }
 
 { #category : #'as yet unclassified' }

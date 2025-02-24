@@ -7,7 +7,7 @@ Class {
 		'endTime',
 		'promise'
 	],
-	#category : #'Futures-Executor - Telemetry'
+	#category : #'Futures-Telemetry-Telemetry'
 }
 
 { #category : #accessing }

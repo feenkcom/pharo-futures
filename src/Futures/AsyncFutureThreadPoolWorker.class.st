@@ -16,7 +16,8 @@ Class {
 		'logger'
 	],
 	#classVars : [
-		'DefaultLogger'
+		'DefaultLogger',
+		'FuturesCounterClass'
 	],
 	#category : #'Futures-Executor - Thread Pool'
 }
@@ -43,6 +44,11 @@ AsyncFutureThreadPoolWorker class >> ensureDefaultLogger: aLogger [
 	self defaultLogger: (self defaultLogger ensureLogger: aLogger)
 ]
 
+{ #category : #'api - logger' }
+AsyncFutureThreadPoolWorker class >> futuresCounterClass: aClass [
+	FuturesCounterClass := aClass
+]
+
 { #category : #'api - accessing' }
 AsyncFutureThreadPoolWorker >> acceptsFutures [
 	<return: #Boolean>
@@ -57,11 +63,6 @@ AsyncFutureThreadPoolWorker >> amountOfFutures [
 	<return: #Number>
 
 	^ localQueue size
-]
-
-{ #category : #'api - accessing' }
-AsyncFutureThreadPoolWorker >> amountOfRecentFutures [
-	^ futuresCounter amountOfPings
 ]
 
 { #category : #'api - worker' }
@@ -107,7 +108,8 @@ AsyncFutureThreadPoolWorker >> initialize [
 	currentTask := AsyncOptionalValue none.
 	currentTaskProcess := nil.
 	
-	futuresCounter := AsyncFutureThreadPoolCounter new secondsPerBucket: 2
+	futuresCounter := FuturesCounterClass
+		ifNotNil: [ :aClass | aClass new secondsPerBucket: 2 ].
 ]
 
 { #category : #'api - accessing' }
@@ -390,7 +392,7 @@ AsyncFutureThreadPoolWorker >> schedule: anAsyncPendingFuturePromise [
 			ifFalse: [ ^ false ].
 
 		localQueue pushBack: anAsyncPendingFuturePromise.
-		futuresCounter ping.
+		futuresCounter ifNotNil: [ futuresCounter ping ].
 		
 		true ]
 ]
@@ -503,11 +505,6 @@ AsyncFutureThreadPoolWorker >> terminate: anAsyncPendingFuturePromise [
 { #category : #initialization }
 AsyncFutureThreadPoolWorker >> threadPool: anAsyncFutureThreadPool [
 	threadPool := anAsyncFutureThreadPool
-]
-
-{ #category : #'api - accessing' }
-AsyncFutureThreadPoolWorker >> timelineOfRecentFutures [
-	^ futuresCounter pingsTimeline
 ]
 
 { #category : #'api - worker' }

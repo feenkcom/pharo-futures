@@ -10,7 +10,7 @@ AsyncFutureThreadPoolCounterExamples >> newCounter [
 	| aCounter |
 
 	"we simulate time for precise testing"
-	aCounter := AsyncFutureThreadPoolCounter withTime: 0 seconds.
+	aCounter := AsyncFutureThreadPoolCounter2 withTime: 0 seconds.
 	self assert: aCounter amountOfPings equals: 0.
 	self assert: aCounter pingsArray equals: (WordArray withAll: #(0 0 0 0 0 0 0 0 0 0 0 0)).
 	
