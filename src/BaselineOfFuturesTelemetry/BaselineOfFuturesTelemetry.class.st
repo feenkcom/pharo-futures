@@ -18,7 +18,7 @@ BaselineOfFuturesTelemetry >> baseline: spec [
 
 	spec for: #'common' do: [
 		spec baseline: 'Futures' with: [
-			spec repository: 'github://feenkcom/pharo-futures/src:main' ].
+			spec repository: 'github://feenkcom/pharo-futures:main/src' ].
 		spec 
 			package: 'Futures-Telemetry' with: [ spec requires: #(Futures) ] ].
 ]
