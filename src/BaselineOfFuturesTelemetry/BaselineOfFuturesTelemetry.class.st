@@ -12,13 +12,15 @@ BaselineOfFuturesTelemetry class >> gtDependencyAnalysisPreloadedBaselines [
 				BaselineOfGToolkitVisualizer}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #baseline }
 BaselineOfFuturesTelemetry >> baseline: spec [
 	<baseline>
-
 	spec for: #'common' do: [
-		spec baseline: 'Futures' with: [
-			spec repository: 'github://feenkcom/pharo-futures:main/src' ].
-		spec 
-			package: 'Futures-Telemetry' with: [ spec requires: #(Futures) ] ].
+		spec
+			baseline: 'Futures' with: [
+				spec repository: 'github://feenkcom/pharo-futures:v0.6.127/src' ].
+
+		spec package: 'Futures-Telemetry' with: [
+			spec requires: #(#Futures) ].
+	]
 ]
