@@ -1,5 +1,5 @@
 Class {
 	#name : #AsyncFutureThreadPoolTelemetryDoneEvent,
 	#superclass : #AsyncFutureThreadPoolTelemetryEvent,
-	#category : #'Futures-Executor - Thread Pool'
+	#category : #'Futures-Telemetry-Telemetry'
 }

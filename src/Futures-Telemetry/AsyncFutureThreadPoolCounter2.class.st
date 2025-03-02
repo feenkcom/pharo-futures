@@ -1,8 +1,5 @@
-"
-Counts how many time something happened within the last minute
-"
 Class {
-	#name : #AsyncFutureThreadPoolCounter,
+	#name : #AsyncFutureThreadPoolCounter2,
 	#superclass : #Object,
 	#instVars : [
 		'mutex',
@@ -12,11 +9,11 @@ Class {
 		'previousSeconds',
 		'pings'
 	],
-	#category : #'Futures-Executor - Telemetry'
+	#category : #'Futures-Telemetry-Telemetry'
 }
 
 { #category : #'instance creation' }
-AsyncFutureThreadPoolCounter class >> withTime: aTime [
+AsyncFutureThreadPoolCounter2 class >> withTime: aTime [
 	^ self basicNew
 		setTime: aTime;
 		initialize;
@@ -24,14 +21,14 @@ AsyncFutureThreadPoolCounter class >> withTime: aTime [
 ]
 
 { #category : #accessing }
-AsyncFutureThreadPoolCounter >> amountOfPings [
+AsyncFutureThreadPoolCounter2 >> amountOfPings [
 	^ mutex critical: [
 		self flushAndGetCurrentBucket.
 		pings sum ]
 ]
 
 { #category : #private }
-AsyncFutureThreadPoolCounter >> flushAndGetCurrentBucket [
+AsyncFutureThreadPoolCounter2 >> flushAndGetCurrentBucket [
 	| currentBucket elapsedSeconds totalSeconds |
 	totalSeconds := self totalSeconds.
 	elapsedSeconds := totalSeconds - previousSeconds.
@@ -63,7 +60,7 @@ AsyncFutureThreadPoolCounter >> flushAndGetCurrentBucket [
 ]
 
 { #category : #initialization }
-AsyncFutureThreadPoolCounter >> initialize [
+AsyncFutureThreadPoolCounter2 >> initialize [
 	super initialize.
 	
 	mutex := AsyncDeadlockSafeMonitor new.
@@ -73,7 +70,7 @@ AsyncFutureThreadPoolCounter >> initialize [
 ]
 
 { #category : #accessing }
-AsyncFutureThreadPoolCounter >> ping [
+AsyncFutureThreadPoolCounter2 >> ping [
 	mutex critical: [
 		| currentBucket |
 		currentBucket := self flushAndGetCurrentBucket.
@@ -81,12 +78,12 @@ AsyncFutureThreadPoolCounter >> ping [
 ]
 
 { #category : #private }
-AsyncFutureThreadPoolCounter >> pingsArray [
+AsyncFutureThreadPoolCounter2 >> pingsArray [
 	^ pings
 ]
 
 { #category : #accessing }
-AsyncFutureThreadPoolCounter >> pingsTimeline [
+AsyncFutureThreadPoolCounter2 >> pingsTimeline [
 	^ mutex critical: [
 		| currentBucket previousPings offset |
 		
@@ -106,12 +103,12 @@ AsyncFutureThreadPoolCounter >> pingsTimeline [
 ]
 
 { #category : #private }
-AsyncFutureThreadPoolCounter >> previousSeconds [
+AsyncFutureThreadPoolCounter2 >> previousSeconds [
 	^ previousSeconds
 ]
 
 { #category : #initialization }
-AsyncFutureThreadPoolCounter >> secondsPerBucket: aNumber [	
+AsyncFutureThreadPoolCounter2 >> secondsPerBucket: aNumber [	
 	secondsPerBucket := aNumber.
 	amountOfBuckets := (60 // secondsPerBucket).
 	
@@ -123,11 +120,11 @@ AsyncFutureThreadPoolCounter >> secondsPerBucket: aNumber [
 ]
 
 { #category : #initialization }
-AsyncFutureThreadPoolCounter >> setTime: aTime [
+AsyncFutureThreadPoolCounter2 >> setTime: aTime [
 	time := aTime
 ]
 
 { #category : #private }
-AsyncFutureThreadPoolCounter >> totalSeconds [
+AsyncFutureThreadPoolCounter2 >> totalSeconds [
 	^ time totalSeconds
 ]

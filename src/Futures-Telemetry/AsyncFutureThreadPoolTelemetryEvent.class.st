@@ -6,7 +6,7 @@ Class {
 		'promise',
 		'timestamp'
 	],
-	#category : #'Futures-Executor - Thread Pool'
+	#category : #'Futures-Telemetry-Telemetry'
 }
 
 { #category : #accessing }
