@@ -200,22 +200,37 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 	aSemaphore := Semaphore new.
 
 	aPendingTask := AsyncFutureThreadPoolPendingTask new task: anAsyncPendingFuturePromise.
-
+	
 	aFutureResultHolder := Array with: nil.
 	
 	monitor critical: [
 		currentTask := AsyncOptionalValue some: aPendingTask.
 
 		currentTaskProcess := [
+			self
+				telemetrySignalStart: true
+				object: anAsyncPendingFuturePromise
+				process: Processor activeProcess.
+			
 			anAsyncPendingFuturePromise isCancelled
-				ifTrue: [ self privateRejectCancelledPendingFuture: anAsyncPendingFuturePromise signalling: aSemaphore ]
+				ifTrue: [ self privateRejectCancelledPendingFuture: anAsyncPendingFuturePromise signallingBlock: [
+							self
+								telemetrySignalStart: false
+								object: anAsyncPendingFuturePromise
+								process: Processor activeProcess.
+							aSemaphore signal ] ]
 				ifFalse: [
 					pendingQueue pushBack: aPendingTask.
 
 					self
 						privateExecutePendingFuture: anAsyncPendingFuturePromise
 						storingResultIn: aFutureResultHolder
-						signalling: aSemaphore ]
+						signallingBlock: [
+							self
+								telemetrySignalStart: false
+								object: anAsyncPendingFuturePromise
+								process: Processor activeProcess.
+							aSemaphore signal ] ].
 		] newProcess
 			priority: self priority asPharoProcessPriority - 1;
 			name: 'Future: ', self name.
@@ -243,7 +258,7 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 
 	aFutureResult := aFutureResultHolder at: 1.	
 	aFutureResult
-		ifNil: [ 
+		ifNil: [
 			"Failed to execute the future"
 			pendingQueue pop: aPendingTask ]
 		ifNotNil: [
@@ -251,7 +266,7 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 				ifReady: [ :aResultValue | pendingQueue pop: aPendingTask ]
 				ifPending: [ "it is already in the queue" ] ].
 
-	self telemetryDo: [ :aTelemetry | aTelemetry done: anAsyncPendingFuturePromise worker: self ]
+	self telemetryDo: [ :aTelemetry | aTelemetry done: anAsyncPendingFuturePromise worker: self ].
 ]
 
 { #category : #'private - process' }
@@ -305,6 +320,56 @@ AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFutureP
 ]
 
 { #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFuturePromise storingResultIn: aResultValueHolder signallingBlock: aSemaphoreBlock [
+	"Errors are explicitly handled and frozen, exceptions are forked and passed"
+	| aWaker aContext wasRejected |
+	
+	wasRejected := false.
+	
+	aWaker := AsyncFutureThreadPoolWaker new
+		worker: self;
+		task: aAsyncPendingFuturePromise.
+	
+	aContext := AsyncFutureExecutionContext new
+		waker: aWaker.
+	
+	[ [ [ self privatePollFuture: aAsyncPendingFuturePromise during: [
+		| aFutureResult |
+		aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
+
+		"we must `return` the result before signalling the semaphore, otherwise the waiting process will continue before result is return from the method"
+		aResultValueHolder at: 1 put: aFutureResult.
+
+		aFutureResult
+			ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
+			ifPending: [ :aPendingPoll | "it is already in the queue"
+				aPendingPoll isPendingIndefinitely
+					ifTrue: [ aAsyncPendingFuturePromise notifyPotentiallyIndefinitelyPending ] ].
+		
+		aSemaphoreBlock value
+	] ]
+	on: Error do: [ :anError |
+		wasRejected := true.
+		self
+			privateRejectPendingFuture: aAsyncPendingFuturePromise
+			withException: anError
+			signallingBlock: aSemaphoreBlock
+	] ]
+	"Unhandled exceptions are passed, they mean the system is now broken - we need a debugger"
+	on: UnhandledException do: [ :anUnhandledException |
+		self
+			privateRejectPendingFuture: aAsyncPendingFuturePromise
+			withUnhandledException: anUnhandledException
+			signallingBlock: aSemaphoreBlock
+			ifRejected: wasRejected ] ]
+	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
+	However, we should signal the semaphore to unblock the worker"
+	on: Exception do: [ :anException |
+		aSemaphoreBlock value.
+		anException pass ]
+]
+
+{ #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privatePollFuture: aAsyncPendingFuturePromise during: aBlock [
 	^ self
 		telemetryDo: [ :aTelemetry |
@@ -330,6 +395,20 @@ AsyncFutureThreadPoolWorker >> privateRejectCancelledPendingFuture: anAsyncPendi
 ]
 
 { #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateRejectCancelledPendingFuture: anAsyncPendingFuturePromise signallingBlock: aSemaphoreBlock [
+	"Error handling is a user code that we should handle"
+	
+	[ anAsyncPendingFuturePromise rejectWithCancellation ]
+		on: Error
+		do: [ :anError |
+			aSemaphoreBlock value.
+			anError pass ].
+	
+	"If rejecting error happened without problems we signal the semaphore normally"
+	aSemaphoreBlock value
+]
+
+{ #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePromise withException: anException signalling: aSemaphore [
 	"Error handling is a user code that we should handle"
 
@@ -341,6 +420,20 @@ AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePr
 	
 	"If rejecting error happened without problems we signal the semaphore normally"
 	aSemaphore signal
+]
+
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePromise withException: anException signallingBlock: aSemaphoreBlock [
+	"Error handling is a user code that we should handle"
+
+	[ aAsyncPendingFuturePromise rejectWithError: anException ]
+		on: Error
+		do: [ :anError |
+			aSemaphoreBlock value.
+			anError pass ].
+	
+	"If rejecting error happened without problems we signal the semaphore normally"
+	aSemaphoreBlock value
 ]
 
 { #category : #'private - process' }
@@ -357,6 +450,23 @@ AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePr
 				on: Error
 				do: [ :anError |
 					aSemaphore signal.
+					anError pass ] ]
+]
+
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePromise withUnhandledException: anUnhandledException signallingBlock: aSemaphoreBlock ifRejected: wasAlreadyRejected [
+	"Error handling is a user code that we should handle"
+
+	wasAlreadyRejected
+		"If promise was already rejected it means we already signalled a semaphore, do nothing here and just pass an error"
+		ifTrue: [ anUnhandledException pass ]
+		ifFalse: [
+			"If the promise is not rejected yet it means we didn't handle an error and this is our first try.
+			We give promise a chance to handle the error, if it does not work we pass."
+			[ aAsyncPendingFuturePromise rejectWithError: anUnhandledException. aSemaphoreBlock value ]
+				on: Error
+				do: [ :anError |
+					aSemaphoreBlock value.
 					anError pass ] ]
 ]
 
@@ -467,6 +577,11 @@ AsyncFutureThreadPoolWorker >> telemetryDo: aBlock ifNone: aNoneBlock [
 	^ threadPool
 		ifNotNil: [ :aThreadPool | aThreadPool telemetryDo: aBlock ifNone: aNoneBlock ]
 		ifNil: aNoneBlock
+]
+
+{ #category : #'as yet unclassified' }
+AsyncFutureThreadPoolWorker >> telemetrySignalStart: isStart object: anObject process: aProcess [
+	<primitive: 'primitiveTelemetryObjectSignal'>
 ]
 
 { #category : #'api - worker' }
