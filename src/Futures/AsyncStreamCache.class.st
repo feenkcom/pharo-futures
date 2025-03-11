@@ -6,7 +6,7 @@ Class {
 	#name : #AsyncStreamCache,
 	#superclass : #Object,
 	#instVars : [
-		'monitor',
+		'mutex',
 		'stream',
 		'items',
 		'isDone'
@@ -23,7 +23,7 @@ AsyncStreamCache class >> forStream: anAsyncStream [
 AsyncStreamCache >> initialize [
 	super initialize.
 	
-	monitor := Monitor new
+	mutex := Monitor new.
 ]
 
 { #category : #'api - stream' }
@@ -31,7 +31,7 @@ AsyncStreamCache >> pollAt: anIndex context: anAsynchronousContext [
 	<return: #AsyncPoll>
 
 	[
-		monitor critical: [
+		mutex critical: [
 			anIndex > items size
 				"Asked for an item outside of the cache"
 				ifTrue: [
@@ -51,7 +51,7 @@ AsyncStreamCache >> pollAt: anIndex context: anAsynchronousContext [
 								ifPending: [ :aPendingPoll | ^ aPendingPoll ] ] ]
 				"an item is cached, we are good"
 				ifFalse: [ ^ AsyncPoll ready: (AsyncOptionalValue some: (items at: anIndex)) ]
-		] 
+		]
 	] repeat
 ]
 
