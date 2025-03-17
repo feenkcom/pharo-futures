@@ -629,7 +629,8 @@ AsyncFutureThreadPoolWorker >> unschedule: anAsyncPendingFuturePromise [
 		ifNotNil: [ :aPromise | ^ aPromise rejectWithCancellation ].
 
 	"if the promise is not in the local queue, it means that it is being executed or is about to be executed"
-	self privateUnschedule: anAsyncPendingFuturePromise
+	self privateUnschedule: anAsyncPendingFuturePromise.
+	anAsyncPendingFuturePromise rejectWithCancellation
 ]
 
 { #category : #'api - lifecycle' }
