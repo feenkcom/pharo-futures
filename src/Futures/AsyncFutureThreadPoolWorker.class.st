@@ -270,6 +270,11 @@ AsyncFutureThreadPoolWorker >> privateExecuteFuture: anAsyncPendingFuturePromise
 ]
 
 { #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateExecuteNextFuture [
+	self privateExecuteFuture: localQueue popAndWait
+]
+
+{ #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFuturePromise storingResultIn: aResultValueHolder signalling: aSemaphore [
 	"Errors are explicitly handled and frozen, exceptions are forked and passed"
 	| aWaker aContext wasRejected |
@@ -470,6 +475,28 @@ AsyncFutureThreadPoolWorker >> privateRejectPendingFuture: aAsyncPendingFuturePr
 					anError pass ] ]
 ]
 
+{ #category : #'private - process' }
+AsyncFutureThreadPoolWorker >> privateSchedule: anAsyncPendingFuturePromise forced: isForcedToSchedule [
+	"Return true if the promised future was scheduled, false otherwise.
+	If a worker is not running or is shutting down, the scheduling is forbidden"
+	<return: #Boolean>
+	
+	anAsyncPendingFuturePromise isCancelled
+		ifTrue: [
+			anAsyncPendingFuturePromise rejectWithCancellation.
+			^ false ]
+		ifFalse: [ anAsyncPendingFuturePromise worker: self ].
+
+	^ monitor critical: [
+		(isForcedToSchedule or: [ self acceptsFutures ])
+			ifFalse: [ ^ false ].
+
+		localQueue pushBack: anAsyncPendingFuturePromise.
+		futuresCounter ifNotNil: [ futuresCounter ping ].
+		
+		true ]
+]
+
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> privateUnschedule: anAsyncPendingFuturePromise [
 	"Must be called from within the critical block"
@@ -491,20 +518,9 @@ AsyncFutureThreadPoolWorker >> schedule: anAsyncPendingFuturePromise [
 	If a worker is not running or is shutting down, the scheduling is forbidden"
 	<return: #Boolean>
 	
-	anAsyncPendingFuturePromise isCancelled
-		ifTrue: [
-			anAsyncPendingFuturePromise rejectWithCancellation.
-			^ false ]
-		ifFalse: [ anAsyncPendingFuturePromise worker: self ].
-
-	^ monitor critical: [
-		self acceptsFutures
-			ifFalse: [ ^ false ].
-
-		localQueue pushBack: anAsyncPendingFuturePromise.
-		futuresCounter ifNotNil: [ futuresCounter ping ].
-		
-		true ]
+	^ self
+		privateSchedule: anAsyncPendingFuturePromise
+		forced: false
 ]
 
 { #category : #'api - lifecycle' }
@@ -629,7 +645,8 @@ AsyncFutureThreadPoolWorker >> unschedule: anAsyncPendingFuturePromise [
 		ifNotNil: [ :aPromise | ^ aPromise rejectWithCancellation ].
 
 	"if the promise is not in the local queue, it means that it is being executed or is about to be executed"
-	self privateUnschedule: anAsyncPendingFuturePromise
+	self privateUnschedule: anAsyncPendingFuturePromise.
+	anAsyncPendingFuturePromise rejectWithCancellation
 ]
 
 { #category : #'api - lifecycle' }
@@ -652,7 +669,7 @@ AsyncFutureThreadPoolWorker >> workerLoop [
 	
 	[ monitor critical: [ shouldStop notNil and: [ localQueue isEmpty and: [ pendingQueue isEmpty ] ] ] ] whileFalse: [
 			self maintanance.
-			self privateExecuteFuture: localQueue popAndWait ]
+			self privateExecuteNextFuture ]
 ]
 
 { #category : #'api - accessing' }

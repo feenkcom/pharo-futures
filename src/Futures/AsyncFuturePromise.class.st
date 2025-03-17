@@ -30,7 +30,6 @@ AsyncFuturePromise >> cancel: anAsyncFutureExecutionCancellation [
 			"Worker is not assigned yet, meaning that the future is not yet scheduled"
 			ifNil: [ ^ self rejectWithCancellation ]
 			ifNotNil: [ :aWorker |
-				executionState := AsyncFutureExecutionCancelledState uniqueInstance.
 				anAsyncFutureExecutionCancellation
 					cancel: self
 					worker: aWorker ] ]
@@ -66,6 +65,10 @@ AsyncFuturePromise >> errorHandler: anObject [
 { #category : #'private - state' }
 AsyncFuturePromise >> fulfillWithValue: aValue [
 	self critical: [
+		"Is already cancelled"
+		executionState isCancelled
+			ifTrue: [ ^ self ].
+	
 		"The future is already fulfilled or rejected"
 		executionState isSuccess
 			ifTrue: [ ^ self ].
@@ -170,6 +173,10 @@ AsyncFuturePromise >> rejectWithError: anError [
 { #category : #'private - state' }
 AsyncFuturePromise >> rejectWithError: anError state: anExecutuionState [
 	self critical: [
+		"Is already cancelled"
+		executionState isCancelled
+			ifTrue: [ ^ self ].
+			
 		"The future is already fulfilled or rejected"
 		executionState isSuccess
 			ifTrue: [ ^ self ].
