@@ -499,10 +499,18 @@ AsyncFutureThreadPoolWorker >> privateSchedule: anAsyncPendingFuturePromise forc
 
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> privateUnschedule: anAsyncPendingFuturePromise [
-	"Must be called from within the critical block"
+	"Must be called from within the critical block.
+	
+	Return true of a given promise was cleanly unscheduled, meaning that is wasn't being executed"
+	<return: #Boolean>
 
 	localQueue pop: anAsyncPendingFuturePromise.
-	pendingQueue popSuchThat: [ :eachPendingTask | eachPendingTask task == anAsyncPendingFuturePromise ]
+	^ (pendingQueue popSuchThat: [ :eachPendingTask | eachPendingTask task == anAsyncPendingFuturePromise ])
+		ifNil: [ true ]
+		ifNotNil: [
+			currentTask
+				ifSome: [ :aPendingTask | aPendingTask task ~~ anAsyncPendingFuturePromise ]
+				ifNone: [ ^ true ] ]
 ]
 
 { #category : #'private - process' }
@@ -640,13 +648,15 @@ AsyncFutureThreadPoolWorker >> threadPool: anAsyncFutureThreadPool [
 
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> unschedule: anAsyncPendingFuturePromise [
+	"Return true of a given promise was cleanly unscheduled, meaning that is wasn't being executed"
+	<return: #Boolean>
+
 	"if it was in the local queue it means that the worker didn't start to process it yet"
 	(localQueue pop: anAsyncPendingFuturePromise)
-		ifNotNil: [ :aPromise | ^ aPromise rejectWithCancellation ].
+		ifNotNil: [ :aPromise | ^ true ].
 
 	"if the promise is not in the local queue, it means that it is being executed or is about to be executed"
-	self privateUnschedule: anAsyncPendingFuturePromise.
-	anAsyncPendingFuturePromise rejectWithCancellation
+	^ self privateUnschedule: anAsyncPendingFuturePromise
 ]
 
 { #category : #'api - lifecycle' }

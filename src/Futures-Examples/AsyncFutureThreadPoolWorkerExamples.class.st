@@ -432,7 +432,7 @@ AsyncFutureThreadPoolWorkerExamples >> softCancelScheduledInRunningWorker [
 	self assert: aWorker acceptsFutures.
 	self assert: aWorker amountOfFutures equals: 0.
 
-	^ aWorker
+	^ aPendingFuturePromise
 ]
 
 { #category : #examples }
