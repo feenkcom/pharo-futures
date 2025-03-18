@@ -65,7 +65,7 @@ AsyncObservableValue >> gtDisplayOn: aStream [
 	aStream nextPut: $(.
 	self
 		ifSome: [ :aValue | aValue gtDisplayOn: aStream ]
-		ifNone: [ aStream nextPut: 'None' ].
+		ifNone: [ aStream nextPutAll: 'None' ].
 	aStream nextPut: $)
 ]
 

@@ -16,7 +16,6 @@ Class {
 { #category : #'api - promise' }
 AsyncFuturePromise >> cancel: anAsyncFutureExecutionCancellation [
 	"Cancel the future according to the given cancellation strategy"
-	| aWorker |
 
 	self critical: [
 		"Is already cancelled"
@@ -27,16 +26,13 @@ AsyncFuturePromise >> cancel: anAsyncFutureExecutionCancellation [
 		executionState isSuccess
 			ifTrue: [ ^ self ].
 
-		executionState := AsyncFutureExecutionCancelledState uniqueInstance.
 		worker
 			"Worker is not assigned yet, meaning that the future is not yet scheduled"
-			ifNil: [ ^ self ].
-
-		aWorker := worker.
-
-		anAsyncFutureExecutionCancellation
-			cancel: self
-			worker: aWorker ]
+			ifNil: [ ^ self rejectWithCancellation ]
+			ifNotNil: [ :aWorker |
+				anAsyncFutureExecutionCancellation
+					cancel: self
+					worker: aWorker ] ]
 ]
 
 { #category : #'api - promise' }
@@ -69,6 +65,10 @@ AsyncFuturePromise >> errorHandler: anObject [
 { #category : #'private - state' }
 AsyncFuturePromise >> fulfillWithValue: aValue [
 	self critical: [
+		"Is already cancelled"
+		executionState isCancelled
+			ifTrue: [ ^ self ].
+	
 		"The future is already fulfilled or rejected"
 		executionState isSuccess
 			ifTrue: [ ^ self ].
@@ -158,17 +158,30 @@ AsyncFuturePromise >> priority: anAsyncFutureExecutionPriority [
 
 { #category : #'private - state' }
 AsyncFuturePromise >> rejectWithCancellation [
-	self rejectWithError: AsyncFutureCancelled new
+	self
+		rejectWithError: AsyncFutureCancelled new 
+		state: AsyncFutureExecutionCancelledState uniqueInstance
 ]
 
 { #category : #'private - state' }
 AsyncFuturePromise >> rejectWithError: anError [
+	self
+		rejectWithError: anError
+		state: AsyncFutureExecutionSuccessfulState uniqueInstance
+]
+
+{ #category : #'private - state' }
+AsyncFuturePromise >> rejectWithError: anError state: anExecutuionState [
 	self critical: [
+		"Is already cancelled"
+		executionState isCancelled
+			ifTrue: [ ^ self ].
+			
 		"The future is already fulfilled or rejected"
 		executionState isSuccess
 			ifTrue: [ ^ self ].
 
-		executionState := AsyncFutureExecutionSuccessfulState uniqueInstance ].
+		executionState := anExecutuionState ].
 
 	worker := nil.
 	errorHandler handleError: anError.
