@@ -181,7 +181,10 @@ TaskAtQueue >> pulse [
 
 { #category : #private }
 TaskAtQueue >> queueReaderLoop [
-
+	"Prevent users from interrupting the process executing this loop"
+	#GlutinIgnoreDuringInterruptStatus asClassIfPresent: [ :aClass |
+		aClass value: true ].
+	
 	[
 		[
 			[ self processNextEntry ]
