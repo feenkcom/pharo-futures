@@ -12,27 +12,29 @@ Metacello new
 
 ## Futures
 
+*Please note, that `wait` shouldn't be used in production, it is just for debugging and example purposes*
+
 Ready:
 ```smalltalk
-42 asFuture wait = 42
+42 asAsyncFuture wait = 42
 ```
 
 Computation:
 ```smalltalk
-[ 2 seconds wait . 42 ] asFuture wait = 42 
+[ 2 seconds wait . 42 ] asAsyncFuture wait = 42 
 ```
 
 Map:
 ```smalltalk
-([ 2 ] asFuture map: [ :x | x + 40 ]) wait = 42
+([ 2 ] asAsyncFuture map: [ :x | x + 40 ]) wait = 42
 ```
 
 Join all:
 ```
 (AsyncJoinAllFuture futures: { 
-   [ 42 ] asFuture.
-   3.14 asFuture.
-   9 asFuture map: [ :x | x * x ].
+   [ 42 ] asAsyncFuture.
+   3.14 asAsyncFuture.
+   9 asAsyncFuture map: [ :x | x * x ].
 }) wait = #(42 3.14 81)
 ```
 
