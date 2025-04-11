@@ -64,6 +64,19 @@ AsyncStreamBufferExamples >> getAtLast [
 ]
 
 { #category : #examples }
+AsyncStreamBufferExamples >> preloadNotFoundUntilEndOfStream [
+	<gtExample>
+	| aBuffer theItem |
+
+	aBuffer := self bufferOnLargeStream.
+	theItem := (aBuffer preloadUntilFoundSuchThat: [ :each | each = 9999999 ]) wait.
+	
+	self assert: theItem isNotFound.
+
+	^ aBuffer
+]
+
+{ #category : #examples }
 AsyncStreamBufferExamples >> preloadUntilFound [
 	<gtExample>
 	| aBuffer theItem |

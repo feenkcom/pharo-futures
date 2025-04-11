@@ -11,6 +11,19 @@ Class {
 }
 
 { #category : #'api - sink' }
+AsyncStreamBufferSentSink >> pollClose: anAsynchronousContext [
+	"Flush any remaining output and close this sink, if necessary.
+	Returns AsyncPoll::Ready(true) when no buffered items remain and the sink has been successfully closed.
+	Returns Poll::Pending if there is more work left to do, in which case the current task is scheduled (via cx.waker().wake_by_ref()) to wake up when poll_close should be called again.
+	If this function encounters an error, the sink should be considered to have failed permanently, and no more Sink methods should be called."
+	<return: #AsyncPoll>
+	
+	streamBuffer privateOnStreamDone.
+	
+	^ AsyncPoll ready: true
+]
+
+{ #category : #'api - sink' }
 AsyncStreamBufferSentSink >> pollReady: anAsynchronousContext [
 	"Attempts to prepare the Sink to receive a value.
 	This method must be called and return Poll::Ready(true) prior to each call to start_send.

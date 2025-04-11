@@ -284,7 +284,7 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 				eachIndex := eachIndex + 1.
 				(aBlock cull: eachItem cull: eachIndex)
 					ifTrue: [ ^ (AsyncStreamBufferItem new item: eachItem; index: eachIndex) asAsyncPromise ] ] ].
-
+		
 		"the value was not found, let's register a pending scan"
 		aPendingScanPromise := AsyncPendingPromise new.
 		pendingScanPromises add: (aPendingScanPromise -> aBlock).
@@ -339,6 +339,19 @@ AsyncStreamBuffer >> privateOnItemLoaded: anItem at: anIndex [
 
 			eachItemFound ].
 		pendingScanPromises ifNotEmpty: [ self continue ] ]
+]
+
+{ #category : #'private - event handling' }
+AsyncStreamBuffer >> privateOnStreamDone [
+	monitor critical: [
+		pendingScanPromises do: [ :eachPendingScanAssociation |
+			| eachScanPromise eachScanBlock |
+
+			eachScanPromise := eachPendingScanAssociation key.
+			eachScanBlock := eachPendingScanAssociation value.
+			
+			eachScanPromise fulfillWithValue: (AsyncStreamBufferItem notFound) ].
+		pendingScanPromises removeAll ]
 ]
 
 { #category : #'api - accessing' }
