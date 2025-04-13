@@ -64,6 +64,16 @@ TAsyncFuture >> await: anExecutionSpecification [
 ]
 
 { #category : #'api - future' }
+TAsyncFuture >> awaitWithLowPriority [
+	"Execute the future asynchronously and return a promise that will be resolved with the future's result"
+	"Run with low priority, which is lower than the UI priority"
+	<return: #TAsyncPromise>
+	
+	^ self await: AsyncFutureExecutionConfiguration new lowPriority
+		
+]
+
+{ #category : #'api - future' }
 TAsyncFuture >> awaitWithPassExceptionHandler [
 	"Execute the future asynchronously by allowing error to pass and raise a debugger if not caught."
 	<return: #TAsyncPromise>
