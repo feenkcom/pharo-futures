@@ -73,6 +73,38 @@ TAsyncFuture >> awaitWithPassExceptionHandler [
 ]
 
 { #category : #'api - future' }
+TAsyncFuture >> awaitWithPriority: anAsyncFutureExecutionPriority inCustomGroup: aGroupName [
+	"Execute the future asynchronously and return a promise that will be resolved with the future's result"
+	"Run with the given priority in the given group."
+	<return: #TAsyncPromise>
+
+	^ self await: (AsyncFutureExecutionConfiguration new 
+		priority: anAsyncFutureExecutionPriority;
+		customGroup: aGroupName)
+]
+
+{ #category : #'api - future' }
+TAsyncFuture >> awaitWithUserBackgroundPriority [ 
+	"Execute the future asynchronously and return a promise that will be resolved with the future's result"
+	"Run with user background priority, which is lower than the lowest priority used by the UI"
+	<return: #TAsyncPromise>
+
+	^ self await: AsyncFutureExecutionConfiguration new userBackgroundPriority
+]
+
+{ #category : #'api - future' }
+TAsyncFuture >> awaitWithUserBackgroundPriorityInCustomGroup: aGroupName [
+	"Execute the future asynchronously and return a promise that will be resolved with the future's result"
+	"Run with user background priority, which is lower than the lowest priority used by the UI.
+	Schedule the computation in the given group."
+	<return: #TAsyncPromise>
+
+	^ self await: (AsyncFutureExecutionConfiguration new 
+		userBackgroundPriority;
+		customGroup: aGroupName)
+]
+
+{ #category : #'api - future' }
 TAsyncFuture >> delayed: aDuration [
 	^ AsyncDelayedFuture forFuture: self delay: aDuration
 ]

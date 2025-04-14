@@ -149,3 +149,8 @@ AsyncFutureExecutionConfiguration >> priority [
 AsyncFutureExecutionConfiguration >> priority: anAsyncFutureExecutionPriority [
 	priority := anAsyncFutureExecutionPriority
 ]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration >> userBackgroundPriority [
+	self priority: AsyncFutureExecutionUserBackgroundPriority uniqueInstance
+]
