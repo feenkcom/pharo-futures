@@ -6,7 +6,7 @@ Class {
 
 { #category : #converting }
 AsyncFutureExecutionUserBackgroundPriority >> asPharoProcessPriority [
-	^ 23
+	^ 20
 ]
 
 { #category : #printing }
