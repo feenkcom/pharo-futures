@@ -94,7 +94,7 @@ AsyncFutureThreadPoolWorker >> gtDisplayOn: aStream [
 AsyncFutureThreadPoolWorker >> initialize [
 	super initialize.
 	
-	monitor := Monitor new.
+	monitor := Mutex new.
 	
 	"local queue contains futures that should be executed"
 	localQueue := AsyncFutureThreadPoolQueue new.

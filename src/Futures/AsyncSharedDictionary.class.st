@@ -51,7 +51,7 @@ AsyncSharedDictionary >> do: aBlock [
 AsyncSharedDictionary >> initialize [
 	super initialize.
 	
-	monitor := Monitor new.
+	monitor := Mutex new.
 	dictionary := self newDictionary
 ]
 

@@ -69,7 +69,7 @@ AsyncDeferredPromise >> initialize [
 	super initialize.
 	
 	state := AsyncPendingPromiseState new.
-	mutex := Monitor new.
+	mutex := Mutex new.
 	chainedPromises := self newChainedPromises
 ]
 

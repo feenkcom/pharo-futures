@@ -18,7 +18,7 @@ AsyncFutureExecutionAtomicWaker >> hasWaker [
 AsyncFutureExecutionAtomicWaker >> initialize [
 	super initialize.
 	
-	monitor := Monitor new.
+	monitor := Mutex new.
 	state := AsyncFutureExecutionWakerInitialState new
 ]
 

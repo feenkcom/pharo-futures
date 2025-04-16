@@ -23,7 +23,7 @@ AsyncPollValueHolder >> ifSome: aSomeBlock ifNone: aNoneBlock [
 AsyncPollValueHolder >> initialize [
 	super initialize.
 	
-	monitor := Monitor new.
+	monitor := Mutex new.
 	value := AsyncOptionalValue none.
 	polled := false
 ]
