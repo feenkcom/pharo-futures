@@ -77,13 +77,13 @@ AsyncAbstractOrderedCollection >> indexOf: anObject [
 AsyncAbstractOrderedCollection >> initialize [
 	super initialize.
 	
-	monitor := Monitor new.
+	monitor := Mutex new.
 	collection := self class collectionType new
 ]
 
 { #category : #copying }
 AsyncAbstractOrderedCollection >> postCopy [
-	monitor := Monitor new.
+	monitor := Mutex new.
 	collection := collection copy
 ]
 

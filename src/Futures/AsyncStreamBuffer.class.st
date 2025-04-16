@@ -194,7 +194,7 @@ AsyncStreamBuffer >> initialize [
 
 	id := self class generateUniqueId.
 
-	monitor := Monitor new.
+	monitor := Mutex new.
 	stream := nil.
 
 	bufferSink := AsyncCollectionSink forCollection: AsyncSharedOrderedCollection new.

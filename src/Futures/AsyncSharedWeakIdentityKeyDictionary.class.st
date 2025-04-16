@@ -37,7 +37,7 @@ AsyncSharedWeakIdentityKeyDictionary >> at: key put: anObject [
 AsyncSharedWeakIdentityKeyDictionary >> initialize [
 	super initialize.
 
-	monitor := Monitor new.
+	monitor := Mutex new.
 	dictionary := WeakIdentityKeyDictionary new
 ]
 

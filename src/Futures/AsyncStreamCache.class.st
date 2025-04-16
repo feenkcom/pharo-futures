@@ -23,7 +23,7 @@ AsyncStreamCache class >> forStream: anAsyncStream [
 AsyncStreamCache >> initialize [
 	super initialize.
 	
-	mutex := Monitor new.
+	mutex := Mutex new.
 ]
 
 { #category : #'api - stream' }

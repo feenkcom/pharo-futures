@@ -45,7 +45,7 @@ AsyncFutureCache >> ifSome: aSomeBlock ifNonePutPoll: aNoneBlock [
 AsyncFutureCache >> initialize [
 	super initialize.
 	
-	monitor := Monitor new.
+	monitor := Mutex new.
 	value := AsyncOptionalValue none
 ]
 
