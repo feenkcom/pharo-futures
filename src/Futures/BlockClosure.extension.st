@@ -16,6 +16,23 @@ BlockClosure >> asAsyncPromise [
 ]
 
 { #category : #'*Futures' }
+BlockClosure >> asAsyncPromiseWithLowPriority [
+	^ self asAsyncFuture awaitWithLowPriority
+]
+
+{ #category : #'*Futures' }
+BlockClosure >> asAsyncPromiseWithPriority: anAsyncFutureExecutionPriority inCustomGroup: aGroupName [
+	^ self asAsyncFuture 
+		awaitWithPriority: anAsyncFutureExecutionPriority 
+		inCustomGroup: aGroupName
+]
+
+{ #category : #'*Futures' }
+BlockClosure >> asAsyncPromiseWithUserBackgroundPriority [
+	^ self asAsyncFuture awaitWithUserBackgroundPriority
+]
+
+{ #category : #'*Futures' }
 BlockClosure >> entryPriority [
 	"Answer the priority of the receiver when submitted as a task to TaskIt. 0 is highest priority"
 
