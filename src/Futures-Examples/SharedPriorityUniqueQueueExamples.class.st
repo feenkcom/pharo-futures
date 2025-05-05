@@ -7,9 +7,8 @@ Class {
 { #category : #tests }
 SharedPriorityUniqueQueueExamples >> testQueuePriority [
 	<gtExample>
-
+	<return: #SharedPriorityUniqueQueue>
 	| queue |
-
 	queue := SharedPriorityUniqueQueue new.
 	queue
 		nextPut: (SharedPriorityQueueTestEntry priority: 0);
@@ -40,24 +39,23 @@ SharedPriorityUniqueQueueExamples >> testQueuePriority [
 	self assert: queue nextOrNil isNil.
 	self assert: queue size equals: 0.
 
-	^queue
+	^ queue
 ]
 
 { #category : #tests }
 SharedPriorityUniqueQueueExamples >> testQueuePriorityAndIdentity [
 	<gtExample>
+	<return: #SharedPriorityUniqueQueue>
 	| queue |
-
 	queue := SharedPriorityUniqueQueue new.
 	queue
 		nextPut: (SharedPriorityQueueTestEntry priority: 0);
 		nextPut: (SharedPriorityQueueTestEntry priority: 5);
 		nextPut: (SharedPriorityQueueTestEntry priority: 6 identifier: #unique);
 		nextPut: (SharedPriorityQueueTestEntry priority: 8);
-		"The next entry isn't added to the queue because an existing
-		entry has the same identifier"
 		nextPut: (SharedPriorityQueueTestEntry priority: 7 identifier: #unique);
-		nextPut: (SharedPriorityQueueTestEntry priority: 1).
+		nextPut: (SharedPriorityQueueTestEntry priority: 1).	"The next entry isn't added to the queue because an existing
+		entry has the same identifier"
 
 	self assert: queue size equals: 5.
 
@@ -79,5 +77,5 @@ SharedPriorityUniqueQueueExamples >> testQueuePriorityAndIdentity [
 	self assert: queue nextOrNil isNil.
 	self assert: queue size equals: 0.
 
-	^queue
+	^ queue
 ]

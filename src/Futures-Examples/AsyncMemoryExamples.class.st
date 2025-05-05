@@ -10,6 +10,7 @@ Class {
 { #category : #accessing }
 AsyncMemoryExamples >> closedStreamExample [
 	<gtExample>
+	<return: #AsyncMemoryExamples>
 	| sink future ending |
 	ending := self findUniqueIntervalEnd.
 	sink := AsyncCounterSink new.
@@ -30,6 +31,7 @@ AsyncMemoryExamples >> dirtyBlockExample [
 	"Checks to ensure that streams are gc'd even when using 'dirty' blocks"
 
 	<gtExample>
+	<return: #AsyncMemoryExamples>
 	| sink future ending |
 	ending := self findUniqueIntervalEnd.
 	sink := AsyncCounterSink new.
@@ -62,6 +64,7 @@ AsyncMemoryExamples >> leakExample [
 	"Checks to ensure that streams are gc'd when unreferenced by sinks"
 
 	<gtExample>
+	<return: #AsyncMemoryExamples>
 	| sink future ending |
 	ending := self findUniqueIntervalEnd.
 	sink := AsyncCounterSink new.
@@ -77,6 +80,7 @@ AsyncMemoryExamples >> leakExample [
 { #category : #accessing }
 AsyncMemoryExamples >> weakExample [
 	<gtExample>
+	<return: #AsyncMemoryExamples>
 	| sink future |
 	sink := AsyncCounterSink new.
 	future := (1 to: 1000) asAsyncStream forward: sink.
@@ -90,6 +94,7 @@ AsyncMemoryExamples >> weakExample [
 { #category : #accessing }
 AsyncMemoryExamples >> weakGroupByExample [
 	<gtExample>
+	<return: #AsyncMemoryExamples>
 	| sink1 sink2 sink3 sink4 future |
 	sink1 := AsyncCounterSink new.
 	sink2 := AsyncCounterSink new.
@@ -115,5 +120,5 @@ AsyncMemoryExamples >> weakGroupByExample [
 	{sink1.
 		sink2.
 		sink3.
-		sink4} do: [:each | self assert: each count equals: 250 ]
+		sink4} do: [ :each | self assert: each count equals: 250 ]
 ]
