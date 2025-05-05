@@ -15,19 +15,21 @@ AsyncFutureThreadPoolWorkerExamples >> cleanUp [
 { #category : #'examples - cancellation' }
 AsyncFutureThreadPoolWorkerExamples >> hardCancelScheduledInRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aSemaphore aPendingFuturePromise |
-
 	aWorker := self startupNewWorker.
-	
+
 	aSemaphore := Semaphore new.
-	aPendingFuturePromise := AsyncFuturePromise new future: [ aSemaphore signal. 10 seconds wait. 42 ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new
+			future: [ aSemaphore signal.
+				10 seconds wait.
+				42 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
-	
-	aSemaphore wait.
-	
-	"Hard cancellation terminates the currently running future"
-	aPendingFuturePromise cancel: AsyncFutureExecutionHardCancellation uniqueInstance.
-	
+
+	aSemaphore wait.	"Hard cancellation terminates the currently running future"
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionHardCancellation uniqueInstance.
+
 	self assert: aPendingFuturePromise wait class equals: AsyncFutureCancelled.
 
 	self assert: aWorker isRunning.
@@ -42,9 +44,9 @@ AsyncFutureThreadPoolWorkerExamples >> hardCancelScheduledInRunningWorker [
 AsyncFutureThreadPoolWorkerExamples >> newWorker [
 	<gtExample>
 	<after: #cleanUp>
-	
+	<return: #AsyncFutureThreadPoolWorker>
 	worker ifNotNil: [ ^ worker ].
-	
+
 	worker := AsyncFutureThreadPoolWorker new.
 	self assert: worker isRunning not.
 	self assert: worker isShuttingDown not.
@@ -58,8 +60,8 @@ AsyncFutureThreadPoolWorkerExamples >> newWorker [
 { #category : #'examples - exceptions' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleErroneousInRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self startupNewWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: [ 1 / 0 ] asAsyncFuture.
@@ -98,12 +100,13 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleHaltInRunningWorker [
 { #category : #'examples - cancellation' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleHardCancelledInRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self startupNewWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
-	aPendingFuturePromise cancel: AsyncFutureExecutionHardCancellation uniqueInstance.
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionHardCancellation uniqueInstance.
 
 	self assert: (aWorker schedule: aPendingFuturePromise) not.
 	self assert: aPendingFuturePromise wait class equals: AsyncFutureCancelled.
@@ -119,8 +122,8 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleHardCancelledInRunningWorker [
 { #category : #examples }
 AsyncFutureThreadPoolWorkerExamples >> scheduleInNewWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self newWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
@@ -137,8 +140,8 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInNewWorker [
 { #category : #examples }
 AsyncFutureThreadPoolWorkerExamples >> scheduleInRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self startupNewWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
@@ -156,8 +159,8 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInRunningWorker [
 { #category : #examples }
 AsyncFutureThreadPoolWorkerExamples >> scheduleInShutdownWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self shutdownNewWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
@@ -174,8 +177,8 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInShutdownWorker [
 { #category : #examples }
 AsyncFutureThreadPoolWorkerExamples >> scheduleInShuttingDownWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise aShutdownPromise |
-
 	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
 
 	aWorker := self startupNewWorker.
@@ -196,11 +199,12 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleInShuttingDownWorker [
 { #category : #'examples - exceptions' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationInRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncFuturePromise new future: [ AsyncFutureExampleNotification new signal ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new
+			future: [ AsyncFutureExampleNotification new signal ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	self assert: aPendingFuturePromise wait equals: nil.
 
@@ -216,11 +220,13 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationInRunningWorker [
 { #category : #'examples - exceptions' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationWithReturnValueInRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self startupNewWorker.
 
-	aPendingFuturePromise := AsyncFuturePromise new future: [ (AsyncFutureExampleNotificationWithReturnValue new value: 42) signal * 2 ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new
+			future: [ (AsyncFutureExampleNotificationWithReturnValue new value: 42) signal * 2 ]
+					asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 	self assert: aPendingFuturePromise wait equals: 84.
 
@@ -236,12 +242,13 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleNotificationWithReturnValueInRunn
 { #category : #'examples - cancellation' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleSoftCancelledInRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self startupNewWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: 42 asAsyncFuture.
-	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
 
 	self assert: (aWorker schedule: aPendingFuturePromise) not.
 	self assert: aPendingFuturePromise wait class equals: AsyncFutureCancelled.
@@ -257,14 +264,13 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleSoftCancelledInRunningWorker [
 { #category : #'examples - exceptions' }
 AsyncFutureThreadPoolWorkerExamples >> scheduleUnhandledExceptionInRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aPendingFuturePromise aResult |
-
 	aWorker := self startupNewWorker.
-	
-	aPendingFuturePromise := AsyncFuturePromise new future: [ AsyncFutureExampleUnhandledException signal ] asAsyncFuture.
-	self assert: (aWorker schedule: aPendingFuturePromise).
-	
-	"an exception is passed after we signal the promise semaphore"
+
+	aPendingFuturePromise := AsyncFuturePromise new
+			future: [ AsyncFutureExampleUnhandledException signal ] asAsyncFuture.
+	self assert: (aWorker schedule: aPendingFuturePromise).	"an exception is passed after we signal the promise semaphore"
 	aResult := aPendingFuturePromise wait.
 
 	self assert: aResult class equals: AsyncFutureExampleUnhandledException.
@@ -281,8 +287,8 @@ AsyncFutureThreadPoolWorkerExamples >> scheduleUnhandledExceptionInRunningWorker
 { #category : #examples }
 AsyncFutureThreadPoolWorkerExamples >> shutdownNewWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aShutdownPromise |
-	
 	aWorker := self newWorker.
 	aShutdownPromise := aWorker shutdown.
 	self assert: aShutdownPromise wait equals: #notRunning.
@@ -298,8 +304,8 @@ AsyncFutureThreadPoolWorkerExamples >> shutdownNewWorker [
 { #category : #examples }
 AsyncFutureThreadPoolWorkerExamples >> shutdownRunningWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aShutdownPromise |
-	
 	aWorker := self startupNewWorker.
 	aShutdownPromise := aWorker shutdown.
 	self assert: aShutdownPromise wait equals: #shutdown.
@@ -315,17 +321,18 @@ AsyncFutureThreadPoolWorkerExamples >> shutdownRunningWorker [
 { #category : #'examples - cancellation' }
 AsyncFutureThreadPoolWorkerExamples >> softCancelExecutedButPendingInRunningWorker [
 	<gtExample>
+	<return: #AsyncFuturePromise>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self newWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: AsyncPendingFuture new.
 	self assert: (aWorker privateSchedule: aPendingFuturePromise forced: true).
 	self assert: aPendingFuturePromise worker equals: aWorker.
-	
+
 	aWorker privateExecuteNextFuture.
 
-	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
 	self assert: aPendingFuturePromise isCancelled.
 	self assert: aPendingFuturePromise isRejected.
 
@@ -335,95 +342,101 @@ AsyncFutureThreadPoolWorkerExamples >> softCancelExecutedButPendingInRunningWork
 { #category : #'examples - cancellation' }
 AsyncFutureThreadPoolWorkerExamples >> softCancelExecutedButPendingInRunningWorkerThenFulfill [
 	<gtExample>
+	<return: #AsyncFuturePromise>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self newWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: AsyncPendingFuture new.
 	self assert: (aWorker privateSchedule: aPendingFuturePromise forced: true).
 	self assert: aPendingFuturePromise worker equals: aWorker.
-	
+
 	aWorker privateExecuteNextFuture.
 
-	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
-	
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
+
 	self assert: aPendingFuturePromise isCancelled.
 	self assert: aPendingFuturePromise isRejected.
 
 	aPendingFuturePromise fulfillWithValue: 42.
-	
+
 	self assert: aPendingFuturePromise isCancelled.
 	self assert: aPendingFuturePromise isRejected.
-	
+
 	^ aPendingFuturePromise
 ]
 
 { #category : #'examples - cancellation' }
 AsyncFutureThreadPoolWorkerExamples >> softCancelExecutedButPendingInRunningWorkerThenReject [
 	<gtExample>
+	<return: #AsyncFuturePromise>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self newWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: AsyncPendingFuture new.
 	self assert: (aWorker privateSchedule: aPendingFuturePromise forced: true).
 	self assert: aPendingFuturePromise worker equals: aWorker.
-	
+
 	aWorker privateExecuteNextFuture.
 
-	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
-	
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
+
 	self assert: aPendingFuturePromise isCancelled.
 	self assert: aPendingFuturePromise isRejected.
 
 	aPendingFuturePromise rejectWithError: Error new.
-	
+
 	self assert: aPendingFuturePromise isCancelled.
 	self assert: aPendingFuturePromise isRejected.
-	
+
 	^ aPendingFuturePromise
 ]
 
 { #category : #'examples - cancellation' }
 AsyncFutureThreadPoolWorkerExamples >> softCancelExecutedButPendingInRunningWorkerTwice [
 	<gtExample>
+	<return: #AsyncFuturePromise>
 	| aWorker aPendingFuturePromise |
-
 	aWorker := self newWorker.
 
 	aPendingFuturePromise := AsyncFuturePromise new future: AsyncPendingFuture new.
 	self assert: (aWorker privateSchedule: aPendingFuturePromise forced: true).
 	self assert: aPendingFuturePromise worker equals: aWorker.
-	
+
 	aWorker privateExecuteNextFuture.
 
-	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
-	
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
+
 	self assert: aPendingFuturePromise isCancelled.
 	self assert: aPendingFuturePromise isRejected.
 
-	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
-	
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
+
 	^ aPendingFuturePromise
 ]
 
 { #category : #'examples - cancellation' }
 AsyncFutureThreadPoolWorkerExamples >> softCancelScheduledInRunningWorker [
 	<gtExample>
+	<return: #AsyncFuturePromise>
 	| aWorker aSemaphore aPendingFuturePromise |
-
 	aWorker := self startupNewWorker.
 
 	aSemaphore := Semaphore new.
-	aPendingFuturePromise := AsyncFuturePromise new future: [ aSemaphore signal. 42 ] asAsyncFuture.
+	aPendingFuturePromise := AsyncFuturePromise new
+			future: [ aSemaphore signal.
+				42 ] asAsyncFuture.
 	self assert: (aWorker schedule: aPendingFuturePromise).
 
-	aSemaphore wait.
-	"Soft cancellation allows currently executing running future to finish"
-	aPendingFuturePromise cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
-	
+	aSemaphore wait.	"Soft cancellation allows currently executing running future to finish"
+	aPendingFuturePromise
+		cancel: AsyncFutureExecutionSoftCancellation uniqueInstance.
+
 	self assert: aPendingFuturePromise wait equals: 42.
-	
+
 	self assert: aPendingFuturePromise isCancelled not.
 	self assert: aPendingFuturePromise isFulfilled.
 
@@ -438,8 +451,8 @@ AsyncFutureThreadPoolWorkerExamples >> softCancelScheduledInRunningWorker [
 { #category : #examples }
 AsyncFutureThreadPoolWorkerExamples >> startupNewWorker [
 	<gtExample>
+	<return: #AsyncFutureThreadPoolWorker>
 	| aWorker aStartPromise |
-
 	aWorker := self newWorker.
 	aStartPromise := aWorker startup.
 	self assert: aStartPromise wait equals: #startup.

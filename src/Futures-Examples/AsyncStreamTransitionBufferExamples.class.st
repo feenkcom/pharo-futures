@@ -7,6 +7,7 @@ Class {
 { #category : #accessing }
 AsyncStreamTransitionBufferExamples >> bufferOnLargeStream [
 	<gtExample>
+	<return: #AsyncStreamTransitionBuffer>
 	| aTransitionBuffer aPreviousBuffer |
 	aPreviousBuffer := AsyncStreamBufferExamples new bufferOnLargeStream.
 
@@ -16,13 +17,14 @@ AsyncStreamTransitionBufferExamples >> bufferOnLargeStream [
 
 	self assert: aPreviousBuffer size equals: 20.
 	self assert: aTransitionBuffer size equals: 20.
-			
+
 	^ aTransitionBuffer
 ]
 
 { #category : #accessing }
 AsyncStreamTransitionBufferExamples >> getAtLast [
 	<gtExample>
+	<return: #AsyncStreamTransitionBuffer>
 	| aTransitionBuffer theLastIndex |
 	aTransitionBuffer := self bufferOnLargeStream.
 
@@ -38,26 +40,28 @@ AsyncStreamTransitionBufferExamples >> getAtLast [
 { #category : #accessing }
 AsyncStreamTransitionBufferExamples >> preloadUntilFound [
 	<gtExample>
+	<return: #AsyncStreamTransitionBuffer>
 	| aTransitionBuffer theItem aScanPromise |
 	aTransitionBuffer := self bufferOnLargeStream.
 
 	self assert: aTransitionBuffer size equals: 20.
 
-	aScanPromise := aTransitionBuffer preloadUntilFoundSuchThat: [ :each | each = 510 ].
+	aScanPromise := aTransitionBuffer
+			preloadUntilFoundSuchThat: [ :each | each = 510 ].
 	aTransitionBuffer wait.
-	
+
 	self assert: aTransitionBuffer size equals: 20.
 	self assert: aTransitionBuffer newBuffer size >= 510.
 	self assert: aScanPromise isPending.
-	
+
 	aTransitionBuffer fulfillPendingScanPromises.
-	
+
 	self assert: aTransitionBuffer size equals: 20.
 	self assert: aTransitionBuffer newBuffer size >= 510.
 	self assert: aScanPromise isFulfilled.
-	
+
 	theItem := aScanPromise wait.
-	
+
 	self assert: theItem isNotNil.
 	self assert: theItem index equals: 510.
 	self assert: theItem item equals: 510.
