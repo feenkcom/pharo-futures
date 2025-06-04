@@ -109,7 +109,7 @@ AsyncStreamTransitionBuffer >> preloadUntilFoundSuchThat: aBlock [
     this buffer is no longer in use. My users are reponsible for 
     the invocation by calling #fulfillPendingScanPromises.
     In the mean time, all pending scan promises are stored."
-    aPendingPromise := AsyncPendingPromise new.
+    aPendingPromise := AsyncManualPromise new.
     pendingScanPromises at: aPendingPromise put: AsyncOptionalValue none.
     
     "newBuffer preloads items"

@@ -49,8 +49,8 @@ AsyncPromiseExamples >> chainedFulfilledPromise [
 { #category : #'examples - chaining' }
 AsyncPromiseExamples >> chainedPendingPromise [
 	<gtExample>
-	<return: #AsyncPendingPromise>
-	rootPromise := AsyncPendingPromise new.
+	<return: #AsyncManualPromise>
+	rootPromise := AsyncManualPromise new.
 	promiseA := rootPromise then: [ :aNumber | aNumber / 0 ].
 
 	subPromiseA := promiseA
@@ -107,7 +107,7 @@ AsyncPromiseExamples >> chainedRejectedPromise [
 { #category : #'examples - chaining' }
 AsyncPromiseExamples >> fulfillRootPromise [
 	<gtExample>
-	<return: #AsyncPendingPromise>
+	<return: #AsyncManualPromise>
 	| aRootPromise |
 	aRootPromise := self chainedPendingPromise.
 	aRootPromise fulfillWithValue: 42.

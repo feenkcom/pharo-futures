@@ -286,7 +286,7 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 					ifTrue: [ ^ (AsyncStreamBufferItem new item: eachItem; index: eachIndex) asAsyncPromise ] ] ].
 		
 		"the value was not found, let's register a pending scan"
-		aPendingScanPromise := AsyncPendingPromise new.
+		aPendingScanPromise := AsyncManualPromise new.
 		pendingScanPromises add: (aPendingScanPromise -> aBlock).
 		"and request the loading of new items"
 		self continue.

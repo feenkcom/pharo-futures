@@ -91,7 +91,7 @@ AsyncPausableSink >> resume: anAmount [
 				ifSome: [ :aPromise | aPromise ]
 				ifNone: [
 					| newPromise |
-					newPromise := AsyncPendingPromise new.
+					newPromise := AsyncManualPromise new.
 					promise value: (AsyncOptionalValue some: newPromise).
 					newPromise ] ] ].
 
