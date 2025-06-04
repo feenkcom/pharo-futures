@@ -112,3 +112,11 @@ AsyncFutureThreadPool >> telemetryDo: aBlock ifNone: aNoneBlock [
 				ifNil: aNoneBlock ]
 		ifNil: aNoneBlock
 ]
+
+{ #category : #debugging }
+AsyncFutureThreadPool >> workerArray [
+	"Just for debugging purposes, e.g., BlScripter.
+	Not available for production code use."
+
+	^ workers asArray
+]
