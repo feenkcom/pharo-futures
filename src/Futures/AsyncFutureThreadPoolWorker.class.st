@@ -150,6 +150,14 @@ AsyncFutureThreadPoolWorker >> isWaitingOnSemaphore [
 			ifNotNil: [ :aProcess | aProcess suspendingList notNil ] ]
 ]
 
+{ #category : #debugging }
+AsyncFutureThreadPoolWorker >> localItemArray [
+	"Just for debugging purposes, e.g., BlScripter.
+	Not available for production code use."
+
+	^ localQueue itemArray
+]
+
 { #category : #accessing }
 AsyncFutureThreadPoolWorker >> logger [
 	<return: #TAsyncFutureLogger>
@@ -168,6 +176,14 @@ AsyncFutureThreadPoolWorker >> maintanance [
 { #category : #printing }
 AsyncFutureThreadPoolWorker >> name [
 	^ (group ifNotNil: #label ifNil: [ 'undefined group' ])
+]
+
+{ #category : #debugging }
+AsyncFutureThreadPoolWorker >> pendingItemArray [
+	"Just for debugging purposes, e.g., BlScripter.
+	Not available for production code use."
+
+	^ pendingQueue itemArray
 ]
 
 { #category : #'api - accessing' }
