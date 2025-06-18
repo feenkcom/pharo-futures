@@ -25,7 +25,7 @@ AsyncImagePackagesStream >> hash [
 AsyncImagePackagesStream >> initialize [
 	super initialize.
 	
-	stream := AsyncSequenceStream forCollection: [ RPackage organizer packages ] asAsyncFuture
+	stream := AsyncSequenceStream forCollection: [ self packageOrganizer packages ] asAsyncFuture
 ]
 
 { #category : #'api - stream copy' }
