@@ -17,11 +17,6 @@ AsyncPollPending class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new ]
 ]
 
-{ #category : #'operators-mapping' }
-AsyncPollPending >> asStreamPoll [
-	^ self
-]
-
 { #category : #testing }
 AsyncPollPending >> isPending [
 	^ true

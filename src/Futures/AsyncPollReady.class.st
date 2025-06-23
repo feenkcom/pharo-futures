@@ -12,11 +12,6 @@ AsyncPollReady class >> value: anObject [
 	^ self new value: anObject
 ]
 
-{ #category : #'operators-mapping' }
-AsyncPollReady >> asStreamPoll [
-	^ self map: [ :aValue | AsyncOptionalValue some: aValue ]
-]
-
 { #category : #testing }
 AsyncPollReady >> isPending [
 	^ false
