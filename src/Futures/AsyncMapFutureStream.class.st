@@ -31,20 +31,20 @@ AsyncMapFutureStream >> pollNext: anAsynchronousContext [
 		aPoll := aFuture poll: anAsynchronousContext.
 		aPoll isReady ifTrue: [ pendingFuture := nil ].
 
-		^ aPoll asStreamPoll ].
+		^ aPoll map: [ :aValue | AsyncOptionalValue some: aValue ] ].
 
 	^ (stream pollNext: anAsynchronousContext)
 		ifReady: [ :aReadyPoll |
 			aReadyPoll value
-				ifSome: [ :aValue |
+				ifSome: [ :nextFuture |
 					| aFuture aFuturePoll |	
 						
-					aFuture := (mapBlock value: aValue) asAsyncFuture.
+					aFuture := (mapBlock value: nextFuture) asAsyncFuture.
 					aFuturePoll := aFuture poll: anAsynchronousContext.
 					aFuturePoll isPending
 						ifTrue: [ pendingFuture := aFuture ].
-					aFuturePoll asStreamPoll ]
-				ifNone: [ aReadyPoll asStreamPoll ] ]
+					aFuturePoll map: [ :aValue | AsyncOptionalValue some: aValue ] ]
+				ifNone: [ aReadyPoll ] ]
 		
 		ifPending: [ :aPendingPoll | aPendingPoll ]
 ]
