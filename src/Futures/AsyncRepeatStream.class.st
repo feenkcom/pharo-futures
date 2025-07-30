@@ -14,7 +14,7 @@ Class {
 	#instVars : [
 		'item'
 	],
-	#category : 'Futures-Base - Streams'
+	#category : #'Futures-Base - Streams'
 }
 
 { #category : #'instance creation' }
