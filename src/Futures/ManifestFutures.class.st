@@ -12,7 +12,6 @@ ManifestFutures class >> mustOnlyDependOn [
 	^ {
 		'Announcements-Core'.
 		'Beacon-Core'.
-		'Collections-Abstract'.
 		'Collections-Atomic'.
 		'Collections-Sequenceable'.
 		'Collections-Stack'.
@@ -23,5 +22,10 @@ ManifestFutures class >> mustOnlyDependOn [
 		'Kernel'.
 		'System-Finalization'.
 		'Transcript-NonInteractive'
-	}
+	}, (self  
+		forPharo12: [{
+			'Kernel-CodeModel'.
+			'System-Time' .}] 
+		forPharo11AndPharo10: [{
+			'Collections-Abstract' .}])
 ]
