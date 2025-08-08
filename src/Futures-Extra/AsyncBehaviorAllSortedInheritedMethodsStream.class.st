@@ -25,6 +25,6 @@ AsyncBehaviorAllSortedInheritedMethodsStream >> behavior: aBehavior [
 AsyncBehaviorAllSortedInheritedMethodsStream >> initializeStreams [
 	instanceStream := AsyncBehaviorInstanceSortedInheritedMethodsStream
 			forBehavior: behavior.
-	classStream := AsyncBehaviorSortedInheritedClassMethodsStream
+	classStream := AsyncBehaviorClassInheritedSortedMethodsStream
 			forBehavior: behavior
 ]

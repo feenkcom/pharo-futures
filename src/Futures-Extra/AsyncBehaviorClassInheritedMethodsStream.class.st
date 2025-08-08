@@ -1,20 +1,19 @@
 Class {
-	#name : #AsyncBehaviorSortedInheritedClassMethodsStream,
+	#name : #AsyncBehaviorClassInheritedMethodsStream,
 	#superclass : #AsyncBehaviorStream,
 	#category : #'Futures-Extra'
 }
 
 { #category : #accessing }
-AsyncBehaviorSortedInheritedClassMethodsStream >> initializeStream [
+AsyncBehaviorClassInheritedMethodsStream >> initializeStream [
 	stream := AsyncSequenceStream
 			forCollection: [ 
-				((behavior class allSelectorsBelow: Class) 
-					collect: [ :s | behavior class lookupSelector: s ])
-					sorted: GtInheritedMethodsSortFunction new ] asAsyncFuture
+				((behavior classSide allSelectorsBelow: Class) 
+					collect: [ :s | behavior class lookupSelector: s ])asArray ] asAsyncFuture
 ]
 
 { #category : #'api - stream' }
-AsyncBehaviorSortedInheritedClassMethodsStream >> pollNext: anAsynchronousContext [
+AsyncBehaviorClassInheritedMethodsStream >> pollNext: anAsynchronousContext [
 	"Attempt to pull out the next value of this stream, registering the current task for wakeup if the value is not yet available, and returning None if the stream is exhausted.
 	There are several possible return values, each indicating a distinct stream state:
 	 - Poll::Pending means that this stream's next value is not ready yet. Implementations will ensure that the current task will be notified when the next value may be ready.
