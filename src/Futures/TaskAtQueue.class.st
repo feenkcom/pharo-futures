@@ -133,7 +133,7 @@ TaskAtQueue >> next [
 TaskAtQueue >> processNextEntry [
 	| entry timeRemaining |
 
-	scheduleSemaphore waitTimeoutMSecs: nextTimeDelay asMilliSeconds .
+	scheduleSemaphore waitTimeoutMilliseconds: nextTimeDelay asMilliSeconds .
 	processTime := clock now.
 	[ entry := queue nextOrNilSuchThat: [ :anEntry |
 			timeRemaining := anEntry scheduledTime - processTime.
