@@ -93,21 +93,13 @@ AsyncWeakSink >> sink: aSink [
 	aSink parentSink: self.
 	sink := aSink asWeakReference.
 	self finalize.
-	self
-		forPharo11OrNewer: [
-			aSink finalizationRegistry
-				add: aSink
-				finalizer: (ObjectFinalizer new
-					receiver: self;
-					selector: #onFinalization;
-					arguments: #()) ]
-		forPharo10: [
-			aSink finalizationRegistry
-				add: aSink
-				executor: (ObjectFinalizer new
-					receiver: self;
-					selector: #onFinalization;
-					arguments: #()) ]
+	
+	aSink finalizationRegistry
+		add: aSink
+		finalizer: (ObjectFinalizer new
+			receiver: self;
+			selector: #onFinalization;
+			arguments: #()) 
 ]
 
 { #category : #'api - sink' }
