@@ -160,9 +160,7 @@ SharedPriorityUniqueQueue >> nextOrNilSuchThat: aBlock [
 	Ensure that the operation isn't terminated while within the monitor"
 	
 	self
-		assert: [ self
-			forPharo11OrNewer: [ aBlock hasNonLocalReturn not ]
-			forPharo10: [ aBlock hasMethodReturn not ] ]
+		assert: [ aBlock hasNonLocalReturn not ]
 		description: [ 'Must not have a local return' ].
 
 	^ [ monitor critical: [
