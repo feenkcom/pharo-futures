@@ -23,9 +23,9 @@ ManifestFutures class >> mustOnlyDependOn [
 		'System-Finalization'.
 		'Transcript-NonInteractive'
 	}, (self  
-		forPharo12: [{
+		forPharo12AndNewer: [{
 			'Kernel-CodeModel'.
 			'System-Time' .}] 
-		forPharo11AndPharo10: [{
+		forPharo11: [{
 			'Collections-Abstract' .}])
 ]
