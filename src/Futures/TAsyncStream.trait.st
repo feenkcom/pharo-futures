@@ -22,6 +22,11 @@ TAsyncStream >> asAsyncObservable: anAsyncFutureExecutionConfiguration [
 		executionConfiguration: anAsyncFutureExecutionConfiguration
 ]
 
+{ #category : #'as yet unclassified' }
+TAsyncStream >> asAsyncPageStream [
+	^ AsyncLePageStream new stream: self
+]
+
 { #category : #'api - stream' }
 TAsyncStream >> asAsyncStream [
 	^ self
