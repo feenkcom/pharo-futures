@@ -1,3 +1,6 @@
+"
+I should be used sparingly only for critical calculations, e.g., to display critical tools that must work even when other tools (views) are blocked by a long computation.
+"
 Class {
 	#name : #AsyncFutureExecutionConfiguration,
 	#superclass : #Object,
@@ -97,6 +100,13 @@ AsyncFutureExecutionConfiguration >> hash [
 { #category : #accessing }
 AsyncFutureExecutionConfiguration >> highPriority [
 	self priority: AsyncFutureExecutionHighPriority uniqueInstance
+]
+
+{ #category : #accessing }
+AsyncFutureExecutionConfiguration >> importantPriority [
+	"I should be used carefully only for a critical tools, e.g., Monitor views."
+
+	self priority: AsyncFutureExecutionImportantPriority uniqueInstance
 ]
 
 { #category : #initialization }
