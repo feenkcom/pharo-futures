@@ -7,17 +7,6 @@ Class {
 	#category : #'Futures-Executor - Thread Pool'
 }
 
-{ #category : #ui }
-AsyncFutureThreadPoolQueue >> gtItemsFor: aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Items';
-		priority: 10;
-		object: [ queue ];
-		view: #gtItemsFor:
-]
-
 { #category : #initialization }
 AsyncFutureThreadPoolQueue >> initialize [
 	super initialize.
