@@ -132,7 +132,7 @@ TAsyncFuture >> awaitWithUserBackgroundPriorityInCustomGroup: aGroupName [
 { #category : #configuration }
 TAsyncFuture >> createLepiterWorkerConfiguration [
 	^ AsyncFutureExecutionConfiguration new 
-			"userBackgroundPriority;"
+			userBackgroundPriority;
 			customGroup: #Lepiter
 ]
 
