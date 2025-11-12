@@ -64,6 +64,21 @@ TAsyncFuture >> await: anExecutionSpecification [
 ]
 
 { #category : #'api - future' }
+TAsyncFuture >> awaitInLepiterWorker [
+	<return: #TAsyncPromise>
+	
+	^ self await: self createLepiterWorkerConfiguration
+]
+
+{ #category : #'api - future' }
+TAsyncFuture >> awaitInLepiterWorkerWithErrorHandler: anErrorHandler [
+	<return: #TAsyncPromise>
+	
+	^ self await: (self createLepiterWorkerConfiguration
+			errorHandler: anErrorHandler)
+]
+
+{ #category : #'api - future' }
 TAsyncFuture >> awaitWithLowPriority [
 	"Execute the future asynchronously and return a promise that will be resolved with the future's result"
 	"Run with low priority, which is lower than the UI priority"
@@ -112,6 +127,13 @@ TAsyncFuture >> awaitWithUserBackgroundPriorityInCustomGroup: aGroupName [
 	^ self await: (AsyncFutureExecutionConfiguration new 
 		userBackgroundPriority;
 		customGroup: aGroupName)
+]
+
+{ #category : #configuration }
+TAsyncFuture >> createLepiterWorkerConfiguration [
+	^ AsyncFutureExecutionConfiguration new 
+			"userBackgroundPriority;"
+			customGroup: #Lepiter
 ]
 
 { #category : #'api - future' }
