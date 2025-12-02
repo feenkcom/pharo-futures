@@ -8,7 +8,7 @@ Class {
 	#classInstVars : [
 		'unknown'
 	],
-	#category : 'Futures-Utilities'
+	#category : #'Futures-Utilities'
 }
 
 { #category : #cleanup }
