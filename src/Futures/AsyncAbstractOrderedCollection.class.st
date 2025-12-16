@@ -18,6 +18,11 @@ AsyncAbstractOrderedCollection >> add: anObject [
 	^ monitor critical: [ self privateAdd: anObject ]
 ]
 
+{ #category : #'adding / removing' }
+AsyncAbstractOrderedCollection >> addAll: aCollection [
+	^ monitor critical: [ self privateAddAll: aCollection ]
+]
+
 { #category : #converting }
 AsyncAbstractOrderedCollection >> asArray [
 	^ monitor critical: [ collection asArray ]
@@ -90,6 +95,11 @@ AsyncAbstractOrderedCollection >> postCopy [
 { #category : #'private - adding / removing' }
 AsyncAbstractOrderedCollection >> privateAdd: anObject [
 	collection add: anObject
+]
+
+{ #category : #'private - adding / removing' }
+AsyncAbstractOrderedCollection >> privateAddAll: aCollection [
+	collection addAll: aCollection
 ]
 
 { #category : #'private - adding / removing' }
