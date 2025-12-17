@@ -18,6 +18,11 @@ AsyncAbstractOrderedCollection >> add: anObject [
 	^ monitor critical: [ self privateAdd: anObject ]
 ]
 
+{ #category : #'adding / removing' }
+AsyncAbstractOrderedCollection >> addAll: aCollection [
+	^ monitor critical: [ self privateAddAll: aCollection ]
+]
+
 { #category : #converting }
 AsyncAbstractOrderedCollection >> asArray [
 	^ monitor critical: [ collection asArray ]
@@ -26,6 +31,16 @@ AsyncAbstractOrderedCollection >> asArray [
 { #category : #accessing }
 AsyncAbstractOrderedCollection >> at: anIndex [
 	^ monitor critical: [ self privateAt: anIndex ]
+]
+
+{ #category : #enumerating }
+AsyncAbstractOrderedCollection >> collect: aBlock [
+	^ self asArray collect: aBlock
+]
+
+{ #category : #enumerating }
+AsyncAbstractOrderedCollection >> collect: aBlock as: aClass [
+	^ monitor critical: [ collection collect: aBlock as: aClass ]
 ]
 
 { #category : #'mutual exclusion' }
@@ -93,6 +108,11 @@ AsyncAbstractOrderedCollection >> privateAdd: anObject [
 ]
 
 { #category : #'private - adding / removing' }
+AsyncAbstractOrderedCollection >> privateAddAll: aCollection [
+	collection addAll: aCollection
+]
+
+{ #category : #'private - adding / removing' }
 AsyncAbstractOrderedCollection >> privateAt: anIndex [
 	^ collection
 		at: anIndex
@@ -141,6 +161,12 @@ AsyncAbstractOrderedCollection >> select: aBlock [
 	"Evaluate aBlock with each of the receiver's elements as the argument."
 
 	^ self asArray select: aBlock 
+]
+
+{ #category : #enumerating }
+AsyncAbstractOrderedCollection >> select: selectBlock thenDo: doBlock [
+
+	monitor critical: [ collection select: selectBlock thenDo: doBlock ]
 ]
 
 { #category : #accessing }
