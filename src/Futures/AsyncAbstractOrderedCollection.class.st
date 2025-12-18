@@ -33,6 +33,16 @@ AsyncAbstractOrderedCollection >> at: anIndex [
 	^ monitor critical: [ self privateAt: anIndex ]
 ]
 
+{ #category : #enumerating }
+AsyncAbstractOrderedCollection >> collect: aBlock [
+	^ self asArray collect: aBlock
+]
+
+{ #category : #enumerating }
+AsyncAbstractOrderedCollection >> collect: aBlock as: aClass [
+	^ monitor critical: [ collection collect: aBlock as: aClass ]
+]
+
 { #category : #'mutual exclusion' }
 AsyncAbstractOrderedCollection >> critical: aBlock [
 	^ monitor critical: aBlock
@@ -151,6 +161,12 @@ AsyncAbstractOrderedCollection >> select: aBlock [
 	"Evaluate aBlock with each of the receiver's elements as the argument."
 
 	^ self asArray select: aBlock 
+]
+
+{ #category : #enumerating }
+AsyncAbstractOrderedCollection >> select: selectBlock thenDo: doBlock [
+
+	monitor critical: [ collection select: selectBlock thenDo: doBlock ]
 ]
 
 { #category : #accessing }
