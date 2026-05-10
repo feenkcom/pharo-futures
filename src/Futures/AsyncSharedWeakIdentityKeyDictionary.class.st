@@ -8,6 +8,16 @@ Class {
 	#category : #'Futures-Collections - Dictionary'
 }
 
+{ #category : #converting }
+AsyncSharedWeakIdentityKeyDictionary >> asArray [
+	^ monitor critical: [ dictionary asArray ]
+]
+
+{ #category : #accessing }
+AsyncSharedWeakIdentityKeyDictionary >> associations [
+	^ monitor critical: [ dictionary associations ]
+]
+
 { #category : #accessing }
 AsyncSharedWeakIdentityKeyDictionary >> at: aKey ifAbsent: aBlock [
 	^ monitor critical: [ dictionary at: aKey ifAbsent: aBlock ]
