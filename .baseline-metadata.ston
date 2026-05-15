@@ -1,3 +1,5 @@
 {
-	"repositories" : { }
+	"repositories" : {
+		"github://feenkcom/pharo-beacon/repository" : "d1af72fc3fb759440b1b4b3e62144d1c7f8d73f2"
+	}
 }
