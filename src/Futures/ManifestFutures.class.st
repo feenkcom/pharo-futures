@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : #accessing }
+ManifestFutures class >> mustNotDependOn [
+	^ { 
+		'Bloc'.
+		'Brick'.
+	}
+]
+
+{ #category : #accessing }
 ManifestFutures class >> mustOnlyDependOn [
 	^ {
 		'Announcements-Core'.
