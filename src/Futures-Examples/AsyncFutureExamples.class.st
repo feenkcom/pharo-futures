@@ -102,7 +102,9 @@ AsyncFutureExamples >> parallelWaits [
 				futures: {[ 0.1 second wait ] asAsyncForkedFuture.
 						[ 0.2 second wait ] asAsyncForkedFuture.
 						[ 0.3 second wait ] asAsyncForkedFuture}) await wait ] timeToRun.
-	self assert: totalDuration < 0.4 seconds.
+	self
+		assert: totalDuration < 0.4 seconds
+		description: [ 'Total duration was {1}, but should be < 0.4' format: {totalDuration} ].
 	^ result
 ]
 
