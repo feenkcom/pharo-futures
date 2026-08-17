@@ -10,7 +10,7 @@ BaselineOfFutures >> baseline: spec [
 
 	spec for: #'common' do: [
 		spec baseline: 'BeaconCore' with: [
-			spec repository: 'github://feenkcom/pharo-beacon/repository' ].
+			spec repository: 'github://feenkcom/pharo-beacon:main/src' ].
 		"spec baseline: 'GToolkitBasicUtility' with: [ 
 			spec repository: 'github://feenkcom/gtoolkit-utility:main/src' ]."
 		spec package: #'Futures' with: [
