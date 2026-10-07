@@ -120,15 +120,8 @@ AsyncStreamBuffer >> bufferSnapshot [
 { #category : #'api - loading' }
 AsyncStreamBuffer >> continue [
 	<return: #TAsyncPromise>
-	| anInitialAmountOfItems aLoadingPromise |
 	self privateEnsureLoading.
-	
-	anInitialAmountOfItems := self amountOfLoadedItems.
-	aLoadingPromise := self privateContinueLoading.
-	
-	self notifyStartedLoading: aLoadingPromise initialAmountOfItems: anInitialAmountOfItems.
-
-	^ aLoadingPromise
+	^ self privateContinueLoading
 ]
 
 { #category : #initialization }
@@ -280,10 +273,13 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 			| eachIndex |
 			eachIndex := 0.
 			"first let's try to find among existing buffered items"
-			bufferSink collection do: [ :eachItem | 
+			bufferSink collection do: [ :eachItem |
 				eachIndex := eachIndex + 1.
 				(aBlock cull: eachItem cull: eachIndex)
 					ifTrue: [ ^ (AsyncStreamBufferItem new item: eachItem; index: eachIndex) asAsyncPromise ] ] ].
+		
+		"No further items can match once the stream has finished."
+		stream isDone ifTrue: [ ^ AsyncStreamBufferItem notFound asAsyncPromise ].
 		
 		"the value was not found, let's register a pending scan"
 		aPendingScanPromise := AsyncManualPromise new.
@@ -292,6 +288,7 @@ AsyncStreamBuffer >> preloadUntilFoundSuchThat: aBlock [
 		self continue.
 
 		^ aPendingScanPromise ]
+
 ]
 
 { #category : #'private - loading' }
@@ -303,7 +300,13 @@ AsyncStreamBuffer >> privateContinueLoading [
 		ifTrue: [ 1 ]
 		ifFalse: [ preloadAmount ].
 
-	^ chunkLoadingPromise := pausableSink resume: toLoad
+	^ pausableSink
+		resume: toLoad
+		beforeResuming: [ :aLoadingPromise |
+			chunkLoadingPromise := aLoadingPromise.
+			self
+				notifyStartedLoading: aLoadingPromise
+				initialAmountOfItems: self amountOfLoadedItems ]
 ]
 
 { #category : #'private - loading' }

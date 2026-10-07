@@ -82,21 +82,35 @@ AsyncPausableSink >> pollReady: anAsynchronousContext [
 { #category : #'api - actions' }
 AsyncPausableSink >> resume: anAmount [
 	<return: #TAsyncPromise>
+	^ self resume: anAmount beforeResuming: [ :aPromise | ]
+]
+
+{ #category : #'api - actions' }
+AsyncPausableSink >> resume: anAmount beforeResuming: aBlock [
+	"Publish the loading promise before allowing the worker to send more items.
+	The callback must not wait for the loading promise."
+	<return: #TAsyncPromise>
 	| returnedPromise |
 
 	returnedPromise := remaining lock: [ :aValue |
-		remaining value: (anAmount max: aValue).
-		promise lock: [ :anOptionalPromise |
+		| aLoadingPromise |
+		aLoadingPromise := promise lock: [ :anOptionalPromise |
 			anOptionalPromise
 				ifSome: [ :aPromise | aPromise ]
 				ifNone: [
 					| newPromise |
-					newPromise := AsyncManualPromise new.
+					newPromise := aValue = -1
+						ifTrue: [ true asAsyncPromise ]
+						ifFalse: [ AsyncManualPromise new ].
 					promise value: (AsyncOptionalValue some: newPromise).
-					newPromise ] ] ].
+					newPromise ] ].
+
+		aBlock value: aLoadingPromise.
+		"pollClose: marks the sink closed with -1. Do not reopen it."
+		aValue = -1 ifFalse: [ remaining value: (anAmount max: aValue) ].
+		aLoadingPromise ].
 
 	waker wakeUp.
-
 	^ returnedPromise
 ]
 
