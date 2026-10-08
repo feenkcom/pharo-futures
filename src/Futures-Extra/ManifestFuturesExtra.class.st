@@ -18,6 +18,7 @@ ManifestFuturesExtra class >> mustOnlyDependOn [
 		'GToolkit-Utility-Basic'.
 		'Futures'.
 		'Iceberg'.
-		'Kernel'}
-		, (self forPharo12AndNewer: [ {'Kernel-CodeModel'} ] forPharo11: [ {} ])
+		'Kernel'.
+		'Kernel-CodeModel'.
+	}
 ]
