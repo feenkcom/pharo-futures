@@ -34,16 +34,16 @@ AsyncImageBehaviorsStream >> pollNext: anAsynchronousContext [
 	There are several possible return values, each indicating a distinct stream state:
 	 - Poll::Pending means that this stream's next value is not ready yet. Implementations will ensure that the current task will be notified when the next value may be ready.
 	 - Poll::Ready(Some(val)) means that the stream has successfully produced a value, val, and may produce further values on subsequent poll_next calls.
-	 - Poll::Ready(None) means that the stream has terminated, and poll_next should not be invoked again."
-	<return: #AsyncPoll>
+	 - Poll::Ready(None) means that the stream has terminated, and poll_next should not be invoked again.
+	The names come from a snapshot of the environment, so a class may have been removed after the snapshot was taken. Such a name is skipped, see {{gtMethod:AsyncAbstractWrappedStream>>#pollNextRepeatedly:do:}}."
 
-	^ (stream pollNext: anAsynchronousContext)
-		map: [ :aNameOption |
-			aNameOption map: [ :aName |
-				self class environment
-					at: aName
-					ifPresent: [ :aBehavior | aBehavior ]
-					ifAbsent: [ ^ AsyncPoll pending ] ] ]
+	<return: #AsyncPoll>
+	^ self
+		pollNextRepeatedly: anAsynchronousContext
+		do: [ :aName | 
+			self class environment
+				at: aName
+				ifPresent: [ :aBehavior | ^ AsyncPoll ready: (AsyncOptionalValue some: aBehavior) ] ]
 ]
 
 { #category : #'api - stream copy' }
