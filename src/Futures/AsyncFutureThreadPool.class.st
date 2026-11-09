@@ -26,6 +26,16 @@ AsyncFutureThreadPool class >> current [
 	^ current ifNil:[ current := self new ]
 ]
 
+{ #category : #accessing }
+AsyncFutureThreadPool class >> forCurrentExecutionEnvironment [
+	"Answer the thread pool for futures scheduled by the active process:
+	the pool of the running test or example (see AsyncFutureThreadPoolTestService),
+	or the global #current pool outside of tests"
+
+	<return: #AsyncFutureThreadPool>
+	^ CurrentExecutionEnvironment value asyncFutureThreadPool
+]
+
 { #category : #initialization }
 AsyncFutureThreadPool >> initialize [
 	super initialize.
@@ -111,6 +121,16 @@ AsyncFutureThreadPool >> telemetryDo: aBlock ifNone: aNoneBlock [
 				ifNotNil: aBlock
 				ifNil: aNoneBlock ]
 		ifNil: aNoneBlock
+]
+
+{ #category : #'api - execution' }
+AsyncFutureThreadPool >> terminateWorkers [
+	"Terminate the processes of all workers right away, without waiting for scheduled futures,
+	and reject those futures with cancellation.
+	See AsyncFutureThreadPoolWorker>>#terminateProcesses and AsyncFutureThreadPoolWorker>>#cancelScheduledFutures"
+
+	workers do: [ :eachWorker | eachWorker terminateProcesses ].
+	workers do: [ :eachWorker | eachWorker cancelScheduledFutures ]
 ]
 
 { #category : #debugging }

@@ -65,6 +65,27 @@ AsyncFutureThreadPoolWorker >> amountOfFutures [
 	^ localQueue size
 ]
 
+{ #category : #'api - lifecycle' }
+AsyncFutureThreadPoolWorker >> cancelScheduledFutures [
+	"Reject with cancellation all futures that are waiting in the local queue or pending, including the one
+	that was being executed (it is in the pending queue while it runs).
+	Used after #terminateProcesses to dispose of the workers of a finished test or example,
+	so that their promises do not stay unresolved forever"
+
+	| thePromises |
+	thePromises := IdentitySet new.
+	monitor
+		critical: [ localQueue popAll do: [ :eachPromise | thePromises add: eachPromise ].
+			pendingQueue popAll
+				do: [ :eachPendingTask | thePromises add: eachPendingTask task ] ].
+
+	thePromises
+		do: [ :eachPromise | 
+			[ eachPromise rejectWithCancellation ]
+				on: Error
+				do: [  "errors in user callbacks must not prevent cancelling the other promises":anError |  ] ]
+]
+
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> group [
 	^ group
@@ -655,6 +676,28 @@ AsyncFutureThreadPoolWorker >> terminate: anAsyncPendingFuturePromise [
 		currentTaskProcess suspendedContext: timeoutContext.
 		currentTaskProcess priority: (Processor lowIOPriority min: currentTaskProcess priority + 5).
 		currentTaskProcess resume ]
+]
+
+{ #category : #'api - lifecycle' }
+AsyncFutureThreadPoolWorker >> terminateProcesses [
+	"Terminate the worker process and the process executing the current future right away.
+	Unlike #shutdown, do not wait for scheduled futures to finish.
+	Used to dispose of the workers of a finished test or example, see AsyncFutureThreadPoolTestService"
+
+	| aWorkerProcess aTaskProcess |
+	monitor
+		critical: [ aWorkerProcess := workerProcess
+					ifNotNil: [ :anExecutionProcess | anExecutionProcess process ].
+			aTaskProcess := currentTaskProcess.
+			workerProcess := nil.
+			currentTaskProcess := nil.
+			currentTask := AsyncOptionalValue none ].
+
+	{aTaskProcess.
+		aWorkerProcess}
+		do: [ :aProcess | 
+			(aProcess notNil and: [ aProcess ~~ Processor activeProcess ])
+				ifTrue: [ aProcess terminate ] ]
 ]
 
 { #category : #initialization }
