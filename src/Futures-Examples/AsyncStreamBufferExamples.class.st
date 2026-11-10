@@ -77,6 +77,35 @@ AsyncStreamBufferExamples >> bufferOnLargeStream [
 	^ aBuffer
 ]
 
+{ #category : #'examples - cancellation' }
+AsyncStreamBufferExamples >> cancelledLoadingIsNotReportedAsError [
+	"Cancelling the loading of a stream buffer is not an error: AsyncStreamBuffer class>>#handleError:
+	does not report AsyncFutureCancelled. This happens, for example, when a test or example ends
+	before its buffer finished loading and its unfinished promises are cancelled"
+
+	<gtExample>
+	| aBuffer aLoadingPromise aSemaphore aLogger |
+	"A pending stream never ends, so the loading promise stays unfinished"
+	aBuffer := self defaultStreamBuffer stream: AsyncPendingStream new.
+	aBuffer continue.
+	aLoadingPromise := aBuffer instVarNamed: 'streamLoadingPromise'.
+	self assert: aLoadingPromise notNil.
+
+	aSemaphore := Semaphore new.
+	aLogger := MemoryLogger new.
+	aLogger
+		runFor: ExceptionSignal
+		during: [  "The buffer registered its error handler first, so it runs before our callback"aLoadingPromise
+				then: [ :aValue | aSemaphore signal ]
+				otherwise: [ :anError | aSemaphore signal ].
+			aLoadingPromise cancelSoft.
+			self assert: (aSemaphore waitTimeoutSeconds: 5) not ].
+
+	self assert: aLoadingPromise isCancelled.
+	self assert: aLogger recordings isEmpty.
+	^ aBuffer
+]
+
 { #category : #examples }
 AsyncStreamBufferExamples >> completedSmallStream [
 	<gtExample>
