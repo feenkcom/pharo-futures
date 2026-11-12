@@ -12,7 +12,7 @@ Class {
 		'threadPool',
 		'mutex'
 	],
-	#category : #'Futures-Executor - Test Support'
+	#category : #'Futures-SUnit-Executor - Test Support'
 }
 
 { #category : #controlling }

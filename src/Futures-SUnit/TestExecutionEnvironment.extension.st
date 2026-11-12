@@ -1,6 +1,6 @@
 Extension { #name : #TestExecutionEnvironment }
 
-{ #category : #'*Futures' }
+{ #category : #'*Futures-SUnit' }
 TestExecutionEnvironment >> asyncFutureThreadPool [
 	"Answer the thread pool of the running test or example (see AsyncFutureThreadPoolTestService).
 	Fall back to the global pool if the service is not registered or disabled"

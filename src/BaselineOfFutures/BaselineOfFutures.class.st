@@ -18,6 +18,8 @@ BaselineOfFutures >> baseline: spec [
 			gtoolkit-utility and future repositories, detectable by calling
 			`GtRlReleaserExportWorkflow buildGToolkitRelease`."
 			spec requires: #('FuturesCore' "'GToolkitBasicUtility'" ) ].
+		spec package: #'Futures-SUnit' with: [
+			spec requires: #(FuturesCore) ].
 		spec package: #'Futures-Examples' with: [
 			spec requires: #('FuturesCore' 'Futures-Extra') ] ]
 ]
