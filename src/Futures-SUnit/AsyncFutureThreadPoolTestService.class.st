@@ -33,22 +33,6 @@ AsyncFutureThreadPoolTestService >> cleanUpAfterTest [
 			aThreadPool ifNotNil: [ :aPool | aPool terminateWorkers ] ]
 ]
 
-{ #category : #debugging }
-AsyncFutureThreadPoolTestService >> handleNewProcess: aProcess [
-	"A temporary check"
-
-	super handleNewProcess: aProcess.
-
-	ProcessMonitorTestServiceNewProcessSignal new
-		service: self;
-		process: aProcess;
-		emit.
-
-	self
-		assert: [ aProcess isKindOf: Process ]
-		description: [ 'New process must be kind of Process' ]
-]
-
 { #category : #testing }
 AsyncFutureThreadPoolTestService >> hasThreadPool [
 	<return: #Boolean>
