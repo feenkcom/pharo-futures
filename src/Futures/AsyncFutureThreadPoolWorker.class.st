@@ -65,6 +65,27 @@ AsyncFutureThreadPoolWorker >> amountOfFutures [
 	^ localQueue size
 ]
 
+{ #category : #'api - lifecycle' }
+AsyncFutureThreadPoolWorker >> cancelScheduledFutures [
+	"Reject with cancellation all futures that are waiting in the local queue or pending, including the one
+	that was being executed (it is in the pending queue while it runs).
+	Used after #terminateProcesses to dispose of the workers of a finished test or example,
+	so that their promises do not stay unresolved forever"
+
+	| thePromises |
+	thePromises := IdentitySet new.
+	monitor
+		critical: [ localQueue popAll do: [ :eachPromise | thePromises add: eachPromise ].
+			pendingQueue popAll
+				do: [ :eachPendingTask | thePromises add: eachPendingTask task ] ].
+
+	thePromises
+		do: [ :eachPromise | 
+			[ eachPromise rejectWithCancellation ]
+				on: Error
+				do: [  "errors in user callbacks must not prevent cancelling the other promises":anError |  ] ]
+]
+
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> group [
 	^ group
@@ -293,101 +314,111 @@ AsyncFutureThreadPoolWorker >> privateExecuteNextFuture [
 { #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFuturePromise storingResultIn: aResultValueHolder signalling: aSemaphore [
 	"Errors are explicitly handled and frozen, exceptions are forked and passed"
+
 	| aWaker aContext wasRejected |
-	
 	wasRejected := false.
-	
+
 	aWaker := AsyncFutureThreadPoolWaker new
-		worker: self;
-		task: aAsyncPendingFuturePromise.
-	
-	aContext := AsyncFutureExecutionContext new
-		waker: aWaker.
-	
-	[ [ [ self privatePollFuture: aAsyncPendingFuturePromise during: [
-		| aFutureResult |
-		aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
+			worker: self;
+			task: aAsyncPendingFuturePromise.
 
-		"we must `return` the result before signalling the semaphore, otherwise the waiting process will continue before result is return from the method"
-		aResultValueHolder at: 1 put: aFutureResult.
+	aContext := AsyncFutureExecutionContext new waker: aWaker.
 
-		aFutureResult
-			ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
-			ifPending: [ :aPendingPoll | "it is already in the queue"
-				aPendingPoll isPendingIndefinitely
-					ifTrue: [ aAsyncPendingFuturePromise notifyPotentiallyIndefinitelyPending ] ].
-		
-		aSemaphore signal
-	] ]
-	on: Error do: [ :anError |
-		wasRejected := true.
-		self
-			privateRejectPendingFuture: aAsyncPendingFuturePromise
-			withException: anError
-			signalling: aSemaphore
-	] ]
-	"Unhandled exceptions are passed, they mean the system is now broken - we need a debugger"
-	on: UnhandledException do: [ :anUnhandledException |
-		self
-			privateRejectPendingFuture: aAsyncPendingFuturePromise
-			withUnhandledException: anUnhandledException
-			signalling: aSemaphore
-			ifRejected: wasRejected ] ]
-	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
-	However, we should signal the semaphore to unblock the worker"
-	on: Exception do: [ :anException |
-		aSemaphore signal.
-		anException pass ]
+	[ [ [ [ self
+		privatePollFuture: aAsyncPendingFuturePromise
+		during: [ | aFutureResult |
+			aFutureResult := aAsyncPendingFuturePromise future poll: aContext.	"we must `return` the result before signalling the semaphore, otherwise the waiting process will continue before result is return from the method"
+			aResultValueHolder at: 1 put: aFutureResult.
+
+			aFutureResult
+				ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
+				ifPending: [ :aPendingPoll | 
+					aPendingPoll isPendingIndefinitely
+						ifTrue: [ aAsyncPendingFuturePromise notifyPotentiallyIndefinitelyPending ]	"it is already in the queue" ].
+
+			aSemaphore signal ] ]
+		on: AsyncFutureCancelled
+		do: [ :aCancellation | 
+			wasRejected := true.	"Hard cancellation injects a signalled AsyncFutureCancelled into the running future (see #terminate:).
+		Reject the promise as cancelled and unwind the future, so that it does not continue"
+			self
+				privateRejectCancelledPendingFuture: aAsyncPendingFuturePromise
+				signalling: aSemaphore.
+			aCancellation return ] ]
+		on: Error
+		do: [ :anError | 
+			wasRejected := true.
+			self
+				privateRejectPendingFuture: aAsyncPendingFuturePromise
+				withException: anError
+				signalling: aSemaphore ] ]
+		on: UnhandledException
+		do: [ :anUnhandledException | 
+			self
+				privateRejectPendingFuture: aAsyncPendingFuturePromise
+				withUnhandledException: anUnhandledException
+				signalling: aSemaphore
+				ifRejected: wasRejected	"Unhandled exceptions are passed, they mean the system is now broken - we need a debugger" ] ]
+		on: Exception
+		do: [ :anException | 
+			aSemaphore signal.	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
+		However, we should signal the semaphore to unblock the worker"
+			anException pass ]
 ]
 
 { #category : #'private - process' }
 AsyncFutureThreadPoolWorker >> privateExecutePendingFuture: aAsyncPendingFuturePromise storingResultIn: aResultValueHolder signallingBlock: aSemaphoreBlock [
 	"Errors are explicitly handled and frozen, exceptions are forked and passed"
+
 	| aWaker aContext wasRejected |
-	
 	wasRejected := false.
-	
+
 	aWaker := AsyncFutureThreadPoolWaker new
-		worker: self;
-		task: aAsyncPendingFuturePromise.
-	
-	aContext := AsyncFutureExecutionContext new
-		waker: aWaker.
-	
-	[ [ [ self privatePollFuture: aAsyncPendingFuturePromise during: [
-		| aFutureResult |
-		aFutureResult := aAsyncPendingFuturePromise future poll: aContext.
+			worker: self;
+			task: aAsyncPendingFuturePromise.
 
-		"we must `return` the result before signalling the semaphore, otherwise the waiting process will continue before result is return from the method"
-		aResultValueHolder at: 1 put: aFutureResult.
+	aContext := AsyncFutureExecutionContext new waker: aWaker.
 
-		aFutureResult
-			ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
-			ifPending: [ :aPendingPoll | "it is already in the queue"
-				aPendingPoll isPendingIndefinitely
-					ifTrue: [ aAsyncPendingFuturePromise notifyPotentiallyIndefinitelyPending ] ].
-		
-		aSemaphoreBlock value
-	] ]
-	on: Error do: [ :anError |
-		wasRejected := true.
-		self
-			privateRejectPendingFuture: aAsyncPendingFuturePromise
-			withException: anError
-			signallingBlock: aSemaphoreBlock
-	] ]
-	"Unhandled exceptions are passed, they mean the system is now broken - we need a debugger"
-	on: UnhandledException do: [ :anUnhandledException |
-		self
-			privateRejectPendingFuture: aAsyncPendingFuturePromise
-			withUnhandledException: anUnhandledException
-			signallingBlock: aSemaphoreBlock
-			ifRejected: wasRejected ] ]
-	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
-	However, we should signal the semaphore to unblock the worker"
-	on: Exception do: [ :anException |
-		aSemaphoreBlock value.
-		anException pass ]
+	[ [ [ [ self
+		privatePollFuture: aAsyncPendingFuturePromise
+		during: [ | aFutureResult |
+			aFutureResult := aAsyncPendingFuturePromise future poll: aContext.	"we must `return` the result before signalling the semaphore, otherwise the waiting process will continue before result is return from the method"
+			aResultValueHolder at: 1 put: aFutureResult.
+
+			aFutureResult
+				ifReady: [ :aResultValue | aAsyncPendingFuturePromise fulfillWithValue: aResultValue value ]
+				ifPending: [ :aPendingPoll | 
+					aPendingPoll isPendingIndefinitely
+						ifTrue: [ aAsyncPendingFuturePromise notifyPotentiallyIndefinitelyPending ]	"it is already in the queue" ].
+
+			aSemaphoreBlock value ] ]
+		on: AsyncFutureCancelled
+		do: [ :aCancellation | 
+			wasRejected := true.	"Hard cancellation injects a signalled AsyncFutureCancelled into the running future (see #terminate:).
+		Reject the promise as cancelled and unwind the future, so that it does not continue"
+			self
+				privateRejectCancelledPendingFuture: aAsyncPendingFuturePromise
+				signallingBlock: aSemaphoreBlock.
+			aCancellation return ] ]
+		on: Error
+		do: [ :anError | 
+			wasRejected := true.
+			self
+				privateRejectPendingFuture: aAsyncPendingFuturePromise
+				withException: anError
+				signallingBlock: aSemaphoreBlock ] ]
+		on: UnhandledException
+		do: [ :anUnhandledException | 
+			self
+				privateRejectPendingFuture: aAsyncPendingFuturePromise
+				withUnhandledException: anUnhandledException
+				signallingBlock: aSemaphoreBlock
+				ifRejected: wasRejected	"Unhandled exceptions are passed, they mean the system is now broken - we need a debugger" ] ]
+		on: Exception
+		do: [ :anException | 
+			aSemaphoreBlock value.	"Exceptions are not errors, they may even return a value, that is why we do not reject the promise, it may still be fulfilled later.
+		However, we should signal the semaphore to unblock the worker"
+			anException pass ]
 ]
 
 { #category : #'private - process' }
@@ -626,35 +657,55 @@ AsyncFutureThreadPoolWorker >> telemetrySignalStart: isStart object: anObject pr
 
 { #category : #'api - worker' }
 AsyncFutureThreadPoolWorker >> terminate: anAsyncPendingFuturePromise [
-	monitor critical: [
-		| activeContext timeoutContext |
-
-		self privateUnschedule: anAsyncPendingFuturePromise.
-
-		"make sure that there is a process for the task and that the current running task is the one we want to terminate"
-		currentTaskProcess ifNil: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].
-		currentTask
-			ifSome: [ :aPendingTask |
-				aPendingTask task == anAsyncPendingFuturePromise
-					ifFalse: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ] ]
-			ifNone: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].
-
-		"#isSuspended may be too broad, ideally we should have something like #isBeingDebugged.
+	monitor
+		critical: [ | activeContext timeoutContext |
+			self privateUnschedule: anAsyncPendingFuturePromise.	"make sure that there is a process for the task and that the current running task is the one we want to terminate"
+			currentTaskProcess
+				ifNil: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].
+			currentTask
+				ifSome: [ :aPendingTask | 
+					aPendingTask task == anAsyncPendingFuturePromise
+						ifFalse: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ] ]
+				ifNone: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].	"#isSuspended may be too broad, ideally we should have something like #isBeingDebugged.
 		The suspended check prevents errors when terminating a task that is debugged or suspended due to an exception.
 		See https://github.com/feenkcom/gtoolkit/issues/1823"
-		currentTaskProcess isSuspended
-			ifTrue: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].
-	
-		currentTaskProcess == Processor activeProcess
-			ifTrue: [ AsyncFutureCancelled new signal ].
+			currentTaskProcess isSuspended
+				ifTrue: [ ^ anAsyncPendingFuturePromise rejectWithCancellation ].	"The future cancels itself. The worker handles the signal and unwinds the future.
+		If the signal is resumed instead, return, the current process must not suspend itself while holding the monitor"
+			currentTaskProcess == Processor activeProcess
+				ifTrue: [ AsyncFutureCancelled new signal.
+					^ self ].
 
-		currentTaskProcess suspend.
-		activeContext := currentTaskProcess suspendedContext.
-		timeoutContext := [ AsyncFutureCancelled new signal ] asContext.
-		timeoutContext privSender: activeContext.
-		currentTaskProcess suspendedContext: timeoutContext.
-		currentTaskProcess priority: (Processor lowIOPriority min: currentTaskProcess priority + 5).
-		currentTaskProcess resume ]
+			currentTaskProcess suspend.
+			activeContext := currentTaskProcess suspendedContext.
+			timeoutContext := [ AsyncFutureCancelled new signal ] asContext.
+			timeoutContext privSender: activeContext.
+			currentTaskProcess suspendedContext: timeoutContext.
+			currentTaskProcess
+				priority: (Processor lowIOPriority min: currentTaskProcess priority + 5).
+			currentTaskProcess resume ]
+]
+
+{ #category : #'api - lifecycle' }
+AsyncFutureThreadPoolWorker >> terminateProcesses [
+	"Terminate the worker process and the process executing the current future right away.
+	Unlike #shutdown, do not wait for scheduled futures to finish.
+	Used to dispose of the workers of a finished test or example, see AsyncFutureThreadPoolTestService"
+
+	| aWorkerProcess aTaskProcess |
+	monitor
+		critical: [ aWorkerProcess := workerProcess
+					ifNotNil: [ :anExecutionProcess | anExecutionProcess process ].
+			aTaskProcess := currentTaskProcess.
+			workerProcess := nil.
+			currentTaskProcess := nil.
+			currentTask := AsyncOptionalValue none ].
+
+	{aTaskProcess.
+		aWorkerProcess}
+		do: [ :aProcess | 
+			(aProcess notNil and: [ aProcess ~~ Processor activeProcess ])
+				ifTrue: [ aProcess terminate ] ]
 ]
 
 { #category : #initialization }

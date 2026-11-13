@@ -47,18 +47,20 @@ TAsyncFuture >> await [
 
 { #category : #'api - future' }
 TAsyncFuture >> await: anExecutionSpecification [
-	"Execute the future asynchronously and return a promise that will be resolved with the future's result"
+	"Execute the future asynchronously and return a promise that will be resolved with the future's result.
+	The future is scheduled on the thread pool of the running test or example, or on the global pool outside of tests
+	(see AsyncFutureThreadPool class>>#forCurrentExecutionEnvironment)"
+
 	<return: #TAsyncPromise>
 	| aPromise |
-
 	aPromise := AsyncFuturePromise new
-		priority: anExecutionSpecification priority;
-		group: anExecutionSpecification group;
-		errorHandler: anExecutionSpecification errorHandler;
-		maxAmountOfWorkers: anExecutionSpecification maxAmountOfWorkers;
-		future: self.
-		
-	AsyncFutureThreadPool current schedule: aPromise.
+			priority: anExecutionSpecification priority;
+			group: anExecutionSpecification group;
+			errorHandler: anExecutionSpecification errorHandler;
+			maxAmountOfWorkers: anExecutionSpecification maxAmountOfWorkers;
+			future: self.
+
+	AsyncFutureThreadPool forCurrentExecutionEnvironment schedule: aPromise.
 
 	^ aPromise
 ]

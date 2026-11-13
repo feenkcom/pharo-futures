@@ -55,17 +55,22 @@ AsyncStreamBuffer class >> generateUniqueId [
 { #category : #'error handling' }
 AsyncStreamBuffer class >> handleError: anException [
 	"Logging the error on the transcript only shows the exception, not where it came from.
-	Emit the exception as well so that it can be found with a beacon logger (which includes the stack)."
+	Emit the exception as well so that it can be found with a beacon logger (which includes the stack).
+	A cancelled loading is not an error (e.g. when a test ends before the buffer finished loading), so it is not reported"
+
+	(anException isKindOf: AsyncFutureCancelled) ifTrue: [ ^ self ].
+
 	anException emit.
-	Smalltalk logStdOutDuring: [ :aLogger | 
-	aLogger
-		nextPutAll: '*** EXCEPTION ***';
-		cr;
-		nextPutAll: anException printString;
-		cr;
-		nextPutAll: (String streamContents: [ :aStream | 
-			anException signalerContext errorReportOn: aStream ]);
-		cr ]
+	Smalltalk
+		logStdOutDuring: [ :aLogger | 
+			aLogger
+				nextPutAll: '*** EXCEPTION ***';
+				cr;
+				nextPutAll: anException printString;
+				cr;
+				nextPutAll: (String
+						streamContents: [ :aStream | anException signalerContext errorReportOn: aStream ]);
+				cr ]
 ]
 
 { #category : #initialization }
