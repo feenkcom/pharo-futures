@@ -196,7 +196,7 @@ AsyncFutureThreadPoolWorker >> maintanance [
 
 { #category : #printing }
 AsyncFutureThreadPoolWorker >> name [
-	^ (group ifNotNil: #label ifNil: [ 'undefined group' ])
+	^ group ifNotNil: [ :v | v label ] ifNil: [ 'undefined group' ]
 ]
 
 { #category : #debugging }

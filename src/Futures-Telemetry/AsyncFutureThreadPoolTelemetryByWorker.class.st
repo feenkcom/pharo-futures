@@ -12,12 +12,13 @@ Class {
 
 { #category : #'as yet unclassified' }
 AsyncFutureThreadPoolTelemetryByWorker >> description [
-	^ String streamContents: [ :s |
-		s
-			nextPutAll: (worker group ifNotNil: #label ifNil: [ 'undefined group' ]);
-			nextPutAll: ' ('.
-		worker priority gtDisplayOn: s.
-		s nextPutAll: ')' ]
+	^ String
+		streamContents: [ :s | 
+			s
+				nextPutAll: (worker group ifNotNil: [ :v | v label ] ifNil: [ 'undefined group' ]);
+				nextPutAll: ' ('.
+			worker priority gtDisplayOn: s.
+			s nextPutAll: ')' ]
 ]
 
 { #category : #accessing }
