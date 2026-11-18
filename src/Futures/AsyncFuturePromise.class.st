@@ -132,13 +132,14 @@ AsyncFuturePromise >> maxAmountOfWorkers: anObject [
 { #category : #printing }
 AsyncFuturePromise >> printOn: aStream [
 	"Append a sequence of characters to aStream that identify the receiver."
+
 	aStream
 		nextPutAll: 'Pending future promise';
 		nextPutAll: ' state: ';
 		print: state.
 	aStream
 		nextPutAll: ' group: ';
-		nextPutAll: (group ifNotNil: #label).
+		nextPutAll: (group ifNotNil: [ :v | v label ]).
 	aStream
 		nextPutAll: ' future: ';
 		print: future
