@@ -10,7 +10,7 @@ BaselineOfFutures >> baseline: spec [
 	spec for: #'common' do: [
 		spec
 			baseline: 'FuturesCore' with: [
-				spec repository: 'github://feenkcom/pharo-futures:v0.6.168/src' ].
+				spec repository: 'github://feenkcom/pharo-futures:v0.6.169/src' ].
 
 		spec package: 'Futures-Extra' with: [
 			spec requires: #(#FuturesCore) ].
